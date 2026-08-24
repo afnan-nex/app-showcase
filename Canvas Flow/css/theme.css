@@ -1,0 +1,265 @@
+/* ==========================================================================
+   CANVASFLOW — Theme & Design Tokens
+   Professional Creative Application Palette & Typography
+   ========================================================================== */
+
+:root {
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-handwritten: "Caveat", "Comic Sans MS", cursive, sans-serif;
+
+  /* Font Sizes */
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+
+  /* Radii */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Z-Indices */
+  --z-canvas: 1;
+  --z-rulers: 10;
+  --z-overlay: 20;
+  --z-ui-rail: 30;
+  --z-ui-panel: 40;
+  --z-ui-topbar: 50;
+  --z-quick-actions: 60;
+  --z-dropdown: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+
+  /* Accent Colors */
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  --accent-primary-active: #1d4ed8;
+  --accent-primary-subtle: rgba(59, 130, 246, 0.12);
+  --accent-primary-border: rgba(59, 130, 246, 0.35);
+
+  --accent-danger: #ef4444;
+  --accent-danger-hover: #dc2626;
+  --accent-danger-subtle: rgba(239, 68, 68, 0.12);
+
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+
+  /* Preset Sticky / Shape Palette */
+  --color-sticky-yellow: #fef08a;
+  --color-sticky-yellow-text: #713f12;
+  --color-sticky-blue: #bfdbfe;
+  --color-sticky-blue-text: #1e3a8a;
+  --color-sticky-green: #bbf7d0;
+  --color-sticky-green-text: #14532d;
+  --color-sticky-pink: #fbcfe8;
+  --color-sticky-pink-text: #831843;
+  --color-sticky-purple: #e9d5ff;
+  --color-sticky-purple-text: #581c87;
+  --color-sticky-orange: #fed7aa;
+  --color-sticky-orange-text: #7c2d12;
+  --color-sticky-dark: #334155;
+  --color-sticky-dark-text: #f8fafc;
+}
+
+/* ==========================================================================
+   Dark Theme (Default)
+   ========================================================================== */
+html[data-theme="dark"],
+body.theme-dark {
+  --bg-app: #121316;
+  --bg-canvas: #16171b;
+  --bg-topbar: #1a1c21;
+  --bg-panel: #1a1c21;
+  --bg-panel-secondary: #141518;
+  --bg-surface: #22242b;
+  --bg-surface-hover: #2a2d36;
+  --bg-surface-active: #323642;
+  --bg-surface-selected: rgba(59, 130, 246, 0.18);
+  
+  --border-subtle: #272a33;
+  --border-default: #323642;
+  --border-strong: #454a5a;
+  --border-focus: #3b82f6;
+
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-disabled: #4b5563;
+  --text-inverse: #111827;
+
+  --canvas-grid-dot: #2a2d38;
+  --canvas-grid-line: #22252e;
+  --ruler-bg: #16171b;
+  --ruler-text: #6b7280;
+  --ruler-mark: #323642;
+  --ruler-guide: #3b82f6;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-dropdown: 0 10px 24px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  --selection-box-border: #3b82f6;
+  --selection-box-bg: rgba(59, 130, 246, 0.12);
+  --handle-fill: #ffffff;
+  --handle-stroke: #3b82f6;
+  --snap-guide-color: #ec4899;
+}
+
+/* ==========================================================================
+   Light Theme
+   ========================================================================== */
+html[data-theme="light"],
+body.theme-light {
+  --bg-app: #f4f5f7;
+  --bg-canvas: #ffffff;
+  --bg-topbar: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-panel-secondary: #f9fafb;
+  --bg-surface: #f3f4f6;
+  --bg-surface-hover: #e5e7eb;
+  --bg-surface-active: #d1d5db;
+  --bg-surface-selected: rgba(59, 130, 246, 0.12);
+
+  --border-subtle: #edf0f4;
+  --border-default: #e2e5ea;
+  --border-strong: #cbd2dc;
+  --border-focus: #2563eb;
+
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --text-disabled: #d1d5db;
+  --text-inverse: #f9fafb;
+
+  --canvas-grid-dot: #d8dde6;
+  --canvas-grid-line: #ebedf2;
+  --ruler-bg: #fafbfc;
+  --ruler-text: #9ca3af;
+  --ruler-mark: #d1d5db;
+  --ruler-guide: #2563eb;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-dropdown: 0 10px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
+
+  --selection-box-border: #2563eb;
+  --selection-box-bg: rgba(37, 99, 235, 0.08);
+  --handle-fill: #ffffff;
+  --handle-stroke: #2563eb;
+  --snap-guide-color: #db2777;
+}
+
+/* Global Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+/* Utility classes */
+.select-none {
+  user-select: none;
+}
+
+.text-accent {
+  color: var(--accent-primary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Accessibility & Keyboard Focus */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.dropdown-item:focus-visible,
+.tool-btn:focus-visible,
+.btn-segment:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+/* Reduced Motion Preference Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+

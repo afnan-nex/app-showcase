@@ -1,0 +1,200 @@
+/* ==========================================================================
+   DataLens - Dashboard Grid & Layout Styles
+   ========================================================================== */
+
+.dashboard-view-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-app);
+}
+
+.dashboard-toolbar {
+  height: 44px;
+  min-height: 44px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-3);
+}
+
+.dashboard-title-input {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  outline: none;
+}
+
+.dashboard-title-input:hover {
+  border-color: var(--border-default);
+}
+
+.dashboard-title-input:focus {
+  background-color: var(--bg-app);
+  border-color: var(--border-focus);
+}
+
+/* Scrollable Dashboard Canvas */
+.dashboard-canvas {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-4);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-3);
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Dashboard Widget Card */
+.dashboard-widget {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 280px;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+.dashboard-widget:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-widget.widget-kpi {
+  min-height: 120px;
+}
+
+/* Grid Span Classes */
+.dashboard-widget.col-span-3 { grid-column: span 3; }
+.dashboard-widget.col-span-4 { grid-column: span 4; }
+.dashboard-widget.col-span-6 { grid-column: span 6; }
+.dashboard-widget.col-span-8 { grid-column: span 8; }
+.dashboard-widget.col-span-12 { grid-column: span 12; }
+
+@media (max-width: 1200px) {
+  .dashboard-widget.col-span-3 { grid-column: span 6; }
+  .dashboard-widget.col-span-4 { grid-column: span 6; }
+}
+
+@media (max-width: 768px) {
+  .dashboard-widget.col-span-3,
+  .dashboard-widget.col-span-4,
+  .dashboard-widget.col-span-6,
+  .dashboard-widget.col-span-8 { grid-column: span 12; }
+}
+
+/* Widget Header */
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px var(--spacing-3);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  cursor: grab;
+}
+
+.widget-title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.widget-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background-color: var(--bg-app);
+  padding: 1px 4px;
+  border-radius: var(--radius-xs);
+}
+
+.widget-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0.7;
+}
+
+.dashboard-widget:hover .widget-actions {
+  opacity: 1;
+}
+
+/* Widget Content Body */
+.widget-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  padding: var(--spacing-2);
+}
+
+/* Fullscreen Mode */
+.dashboard-view-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background-color: var(--bg-app);
+}
+
+/* Print Stylesheet for Executive BI Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .app-header, .app-sidebar, .app-inspector, .app-statusbar, .dashboard-toolbar, .widget-actions {
+    display: none !important;
+  }
+
+  .dashboard-view-container, .dashboard-canvas {
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .dashboard-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .dashboard-widget {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+}

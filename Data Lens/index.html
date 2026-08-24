@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataLens — Enterprise Data Analysis & Business Intelligence Studio</title>
+  <meta name="description" content="Client-side data analysis engine and business intelligence workspace. Import, clean, transform, profile, visualize, and build interactive dashboards.">
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/table.css">
+  <link rel="stylesheet" href="css/charts.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/pipeline.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Top Command Header -->
+    <header class="app-header" role="banner">
+      <div class="header-brand">
+        <button class="btn btn-ghost btn-sm btn-icon" id="btn-toggle-sidebar" title="Toggle Sidebar" aria-label="Toggle sidebar navigation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
+        <div class="brand-logo" aria-hidden="true">DL</div>
+        <div class="brand-title">
+          DataLens
+          <span class="brand-badge">BI STUDIO</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="header-nav" role="tablist" aria-label="Workspace Views">
+        <button class="nav-tab-btn active" data-tab="table" role="tab" id="tab-table" aria-selected="true" aria-controls="view-table">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+          <span>Data Table</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="charts" role="tab" id="tab-charts" aria-selected="false" aria-controls="view-charts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="10" width="4" height="11"/><rect x="10" y="4" width="4" height="17"/><rect x="17" y="14" width="4" height="7"/></svg>
+          <span>Chart Studio</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="dashboard" role="tab" id="tab-dashboard" aria-selected="false" aria-controls="view-dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="pipeline" role="tab" id="tab-pipeline" aria-selected="false" aria-controls="view-pipeline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Data Pipeline</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="stats" role="tab" id="tab-stats" aria-selected="false" aria-controls="view-stats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>Data Profiling</span>
+        </button>
+      </nav>
+
+      <!-- Global Actions -->
+      <div class="header-actions">
+        <button class="btn btn-primary btn-sm" id="btn-import-data" aria-label="Import dataset">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Import Data</span>
+        </button>
+
+        <button class="btn btn-secondary btn-sm" id="btn-export-master" aria-label="Export or Backup Data">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export / Backup</span>
+        </button>
+
+        <button class="btn btn-ghost btn-sm btn-icon" id="btn-theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle light and dark mode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="theme-toggle-icon">
+            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Body -->
+    <main class="app-main">
+      <!-- Left Sidebar: Datasets & Schema Explorer -->
+      <aside class="app-sidebar" aria-label="Datasets and Schema Explorer">
+        <!-- Datasets List Section -->
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <span>Datasets</span>
+          </div>
+          <div class="sidebar-content" id="sidebar-dataset-list" style="max-height: 200px;"></div>
+        </div>
+
+        <!-- Column Schema Explorer Section -->
+        <div class="sidebar-section" style="flex: 1; border-bottom: none;">
+          <div class="sidebar-header">
+            <span>Schema & Types</span>
+          </div>
+          <div class="sidebar-content" id="sidebar-schema-list"></div>
+        </div>
+      </aside>
+
+      <!-- Central Workspace Views -->
+      <section class="workspace-container">
+        <!-- View 1: Spreadsheet Data Table -->
+        <div class="workspace-view active" id="view-table" role="tabpanel" aria-labelledby="tab-table">
+          <div id="view-table-container" style="width: 100%; height: 100%; display: flex; flex-direction: column;"></div>
+        </div>
+
+        <!-- View 2: Visual Chart Studio -->
+        <div class="workspace-view" id="view-charts" role="tabpanel" aria-labelledby="tab-charts">
+          <div id="view-chart-container" style="width: 100%; height: 100%; display: flex;"></div>
+        </div>
+
+        <!-- View 3: Dashboard Canvas -->
+        <div class="workspace-view" id="view-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+          <div id="view-dashboard-container" style="width: 100%; height: 100%; display: flex; flex-direction: column;"></div>
+        </div>
+
+        <!-- View 4: Data Cleaning Pipeline -->
+        <div class="workspace-view" id="view-pipeline" role="tabpanel" aria-labelledby="tab-pipeline">
+          <div id="view-pipeline-container" style="width: 100%; height: 100%; display: flex;"></div>
+        </div>
+
+        <!-- View 5: Statistics & Profiling -->
+        <div class="workspace-view" id="view-stats" role="tabpanel" aria-labelledby="tab-stats">
+          <div id="view-stats-container" style="width: 100%; height: 100%; display: flex; flex-direction: column;"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer class="app-statusbar" role="status">
+      <div class="status-group">
+        <span class="status-item">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>Engine: Ready</span>
+        </span>
+        <span class="status-item">
+          <span>Active: <strong id="status-dataset-name">Loading...</strong></span>
+        </span>
+      </div>
+
+      <div class="status-group">
+        <span class="status-item" id="status-row-count">0 rows</span>
+        <span class="status-item" aria-hidden="true">·</span>
+        <span class="status-item" id="status-col-count">0 columns</span>
+        <span class="status-item" aria-hidden="true">·</span>
+        <span class="status-item" id="status-memory-size">0 KB</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Global Modal Container -->
+  <div class="modal-backdrop" id="app-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-dialog" id="app-modal-dialog"></div>
+  </div>
+
+  <!-- Hidden Global File Input -->
+  <input type="file" id="global-file-input" accept=".csv,.tsv,.json" style="display: none;">
+
+  <!-- JavaScript Modules (Loaded in dependency order) -->
+  <script src="js/db/indexedDB.js"></script>
+  <script src="js/engine/typeDetector.js"></script>
+  <script src="js/engine/csvParser.js"></script>
+  <script src="js/engine/dataEngine.js"></script>
+  <script src="js/engine/pipelineEngine.js"></script>
+  <script src="js/engine/sampleData.js"></script>
+  <script src="js/charts/chartRenderer.js"></script>
+  <script src="js/ui/toast.js"></script>
+  <script src="js/ui/themeManager.js"></script>
+  <script src="js/ui/tableComponent.js"></script>
+  <script src="js/ui/chartBuilder.js"></script>
+  <script src="js/ui/dashboardView.js"></script>
+  <script src="js/ui/cleaningView.js"></script>
+  <script src="js/ui/statsView.js"></script>
+  <script src="js/ui/exportModal.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

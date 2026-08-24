@@ -1,0 +1,98 @@
+/* ==========================================================================
+   CANVASFLOW — Canvas Styles, Overlays, Cursors & Text Editor
+   ========================================================================== */
+
+/* Canvas Cursor Styles depending on active tool / operation */
+.canvas-container[data-cursor="default"] { cursor: default; }
+.canvas-container[data-cursor="grab"] { cursor: grab; }
+.canvas-container[data-cursor="grabbing"] { cursor: grabbing; }
+.canvas-container[data-cursor="crosshair"] { cursor: crosshair; }
+.canvas-container[data-cursor="text"] { cursor: text; }
+.canvas-container[data-cursor="move"] { cursor: move; }
+.canvas-container[data-cursor="nwse-resize"] { cursor: nwse-resize; }
+.canvas-container[data-cursor="nesw-resize"] { cursor: nesw-resize; }
+.canvas-container[data-cursor="ew-resize"] { cursor: ew-resize; }
+.canvas-container[data-cursor="ns-resize"] { cursor: ns-resize; }
+.canvas-container[data-cursor="rotate"] { cursor: grab; }
+.canvas-container[data-cursor="eraser"] { cursor: crosshair; }
+
+/* --------------------------------------------------------------------------
+   Inline Text Editor Overlay
+   -------------------------------------------------------------------------- */
+.text-editor-container {
+  position: absolute;
+  z-index: var(--z-overlay);
+  min-width: 60px;
+  min-height: 28px;
+  pointer-events: auto;
+}
+
+.inline-text-editor {
+  width: 100%;
+  height: 100%;
+  padding: 4px 6px;
+  background: transparent;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: var(--radius-xs);
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.35;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   Quick Action Bar Floating Overlay
+   -------------------------------------------------------------------------- */
+.quick-action-bar {
+  position: absolute;
+  z-index: var(--z-quick-actions);
+  transform: translate(-50%, -100%);
+  margin-top: -12px;
+  pointer-events: auto;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.quick-action-content {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.qa-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all var(--transition-fast);
+}
+
+.qa-btn:hover {
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.qa-btn-danger:hover {
+  background-color: var(--accent-danger-subtle);
+  color: var(--accent-danger);
+}
+
+.qa-divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--border-subtle);
+  margin: 0 3px;
+}

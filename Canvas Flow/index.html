@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CanvasFlow — Infinite Creative Whiteboard</title>
+  <meta name="description" content="Professional browser-based infinite canvas whiteboard for diagrams, brainstorming, sketching, and wireframing.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/canvas.css">
+</head>
+<body class="theme-dark select-none">
+  <!-- App Root Container -->
+  <div id="app" class="app-root">
+    
+    <!-- Top Header Bar -->
+    <header id="top-bar" class="top-bar" role="banner">
+      <!-- Left: Logo & Board Name -->
+      <div class="top-bar-left">
+        <div class="app-logo" title="CanvasFlow" aria-label="CanvasFlow Whiteboard">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+          <span class="logo-text">Canvas<span class="text-accent">Flow</span></span>
+        </div>
+
+        <div class="divider-v" aria-hidden="true"></div>
+
+        <!-- Board Name Input & Dropdown -->
+        <div class="board-title-group">
+          <input type="text" id="board-name-input" class="board-name-input" value="Untitled Board" spellcheck="false" title="Click to rename board" aria-label="Board Name">
+          <button id="btn-board-menu" class="btn-icon btn-subtle" title="Board Actions & Switcher" aria-label="Board Actions & Switcher" aria-haspopup="menu" aria-expanded="false">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M4 6l4 4 4-4H4z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Center: Undo/Redo & Quick Actions -->
+      <div class="top-bar-center" role="toolbar" aria-label="History and View Controls">
+        <div class="action-btn-group">
+          <button id="btn-undo" class="btn-icon" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
+          </button>
+          <button id="btn-redo" class="btn-icon" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
+          </button>
+        </div>
+
+        <div class="divider-v" aria-hidden="true"></div>
+
+        <!-- Zoom Controls -->
+        <div class="zoom-btn-group">
+          <button id="btn-zoom-out" class="btn-icon" title="Zoom Out (Ctrl+Minus)" aria-label="Zoom Out">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <button id="btn-zoom-level" class="btn-pill zoom-level-indicator" title="Click for Zoom Presets" aria-label="Zoom Level and Presets" aria-haspopup="menu" aria-expanded="false">
+            <span id="zoom-text">100%</span>
+          </button>
+          <button id="btn-zoom-in" class="btn-icon" title="Zoom In (Ctrl+Plus)" aria-label="Zoom In">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <button id="btn-zoom-fit" class="btn-icon" title="Zoom to Fit All (Shift+1)" aria-label="Zoom to Fit All Content">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: View Options, Command Palette, Theme, Export -->
+      <div class="top-bar-right">
+        <!-- Command Palette Trigger -->
+        <button id="btn-command-palette" class="btn-secondary btn-command-trigger" title="Command Palette (Ctrl+K)" aria-label="Command Palette" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Find actions...</span>
+          <kbd class="kbd-badge">Ctrl+K</kbd>
+        </button>
+
+        <div class="divider-v" aria-hidden="true"></div>
+
+        <!-- View Toggles (Grid, Snap, Rulers, Layers, Properties) -->
+        <div class="action-btn-group" role="toolbar" aria-label="View Toggles">
+          <button id="btn-toggle-grid" class="btn-icon active" title="Toggle Grid (G)" aria-label="Toggle Grid" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          </button>
+          <button id="btn-toggle-snap" class="btn-icon active" title="Toggle Snapping & Smart Guides (S)" aria-label="Toggle Snapping and Smart Guides" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </button>
+          <button id="btn-toggle-rulers" class="btn-icon" title="Toggle Rulers (Shift+R)" aria-label="Toggle Coordinate Rulers" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21.3 15.3l-6.6 6.6a2 2 0 01-2.8 0L2.7 12.7a2 2 0 010-2.8l6.6-6.6a2 2 0 012.8 0l9.2 9.2a2 2 0 010 2.8z"/><path d="M7.5 7.5l2 2m-1 3l2 2m-1 3l2 2"/></svg>
+          </button>
+          <button id="btn-toggle-layers" class="btn-icon" title="Toggle Layers & Outline Panel" aria-label="Toggle Layers Panel" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </button>
+          <button id="btn-toggle-props" class="btn-icon active" title="Toggle Inspector / Properties Panel" aria-label="Toggle Properties Panel" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </button>
+        </div>
+
+        <div class="divider-v" aria-hidden="true"></div>
+
+        <!-- Theme Toggle -->
+        <button id="btn-theme-toggle" class="btn-icon" title="Toggle Light/Dark Theme" aria-label="Toggle Light and Dark Theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+
+        <!-- Help / Shortcuts -->
+        <button id="btn-shortcuts-help" class="btn-icon" title="Keyboard Shortcuts (?)" aria-label="Keyboard Shortcuts Help">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+
+        <!-- Export Menu Button -->
+        <button id="btn-export-menu" class="btn-primary" title="Export & Share" aria-label="Export and Share Menu" aria-haspopup="menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Body -->
+    <main class="workspace-body" role="main">
+      
+      <!-- Left Floating Tool Rail -->
+      <nav id="tool-rail" class="tool-rail" aria-label="Drawing Tools" role="toolbar" aria-orientation="vertical">
+        <div class="tool-rail-inner">
+          <button class="tool-btn active" data-tool="select" title="Select / Move (V)" aria-label="Select Tool (V)" aria-pressed="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+            <span class="tool-shortcut">V</span>
+          </button>
+          
+          <button class="tool-btn" data-tool="hand" title="Hand / Pan Canvas (H or Space+Drag)" aria-label="Hand Tool (H)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 11V6a2 2 0 00-2-2v0a2 2 0 00-2 2v3m0 0V4a2 2 0 00-2-2v0a2 2 0 00-2 2v7m0 0V5a2 2 0 00-2-2v0a2 2 0 00-2 2v9m0 0a6 6 0 0012 0v-3a2 2 0 00-2-2v0a2 2 0 00-2 2v2"/></svg>
+            <span class="tool-shortcut">H</span>
+          </button>
+
+          <div class="divider-h"></div>
+
+          <!-- Shapes Subgroup -->
+          <button class="tool-btn" data-tool="rectangle" title="Rectangle (R)" aria-label="Rectangle Shape Tool (R)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tool-shortcut">R</span>
+          </button>
+
+          <button class="tool-btn" data-tool="rounded-rectangle" title="Rounded Rectangle (U)" aria-label="Rounded Rectangle Shape Tool (U)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/></svg>
+            <span class="tool-shortcut">U</span>
+          </button>
+
+          <button class="tool-btn" data-tool="ellipse" title="Ellipse / Circle (E)" aria-label="Ellipse and Circle Tool (E)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>
+            <span class="tool-shortcut">E</span>
+          </button>
+
+          <button class="tool-btn" data-tool="diamond" title="Diamond / Decision (D)" aria-label="Diamond Decision Shape Tool (D)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>
+            <span class="tool-shortcut">D</span>
+          </button>
+
+          <div class="divider-h" aria-hidden="true"></div>
+
+          <!-- Connectors & Lines -->
+          <button class="tool-btn" data-tool="arrow" title="Arrow (A)" aria-label="Arrow Tool (A)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="10 5 19 5 19 14"/></svg>
+            <span class="tool-shortcut">A</span>
+          </button>
+
+          <button class="tool-btn" data-tool="line" title="Line (L)" aria-label="Line Tool (L)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+            <span class="tool-shortcut">L</span>
+          </button>
+
+          <button class="tool-btn" data-tool="connector" title="Smart Shape Connector (C)" aria-label="Smart Shape Connector Tool (C)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><path d="M6 12h3c2 0 3-4 5-4s3 4 5 4h1"/></svg>
+            <span class="tool-shortcut">C</span>
+          </button>
+
+          <div class="divider-h" aria-hidden="true"></div>
+
+          <!-- Freehand & Highlighting -->
+          <button class="tool-btn" data-tool="pencil" title="Freehand Pencil (P)" aria-label="Freehand Pencil Tool (P)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/></svg>
+            <span class="tool-shortcut">P</span>
+          </button>
+
+          <button class="tool-btn" data-tool="highlighter" title="Highlighter (Shift+P)" aria-label="Highlighter Tool (Shift+P)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 11l-6 6v3h3l6-6"/><path d="M22 7l-3-3-9 9 3 3 9-9z"/></svg>
+            <span class="tool-shortcut">M</span>
+          </button>
+
+          <div class="divider-h" aria-hidden="true"></div>
+
+          <!-- Text & Sticky -->
+          <button class="tool-btn" data-tool="text" title="Text (T)" aria-label="Text Tool (T)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tool-shortcut">T</span>
+          </button>
+
+          <button class="tool-btn" data-tool="sticky" title="Sticky Note (S)" aria-label="Sticky Note Tool (S)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9l-6-6z"/><path d="M14 3v6h6"/></svg>
+            <span class="tool-shortcut">N</span>
+          </button>
+
+          <button class="tool-btn" id="btn-insert-image" title="Insert Image (Ctrl+I or Drag & Drop)" aria-label="Insert Image File" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="tool-shortcut">I</span>
+          </button>
+
+          <button class="tool-btn" data-tool="eraser" title="Eraser (X)" aria-label="Eraser Tool (X)" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 20H7L3 16a2 2 0 010-2.83l9.17-9.17a2 2 0 012.83 0l6.17 6.17a2 2 0 010 2.83L14 20"/><line x1="18" y1="12" x2="8" y2="22"/></svg>
+            <span class="tool-shortcut">X</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Canvas Viewport Area -->
+      <div id="canvas-container" class="canvas-container" role="region" aria-label="Infinite Canvas Workspace">
+        <!-- Top and Left Rulers -->
+        <canvas id="ruler-top" class="canvas-ruler ruler-top" aria-hidden="true"></canvas>
+        <canvas id="ruler-left" class="canvas-ruler ruler-left" aria-hidden="true"></canvas>
+        <div id="ruler-corner" class="ruler-corner" aria-hidden="true"></div>
+
+        <!-- Main Drawing Canvas -->
+        <canvas id="canvas-main" class="canvas-layer" aria-label="Main Whiteboard Drawing Surface"></canvas>
+        
+        <!-- Selection & Interactive Overlay Canvas -->
+        <canvas id="canvas-overlay" class="canvas-layer overlay-layer" aria-hidden="true"></canvas>
+
+        <!-- Hidden File Input for Image Upload -->
+        <input type="file" id="image-file-input" accept="image/*" style="display: none;" aria-label="Choose image file">
+        <input type="file" id="json-file-input" accept=".json,.canvasflow" style="display: none;" aria-label="Choose JSON board file">
+
+        <!-- Inline Text Editor Overlay -->
+        <div id="text-editor-container" class="text-editor-container hidden" role="region" aria-label="Inline Text Editor">
+          <textarea id="inline-text-editor" class="inline-text-editor" spellcheck="false" aria-label="Editing text"></textarea>
+        </div>
+
+        <!-- Floating Quick Context Bar on Selected Object -->
+        <div id="quick-action-bar" class="quick-action-bar hidden" role="toolbar" aria-label="Selected Object Quick Actions">
+          <div class="quick-action-content">
+            <button id="qa-duplicate" class="qa-btn" title="Duplicate (Ctrl+D)" aria-label="Duplicate Selected">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+            <button id="qa-lock" class="qa-btn" title="Lock/Unlock (Ctrl+L)" aria-label="Toggle Lock State">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </button>
+            <button id="qa-group" class="qa-btn" title="Group (Ctrl+G)" aria-label="Group Selected">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="M7 11v6h6"/></svg>
+            </button>
+            <button id="qa-bring-front" class="qa-btn" title="Bring to Front (Ctrl+])" aria-label="Bring to Front">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+            </button>
+            <div class="qa-divider" aria-hidden="true"></div>
+            <button id="qa-delete" class="qa-btn qa-btn-danger" title="Delete (Del / Backspace)" aria-label="Delete Selected">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Layers & Outline Panel (Left side or Dockable) -->
+      <aside id="layers-panel" class="side-panel layers-panel hidden" role="region" aria-label="Layers and Document Outline">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <span class="panel-title">Layers & Outline</span>
+          </div>
+          <button id="btn-close-layers" class="btn-icon btn-subtle" title="Close Panel" aria-label="Close Layers Panel">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="panel-content">
+          <div id="layers-list" class="layers-list" role="list">
+            <!-- Dynamic Layer items inserted here -->
+          </div>
+          <div id="layers-empty" class="panel-empty-state">
+            <span>No objects on canvas</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Contextual Properties Panel -->
+      <aside id="properties-panel" class="side-panel properties-panel" role="region" aria-label="Object and Canvas Properties Inspector">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span id="prop-panel-title" class="panel-title">Canvas Settings</span>
+          </div>
+          <button id="btn-toggle-props-collapse" class="btn-icon btn-subtle" title="Collapse Panel" aria-label="Collapse Properties Panel">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div id="properties-content" class="panel-content custom-scrollbar">
+          <!-- Dynamic Controls Rendered via JS -->
+        </div>
+      </aside>
+
+      <!-- Floating Minimap in Bottom-Right -->
+      <div id="minimap-container" class="minimap-container" role="region" aria-label="Canvas Minimap">
+        <div class="minimap-header">
+          <span class="minimap-label">Minimap</span>
+          <button id="btn-toggle-minimap" class="btn-icon-xs" title="Minimize / Expand" aria-label="Toggle Minimap Body">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="minimap-body">
+          <canvas id="canvas-minimap" width="180" height="120" aria-label="Minimap Overview"></canvas>
+          <div id="minimap-viewport-box" class="minimap-viewport-box" aria-hidden="true"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer id="status-bar" class="status-bar" role="contentinfo">
+      <div class="status-left">
+        <span id="status-coords" class="status-item" title="Cursor Coordinates">X: 0 | Y: 0</span>
+        <span class="status-divider" aria-hidden="true"></span>
+        <span id="status-selection" class="status-item" title="Selection Info">No items selected</span>
+      </div>
+      
+      <div class="status-right">
+        <span id="status-objects-count" class="status-item" title="Total objects on canvas">0 objects</span>
+        <span class="status-divider" aria-hidden="true"></span>
+        <span id="status-save-state" class="status-item text-muted" title="Persistence status">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>Saved</span>
+        </span>
+        <span class="status-divider" aria-hidden="true"></span>
+        <span id="status-fps" class="status-item text-muted">60 FPS</span>
+      </div>
+    </footer>
+
+    <!-- Dropdowns, Modals & Toast Overlays -->
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden" role="menu" aria-label="Canvas Context Menu">
+      <!-- Items dynamically populated -->
+    </div>
+
+    <!-- Zoom Dropdown Menu -->
+    <div id="zoom-dropdown" class="dropdown-menu hidden" role="menu" aria-label="Zoom Presets Menu">
+      <button class="dropdown-item" data-action="zoom-reset" role="menuitem"><span>Reset to 100%</span><kbd>Ctrl+0</kbd></button>
+      <button class="dropdown-item" data-action="zoom-fit" role="menuitem"><span>Zoom to Fit All</span><kbd>Shift+1</kbd></button>
+      <button class="dropdown-item" data-action="zoom-selection" role="menuitem"><span>Zoom to Selection</span><kbd>Shift+2</kbd></button>
+      <div class="dropdown-divider" aria-hidden="true"></div>
+      <button class="dropdown-item" data-action="zoom-50" role="menuitem"><span>50%</span></button>
+      <button class="dropdown-item" data-action="zoom-100" role="menuitem"><span>100%</span></button>
+      <button class="dropdown-item" data-action="zoom-200" role="menuitem"><span>200%</span></button>
+      <button class="dropdown-item" data-action="zoom-400" role="menuitem"><span>400%</span></button>
+    </div>
+
+    <!-- Board Switcher Dropdown Menu -->
+    <div id="board-dropdown" class="dropdown-menu board-dropdown hidden" role="menu" aria-label="Boards Menu">
+      <div class="dropdown-header">
+        <span>Boards</span>
+        <button id="btn-create-board-fast" class="btn-link" title="Create New Board">+ New</button>
+      </div>
+      <div id="board-list-menu" class="board-list-menu custom-scrollbar" role="group">
+        <!-- Board list items -->
+      </div>
+      <div class="dropdown-divider" aria-hidden="true"></div>
+      <button class="dropdown-item" data-action="manage-boards" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span>Board Manager...</span>
+      </button>
+      <button class="dropdown-item" data-action="duplicate-board" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span>Duplicate Current Board</span>
+      </button>
+    </div>
+
+    <!-- Export Dropdown Menu -->
+    <div id="export-dropdown" class="dropdown-menu export-dropdown hidden" role="menu" aria-label="Export Menu">
+      <div class="dropdown-header">Export Options</div>
+      <button class="dropdown-item" data-action="export-png" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Export as PNG Image</span>
+      </button>
+      <button class="dropdown-item" data-action="export-svg" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>Export as SVG Vector</span>
+      </button>
+      <button class="dropdown-item" data-action="export-json" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Export CanvasFlow JSON File</span>
+      </button>
+      <div class="dropdown-divider" aria-hidden="true"></div>
+      <button class="dropdown-item" data-action="import-json" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Import JSON File...</span>
+      </button>
+      <button class="dropdown-item" data-action="print-canvas" role="menuitem">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span>Print Board (Ctrl+P)</span>
+      </button>
+    </div>
+
+    <!-- Command Palette Modal -->
+    <div id="modal-command-palette" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Command Palette">
+      <div class="command-palette-card">
+        <div class="command-input-wrap">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="command-search-input" placeholder="Type a command or search action..." autocomplete="off" aria-label="Search actions and commands">
+          <kbd class="kbd-badge">ESC to close</kbd>
+        </div>
+        <div id="command-results-list" class="command-results-list custom-scrollbar" role="listbox">
+          <!-- Command Items -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div id="modal-shortcuts" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="shortcuts-modal-title" class="modal-title">Keyboard Shortcuts & Gestures</span>
+          </div>
+          <button class="modal-close btn-icon btn-subtle" data-modal="modal-shortcuts" aria-label="Close Shortcuts Modal">&times;</button>
+        </div>
+        <div class="modal-body custom-scrollbar">
+          <div class="shortcuts-grid">
+            <div class="shortcut-category">
+              <h4>Tools</h4>
+              <div class="shortcut-row"><span>Select Tool</span><kbd>V</kbd></div>
+              <div class="shortcut-row"><span>Hand / Pan Tool</span><kbd>H</kbd> / <kbd>Space+Drag</kbd></div>
+              <div class="shortcut-row"><span>Rectangle</span><kbd>R</kbd></div>
+              <div class="shortcut-row"><span>Rounded Rectangle</span><kbd>U</kbd></div>
+              <div class="shortcut-row"><span>Ellipse / Circle</span><kbd>E</kbd></div>
+              <div class="shortcut-row"><span>Diamond</span><kbd>D</kbd></div>
+              <div class="shortcut-row"><span>Arrow</span><kbd>A</kbd></div>
+              <div class="shortcut-row"><span>Line</span><kbd>L</kbd></div>
+              <div class="shortcut-row"><span>Connector</span><kbd>C</kbd></div>
+              <div class="shortcut-row"><span>Pencil</span><kbd>P</kbd></div>
+              <div class="shortcut-row"><span>Highlighter</span><kbd>Shift + P</kbd> / <kbd>M</kbd></div>
+              <div class="shortcut-row"><span>Text</span><kbd>T</kbd></div>
+              <div class="shortcut-row"><span>Sticky Note</span><kbd>S</kbd> / <kbd>N</kbd></div>
+              <div class="shortcut-row"><span>Insert Image</span><kbd>I</kbd></div>
+              <div class="shortcut-row"><span>Eraser</span><kbd>X</kbd></div>
+            </div>
+
+            <div class="shortcut-category">
+              <h4>Editing & Actions</h4>
+              <div class="shortcut-row"><span>Undo</span><kbd>Ctrl + Z</kbd></div>
+              <div class="shortcut-row"><span>Redo</span><kbd>Ctrl + Shift + Z</kbd></div>
+              <div class="shortcut-row"><span>Cut</span><kbd>Ctrl + X</kbd></div>
+              <div class="shortcut-row"><span>Copy</span><kbd>Ctrl + C</kbd></div>
+              <div class="shortcut-row"><span>Paste</span><kbd>Ctrl + V</kbd></div>
+              <div class="shortcut-row"><span>Duplicate</span><kbd>Ctrl + D</kbd> / <kbd>Alt+Drag</kbd></div>
+              <div class="shortcut-row"><span>Select All</span><kbd>Ctrl + A</kbd></div>
+              <div class="shortcut-row"><span>Delete Selected</span><kbd>Del</kbd> / <kbd>Backspace</kbd></div>
+              <div class="shortcut-row"><span>Group Selection</span><kbd>Ctrl + G</kbd></div>
+              <div class="shortcut-row"><span>Ungroup Selection</span><kbd>Ctrl + Shift + G</kbd></div>
+              <div class="shortcut-row"><span>Lock / Unlock</span><kbd>Ctrl + L</kbd></div>
+              <div class="shortcut-row"><span>Bring to Front</span><kbd>Ctrl + ]</kbd></div>
+              <div class="shortcut-row"><span>Send to Back</span><kbd>Ctrl + [</kbd></div>
+            </div>
+
+            <div class="shortcut-category">
+              <h4>Navigation & View</h4>
+              <div class="shortcut-row"><span>Command Palette</span><kbd>Ctrl + K</kbd></div>
+              <div class="shortcut-row"><span>Zoom In / Out</span><kbd>Ctrl + + / -</kbd> / <kbd>Wheel</kbd></div>
+              <div class="shortcut-row"><span>Reset Zoom (100%)</span><kbd>Ctrl + 0</kbd></div>
+              <div class="shortcut-row"><span>Zoom to Fit</span><kbd>Shift + 1</kbd></div>
+              <div class="shortcut-row"><span>Zoom to Selection</span><kbd>Shift + 2</kbd></div>
+              <div class="shortcut-row"><span>Toggle Grid</span><kbd>G</kbd></div>
+              <div class="shortcut-row"><span>Toggle Snapping</span><kbd>S</kbd></div>
+              <div class="shortcut-row"><span>Toggle Rulers</span><kbd>Shift + R</kbd></div>
+              <div class="shortcut-row"><span>Nudge Object</span><kbd>Arrow Keys</kbd> (10px with <kbd>Shift</kbd>)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board Manager Modal -->
+    <div id="modal-board-manager" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="bm-modal-title">
+      <div class="modal-card modal-md">
+        <div class="modal-header">
+          <span id="bm-modal-title" class="modal-title">Manage Boards</span>
+          <button class="modal-close btn-icon btn-subtle" data-modal="modal-board-manager" aria-label="Close Board Manager">&times;</button>
+        </div>
+        <div class="modal-body custom-scrollbar">
+          <div class="board-manager-controls">
+            <button id="btn-bm-new-board" class="btn-primary">+ Create New Board</button>
+            <button id="btn-bm-import-board" class="btn-secondary">Import JSON</button>
+          </div>
+          <div id="bm-board-items" class="bm-board-items">
+            <!-- Dynamically filled with boards -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Preview & Settings Modal -->
+    <div id="modal-export" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+      <div class="modal-card modal-md">
+        <div class="modal-header">
+          <span id="export-modal-title" class="modal-title">Export PNG Image</span>
+          <button class="modal-close btn-icon btn-subtle" data-modal="modal-export" aria-label="Close Export Modal">&times;</button>
+        </div>
+        <div class="modal-body custom-scrollbar">
+          <div class="export-preview-container">
+            <img id="export-preview-img" class="export-preview-img" alt="Export Image Rendering Preview">
+          </div>
+          <div class="export-options-form">
+            <div class="form-group-row">
+              <label id="export-scale-label">Resolution Scale:</label>
+              <div class="btn-group-segmented" id="export-scale-group" role="group" aria-labelledby="export-scale-label">
+                <button class="btn-segment active" data-scale="1">1x</button>
+                <button class="btn-segment" data-scale="2">2x (Retina)</button>
+                <button class="btn-segment" data-scale="3">3x (High-Res)</button>
+              </div>
+            </div>
+            <div class="form-group-row">
+              <label id="export-bg-label">Background:</label>
+              <div class="btn-group-segmented" id="export-bg-group" role="group" aria-labelledby="export-bg-label">
+                <button class="btn-segment active" data-bg="canvas">Theme Background</button>
+                <button class="btn-segment" data-bg="transparent">Transparent</button>
+                <button class="btn-segment" data-bg="white">Pure White</button>
+              </div>
+            </div>
+            <div class="form-group-row">
+              <label id="export-scope-label">Scope:</label>
+              <div class="btn-group-segmented" id="export-scope-group" role="group" aria-labelledby="export-scope-label">
+                <button class="btn-segment active" data-scope="all">All Content</button>
+                <button class="btn-segment" data-scope="selection">Selection Only</button>
+                <button class="btn-segment" data-scope="viewport">Current Viewport</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary modal-close" data-modal="modal-export">Cancel</button>
+          <button id="btn-confirm-export-png" class="btn-primary">Download PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Dialog Modal -->
+    <div id="modal-confirm" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
+      <div class="modal-card modal-sm">
+        <div class="modal-header">
+          <span id="confirm-dialog-title" class="modal-title">Confirm Action</span>
+        </div>
+        <div class="modal-body">
+          <p id="confirm-dialog-message">Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-dialog-cancel" class="btn-secondary">Cancel</button>
+          <button id="confirm-dialog-confirm" class="btn-danger">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  </div>
+
+  <!-- JavaScript Module Bundle (Universal compatibility for file:// and http://) -->
+  <script src="js/app.bundle.js"></script>
+</body>
+</html>
