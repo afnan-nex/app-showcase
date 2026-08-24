@@ -1,0 +1,158 @@
+:root {
+  /* FlowPilot Dark Engineering Theme (Default) */
+  --bg-app: #080c14;
+  --bg-canvas: #0b0f19;
+  --bg-sidebar: #0d1322;
+  --bg-panel: #101728;
+  --bg-panel-header: #131c30;
+  --bg-card: #121a2d;
+  --bg-card-hover: #17223b;
+  --bg-card-active: #1c2a49;
+  --bg-input: #0a0f1c;
+  --bg-input-focus: #0f1629;
+  --bg-hover: #18233a;
+  --bg-active: #202e4c;
+  --bg-modal-overlay: rgba(3, 7, 18, 0.82);
+
+  --border-subtle: #162035;
+  --border-default: #1c2942;
+  --border-strong: #253759;
+  --border-focus: #3b82f6;
+  --border-node: #223252;
+  --border-node-selected: #60a5fa;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-disabled: #475569;
+  --text-inverse: #090d16;
+
+  /* Restrained Category Accents */
+  --cat-trigger: #10b981;
+  --cat-trigger-glow: rgba(16, 185, 129, 0.2);
+  --cat-schedule: #06b6d4;
+  --cat-schedule-glow: rgba(6, 182, 212, 0.2);
+  --cat-http: #f59e0b;
+  --cat-http-glow: rgba(245, 158, 11, 0.2);
+  --cat-delay: #8b5cf6;
+  --cat-delay-glow: rgba(139, 92, 246, 0.2);
+  --cat-condition: #ec4899;
+  --cat-condition-glow: rgba(236, 72, 153, 0.2);
+  --cat-transform: #3b82f6;
+  --cat-transform-glow: rgba(59, 130, 246, 0.2);
+  --cat-filter: #6366f1;
+  --cat-filter-glow: rgba(99, 102, 241, 0.2);
+  --cat-email: #14b8a6;
+  --cat-email-glow: rgba(20, 184, 166, 0.2);
+  --cat-notification: #f97316;
+  --cat-notification-glow: rgba(249, 115, 22, 0.2);
+  --cat-webhook: #10b981;
+  --cat-webhook-glow: rgba(16, 185, 129, 0.2);
+  --cat-database: #a855f7;
+  --cat-database-glow: rgba(168, 85, 247, 0.2);
+  --cat-output: #22c55e;
+  --cat-output-glow: rgba(34, 197, 94, 0.2);
+
+  /* Status Tokens */
+  --status-idle: #64748b;
+  --status-pending: #f59e0b;
+  --status-running: #38bdf8;
+  --status-success: #10b981;
+  --status-error: #ef4444;
+  --status-skipped: #6b7280;
+
+  /* Connectors & Grid */
+  --grid-dot: #1c283f;
+  --grid-line: #141e33;
+  --connection-default: #475569;
+  --connection-hover: #94a3b8;
+  --connection-selected: #60a5fa;
+  --connection-pulse: #38bdf8;
+  --port-idle: #64748b;
+  --port-hover: #38bdf8;
+  --port-connected: #94a3b8;
+
+  /* Radius & Shadows */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.6);
+  --shadow-node: 0 6px 18px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-node-selected: 0 0 0 2px var(--border-node-selected), 0 8px 24px rgba(0, 0, 0, 0.65);
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.18s ease;
+  --transition-slow: 0.25s ease;
+
+  --z-canvas: 1;
+  --z-connections: 2;
+  --z-nodes: 3;
+  --z-marquee: 4;
+  --z-canvas-controls: 10;
+  --z-sidebars: 20;
+  --z-topbar: 30;
+  --z-drawer: 40;
+  --z-modals: 100;
+  --z-toast: 110;
+}
+
+[data-theme="light"] {
+  --bg-app: #f1f5f9;
+  --bg-canvas: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-panel-header: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-card-active: #f1f5f9;
+  --bg-input: #f8fafc;
+  --bg-input-focus: #ffffff;
+  --bg-hover: #f1f5f9;
+  --bg-active: #e2e8f0;
+  --bg-modal-overlay: rgba(15, 23, 42, 0.5);
+
+  --border-subtle: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #2563eb;
+  --border-node: #cbd5e1;
+  --border-node-selected: #2563eb;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-disabled: #cbd5e1;
+  --text-inverse: #ffffff;
+
+  --grid-dot: #cbd5e1;
+  --grid-line: #e2e8f0;
+  --connection-default: #94a3b8;
+  --connection-hover: #64748b;
+  --connection-selected: #2563eb;
+  --connection-pulse: #0284c7;
+  --port-idle: #94a3b8;
+  --port-hover: #0284c7;
+  --port-connected: #64748b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 3px 6px -1px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.1);
+  --shadow-node: 0 3px 10px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-node-selected: 0 0 0 2px var(--border-node-selected), 0 6px 16px rgba(37, 99, 235, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

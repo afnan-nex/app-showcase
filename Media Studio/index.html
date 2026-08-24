@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="MediaStudio — Professional Browser-Based Image & Graphic Design Editor">
+  <meta name="theme-color" content="#121214">
+  <title>MediaStudio — Creative Image & Graphic Editor</title>
+  
+  <!-- Google Fonts for rich typography in canvas and UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@400;600;700&family=Pacifico&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@400;600&family=Bebas+Neue&family=Caveat:wght@600&family=Cinzel:wght@700&family=Permanent+Marker&family=Righteous&family=Satisfy&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/canvas.css">
+</head>
+<body class="theme-dark">
+  <!-- Main Application Wrapper -->
+  <div id="app" class="app-layout" role="application" aria-label="MediaStudio Image Editor">
+    
+    <!-- TOP TOOLBAR -->
+    <header class="top-bar" role="banner">
+      <!-- App Brand & Project Title -->
+      <div class="top-bar-left">
+        <div class="brand" title="MediaStudio Pro">
+          <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="4" fill="url(#brand-grad)" stroke="none"/>
+            <circle cx="8.5" cy="8.5" r="2" fill="#ffffff"/>
+            <path d="M21 15l-5-5L5 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="brand-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#3b82f6"/>
+                <stop offset="1" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="brand-name">Media<span class="brand-highlight">Studio</span></span>
+        </div>
+
+        <!-- Project Menu / Name -->
+        <div class="project-header">
+          <input type="text" id="project-name-input" class="project-name-input" value="Untitled Project" title="Click to rename project" aria-label="Project Name" spellcheck="false" />
+          <span id="save-status-indicator" class="save-status-indicator saved" title="Auto-saved to local browser storage">Saved</span>
+        </div>
+
+        <!-- Menu Actions -->
+        <nav class="top-nav" role="navigation" aria-label="Main Menu">
+          <!-- File Dropdown -->
+          <div class="nav-dropdown">
+            <button class="nav-btn" data-dropdown="menu-file" aria-haspopup="true" aria-expanded="false">File <span class="caret" aria-hidden="true">▾</span></button>
+            <div id="menu-file" class="dropdown-panel" role="menu">
+              <button class="menu-item" id="btn-new-project" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                <span>New Project...</span>
+                <kbd>Ctrl+N</kbd>
+              </button>
+              <button class="menu-item" id="btn-open-file" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span>Open Image / File...</span>
+                <kbd>Ctrl+O</kbd>
+              </button>
+              <button class="menu-item" id="btn-design-templates" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                <span>Design Templates...</span>
+              </button>
+              <button class="menu-item" id="btn-sample-media" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Sample Stock Media...</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item" id="btn-save-project" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Project</span>
+                <kbd>Ctrl+S</kbd>
+              </button>
+              <button class="menu-item" id="btn-export-project-file" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Export .mediastudio file</span>
+              </button>
+              <button class="menu-item" id="btn-import-project-file" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Import .mediastudio file</span>
+              </button>
+              <button class="menu-item" id="btn-projects-library" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>My Projects Gallery...</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item" id="btn-quick-export" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                <span>Export Image (PNG, JPG, WebP)...</span>
+                <kbd>Ctrl+E</kbd>
+              </button>
+            </div>
+          </div>
+
+          <!-- Edit Dropdown -->
+          <div class="nav-dropdown">
+            <button class="nav-btn" data-dropdown="menu-edit" aria-haspopup="true" aria-expanded="false">Edit <span class="caret" aria-hidden="true">▾</span></button>
+            <div id="menu-edit" class="dropdown-panel" role="menu">
+              <button class="menu-item" id="menu-undo" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                <span>Undo</span>
+                <kbd>Ctrl+Z</kbd>
+              </button>
+              <button class="menu-item" id="menu-redo" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                <span>Redo</span>
+                <kbd>Ctrl+Y</kbd>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item" id="menu-cut" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                <span>Cut Layer</span>
+                <kbd>Ctrl+X</kbd>
+              </button>
+              <button class="menu-item" id="menu-copy" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy Layer</span>
+                <kbd>Ctrl+C</kbd>
+              </button>
+              <button class="menu-item" id="menu-paste" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                <span>Paste Layer</span>
+                <kbd>Ctrl+V</kbd>
+              </button>
+              <button class="menu-item" id="menu-duplicate" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="2" y="2" width="13" height="13" rx="2"/></svg>
+                <span>Duplicate</span>
+                <kbd>Ctrl+D</kbd>
+              </button>
+              <button class="menu-item" id="menu-delete" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete</span>
+                <kbd>Del</kbd>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item" id="menu-select-all" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 2"/></svg>
+                <span>Select All Layers</span>
+                <kbd>Ctrl+A</kbd>
+              </button>
+              <button class="menu-item" id="menu-copy-canvas-png" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                <span>Copy Merged to Clipboard</span>
+                <kbd>Ctrl+Shift+C</kbd>
+              </button>
+            </div>
+          </div>
+
+          <!-- Image & Canvas Dropdown -->
+          <div class="nav-dropdown">
+            <button class="nav-btn" data-dropdown="menu-image" aria-haspopup="true" aria-expanded="false">Canvas <span class="caret" aria-hidden="true">▾</span></button>
+            <div id="menu-image" class="dropdown-panel" role="menu">
+              <button class="menu-item" id="btn-resize-canvas-modal" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                <span>Resize Canvas Size...</span>
+              </button>
+              <button class="menu-item" id="btn-crop-canvas-menu" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+                <span>Crop Canvas (C)</span>
+                <kbd>C</kbd>
+              </button>
+              <button class="menu-item" id="btn-trim-canvas" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/></svg>
+                <span>Trim Canvas to Fit Layers</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item" id="btn-rotate-canvas-cw" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Rotate Canvas 90° CW</span>
+              </button>
+              <button class="menu-item" id="btn-rotate-canvas-ccw" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38L-2.44 1.52"/></svg>
+                <span>Rotate Canvas 90° CCW</span>
+              </button>
+              <button class="menu-item" id="btn-flip-canvas-h" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="7 8 2 12 7 16"/><polyline points="17 8 22 12 17 16"/></svg>
+                <span>Flip Canvas Horizontal</span>
+              </button>
+              <button class="menu-item" id="btn-flip-canvas-v" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="8 7 12 2 16 7"/><polyline points="8 17 12 22 16 17"/></svg>
+                <span>Flip Canvas Vertical</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- View Dropdown -->
+          <div class="nav-dropdown">
+            <button class="nav-btn" data-dropdown="menu-view" aria-haspopup="true" aria-expanded="false">View <span class="caret" aria-hidden="true">▾</span></button>
+            <div id="menu-view" class="dropdown-panel" role="menu">
+              <button class="menu-item" id="menu-zoom-in" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                <span>Zoom In</span>
+                <kbd>Ctrl++</kbd>
+              </button>
+              <button class="menu-item" id="menu-zoom-out" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                <span>Zoom Out</span>
+                <kbd>Ctrl+-</kbd>
+              </button>
+              <button class="menu-item" id="menu-zoom-fit" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                <span>Fit Canvas to Screen</span>
+                <kbd>Ctrl+0</kbd>
+              </button>
+              <button class="menu-item" id="menu-zoom-100" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>Zoom to 100%</span>
+                <kbd>Ctrl+1</kbd>
+              </button>
+              <div class="menu-divider"></div>
+              <label class="menu-checkbox">
+                <input type="checkbox" id="toggle-rulers-check" checked />
+                <span>Show Rulers</span>
+                <kbd>Ctrl+R</kbd>
+              </label>
+              <label class="menu-checkbox">
+                <input type="checkbox" id="toggle-grid-check" />
+                <span>Show Grid</span>
+                <kbd>Ctrl+'</kbd>
+              </label>
+              <label class="menu-checkbox">
+                <input type="checkbox" id="toggle-snap-check" checked />
+                <span>Snap to Smart Guides</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Help / Shortcuts -->
+          <div class="nav-dropdown">
+            <button class="nav-btn" data-dropdown="menu-help" aria-haspopup="true" aria-expanded="false">Help <span class="caret" aria-hidden="true">▾</span></button>
+            <div id="menu-help" class="dropdown-panel" role="menu">
+              <button class="menu-item" id="btn-shortcuts-modal" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
+                <span>Keyboard Shortcuts</span>
+                <kbd>?</kbd>
+              </button>
+              <button class="menu-item" id="btn-about-modal" role="menuitem">
+                <svg class="menu-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>About MediaStudio</span>
+              </button>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <!-- Quick Action Center Badges -->
+      <div class="top-bar-center">
+        <!-- Canvas Dimension Tag -->
+        <button id="btn-canvas-size-badge" class="canvas-size-badge" title="Click to resize canvas" aria-label="Resize canvas artboard">
+          <span id="badge-canvas-width">1920</span> &times; <span id="badge-canvas-height">1080</span> px
+        </button>
+        <div class="tool-quick-hint" id="tool-quick-hint">
+          <span class="tool-hint-name">Select Tool</span>: <span class="tool-hint-desc">Click & drag to move or transform layers</span>
+        </div>
+      </div>
+
+      <!-- Top Right Action Buttons -->
+      <div class="top-bar-right">
+        <!-- Undo / Redo Quick Buttons -->
+        <div class="btn-group" role="group" aria-label="History Controls">
+          <button id="btn-quick-undo" class="icon-btn" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>
+            <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
+          <button id="btn-quick-redo" class="icon-btn" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>
+            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+
+        <!-- Add Layer Quick Button -->
+        <div class="btn-group hide-mobile" role="group" aria-label="Quick Insert">
+          <button id="btn-add-image-top" class="action-btn secondary" title="Import Image Layer">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="10" y1="10" x2="14" y2="10"/></svg>
+            <span>Add Image</span>
+          </button>
+          <button id="btn-add-text-top" class="action-btn secondary" title="Add Text Layer">
+            <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span>Add Text</span>
+          </button>
+        </div>
+
+        <!-- Export Primary Action -->
+        <button id="btn-primary-export" class="action-btn primary" title="Export Image (Ctrl+E)">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export</span>
+        </button>
+
+        <!-- Sidebar Toggle (for Tablets & Responsive Viewports) -->
+        <button id="btn-toggle-sidebar" class="icon-btn sidebar-toggle-btn" title="Toggle Sidebar Panels" aria-label="Toggle Properties and Layers Panel">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE BODY -->
+    <div class="workspace-body">
+      
+      <!-- LEFT TOOLBAR -->
+      <aside class="left-toolbar" id="left-toolbar" role="toolbar" aria-label="Tools">
+        
+        <!-- Selection / Move -->
+        <button class="tool-btn active" data-tool="select" title="Move & Transform Tool (V)" aria-label="Select Tool (V)">
+          <svg viewBox="0 0 24 24"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+          <span class="tool-shortcut">V</span>
+        </button>
+
+        <!-- Hand / Pan -->
+        <button class="tool-btn" data-tool="hand" title="Hand / Pan Viewport (H or Space+Drag)" aria-label="Hand Pan Tool (H)">
+          <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v7"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M6 14a6 6 0 0 0 12 0v-4a2 2 0 0 0-4 0"/></svg>
+          <span class="tool-shortcut">H</span>
+        </button>
+
+        <!-- Crop Tool -->
+        <button class="tool-btn" data-tool="crop" title="Crop Canvas Tool (C)" aria-label="Crop Canvas Tool (C)">
+          <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+          <span class="tool-shortcut">C</span>
+        </button>
+
+        <div class="tool-sep" role="separator"></div>
+
+        <!-- Brush Tool -->
+        <button class="tool-btn" data-tool="brush" title="Brush Drawing Tool (B)" aria-label="Brush Tool (B)">
+          <svg viewBox="0 0 24 24"><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.375-9.375z"/><path d="M18 8l-3-3"/><path d="M2 22s3-1 5-4"/></svg>
+          <span class="tool-shortcut">B</span>
+        </button>
+
+        <!-- Eraser Tool -->
+        <button class="tool-btn" data-tool="eraser" title="Eraser Tool (E)" aria-label="Eraser Tool (E)">
+          <svg viewBox="0 0 24 24"><path d="M20 20H7L3 16c-.78-.78-.78-2.05 0-2.83L14 2c.78-.78 2.05-.78 2.83 0l5.17 5.17c.78.78.78 2.05 0 2.83L10 22"/><path d="M18 12l-6-6"/></svg>
+          <span class="tool-shortcut">E</span>
+        </button>
+
+        <!-- Text Tool -->
+        <button class="tool-btn" data-tool="text" title="Text Tool (T)" aria-label="Text Tool (T)">
+          <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <span class="tool-shortcut">T</span>
+        </button>
+
+        <!-- Shape Tool -->
+        <div class="tool-flyout-wrapper">
+          <button class="tool-btn" data-tool="shape" id="active-shape-tool-btn" title="Vector Shape Tool (U)" aria-label="Vector Shape Tool (U)">
+            <svg id="active-shape-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tool-shortcut">U</span>
+            <span class="flyout-arrow" aria-hidden="true">▸</span>
+          </button>
+          
+          <!-- Flyout Shape Picker -->
+          <div class="tool-flyout" id="shape-flyout" role="menu">
+            <button class="flyout-btn active" data-shape="rectangle" role="menuitem">
+              <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+              <span>Rectangle</span>
+            </button>
+            <button class="flyout-btn" data-shape="rounded-rect" role="menuitem">
+              <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/></svg>
+              <span>Rounded Rect</span>
+            </button>
+            <button class="flyout-btn" data-shape="ellipse" role="menuitem">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+              <span>Ellipse</span>
+            </button>
+            <button class="flyout-btn" data-shape="star" role="menuitem">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Star</span>
+            </button>
+            <button class="flyout-btn" data-shape="polygon" role="menuitem">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+              <span>Polygon</span>
+            </button>
+            <button class="flyout-btn" data-shape="line" role="menuitem">
+              <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+              <span>Line</span>
+            </button>
+            <button class="flyout-btn" data-shape="arrow" role="menuitem">
+              <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9 5 19 5 19 15"/></svg>
+              <span>Arrow</span>
+            </button>
+            <button class="flyout-btn" data-shape="heart" role="menuitem">
+              <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>Heart</span>
+            </button>
+            <button class="flyout-btn" data-shape="bubble" role="menuitem">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>Speech Bubble</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Eyedropper Tool -->
+        <button class="tool-btn" data-tool="eyedropper" title="Color Eyedropper Tool (I)" aria-label="Eyedropper Tool (I)">
+          <svg viewBox="0 0 24 24"><path d="M2 22s1-3 4-5l11-11a2.828 2.828 0 1 0-4-4L2 13v9z"/><path d="M15 5l4 4"/></svg>
+          <span class="tool-shortcut">I</span>
+        </button>
+
+        <div class="tool-sep" role="separator"></div>
+
+        <!-- Active Color Swatch Display -->
+        <div class="tool-color-swatches" aria-label="Color Palette">
+          <div class="color-swatch-box" id="primary-color-picker-trigger" title="Primary Color (Click to change)">
+            <input type="color" id="primary-color-input" value="#3b82f6" class="visually-hidden-color" aria-label="Primary Color" />
+            <div class="color-swatch-preview" id="primary-color-preview" style="background-color: #3b82f6;"></div>
+          </div>
+          <div class="color-swatch-box secondary-swatch" id="secondary-color-picker-trigger" title="Secondary Color">
+            <input type="color" id="secondary-color-input" value="#ffffff" class="visually-hidden-color" aria-label="Secondary Color" />
+            <div class="color-swatch-preview" id="secondary-color-preview" style="background-color: #ffffff;"></div>
+          </div>
+          <button class="color-swap-btn" id="btn-swap-colors" title="Swap Colors (X)" aria-label="Swap Colors (X)">
+            <svg viewBox="0 0 24 24"><path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/></svg>
+          </button>
+        </div>
+
+      </aside>
+
+      <!-- CENTER CANVAS VIEWPORT AREA -->
+      <main class="center-canvas-area" id="viewport-container" role="main" aria-label="Canvas Workspace">
+        
+        <!-- Interactive Rulers -->
+        <div class="ruler-corner" aria-hidden="true"></div>
+        <canvas id="ruler-horizontal" class="ruler ruler-h" height="20" aria-hidden="true"></canvas>
+        <canvas id="ruler-vertical" class="ruler ruler-v" width="20" aria-hidden="true"></canvas>
+
+        <!-- Main Viewport Scroll & Pan Surface -->
+        <div class="viewport-surface" id="viewport-surface">
+          
+          <!-- The Artboard Container (Positioned and Scaled by Zoom/Pan) -->
+          <div class="artboard-container" id="artboard-container">
+            
+            <!-- Checkerboard Transparent Background -->
+            <div class="artboard-shadow-box" id="artboard-box">
+              <div class="artboard-checkerboard" id="artboard-checkerboard">
+                <!-- Master Composite Canvas -->
+                <canvas id="main-canvas"></canvas>
+                <!-- Interaction & Overlay Canvas (Handles, Guides, Selection) -->
+                <canvas id="overlay-canvas"></canvas>
+              </div>
+            </div>
+
+            <!-- In-place Rich Text Editor Overlay -->
+            <div id="canvas-text-editor" class="canvas-text-editor" contenteditable="true" spellcheck="false"></div>
+
+            <!-- Crop HUD & Aspect Overlay -->
+            <div id="crop-hud-overlay" class="crop-hud-overlay hidden">
+              <div class="crop-toolbar">
+                <span class="crop-title">Crop Canvas</span>
+                <select id="crop-aspect-select" class="compact-select" aria-label="Crop Aspect Ratio">
+                  <option value="free">Free Aspect</option>
+                  <option value="1:1">1:1 Square</option>
+                  <option value="16:9">16:9 Widescreen</option>
+                  <option value="9:16">9:16 Story / Reel</option>
+                  <option value="4:3">4:3 Standard</option>
+                  <option value="3:2">3:2 Photo</option>
+                  <option value="2:1">2:1 Landscape</option>
+                </select>
+                <div class="crop-actions">
+                  <button id="btn-crop-cancel" class="compact-btn secondary">Cancel</button>
+                  <button id="btn-crop-apply" class="compact-btn primary">Apply Crop</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Transform Angle Badge -->
+            <div id="transform-angle-badge" class="floating-badge hidden" aria-hidden="true">0°</div>
+            <!-- Floating Dimension Badge -->
+            <div id="transform-dim-badge" class="floating-badge hidden" aria-hidden="true">W: 0, H: 0</div>
+          </div>
+
+        </div>
+
+        <!-- Real-time Eyedropper Magnifier Loupe -->
+        <div id="eyedropper-loupe" class="eyedropper-loupe hidden" aria-hidden="true">
+          <canvas id="loupe-canvas" width="90" height="90"></canvas>
+          <div class="loupe-crosshair"></div>
+          <div class="loupe-color-badge" id="loupe-color-hex">#FFFFFF</div>
+        </div>
+
+        <!-- Floating Quick Zoom & Navigation Overlay (Bottom-left of canvas) -->
+        <div class="canvas-floating-controls">
+          <button class="floating-icon-btn" id="btn-canvas-center" title="Center Canvas" aria-label="Center Canvas">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+          </button>
+          <div class="zoom-floating-pill">
+            <button class="zoom-pill-btn" id="btn-float-zoom-out" title="Zoom Out (Ctrl+-)" aria-label="Zoom Out">-</button>
+            <span class="zoom-pill-text" id="zoom-percentage-badge">100%</span>
+            <button class="zoom-pill-btn" id="btn-float-zoom-in" title="Zoom In (Ctrl++)" aria-label="Zoom In">+</button>
+            <button class="zoom-pill-btn fit-btn" id="btn-float-zoom-fit" title="Fit to Screen" aria-label="Fit Canvas">Fit</button>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone Overlay -->
+        <div id="drop-zone-overlay" class="drop-zone-overlay hidden" aria-hidden="true">
+          <div class="drop-zone-card">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <h3>Drop Image to Import</h3>
+            <p>PNG, JPEG, WebP, SVG supported</p>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- RIGHT SIDEBAR (INSPECTOR & LAYERS) -->
+      <aside class="right-sidebar" id="right-sidebar" role="complementary" aria-label="Inspector and Layers">
+        
+        <!-- Sidebar Navigation Tabs -->
+        <div class="sidebar-tabs" role="tablist">
+          <button class="sidebar-tab-btn active" data-tab="properties" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Properties</span>
+          </button>
+          <button class="sidebar-tab-btn" data-tab="layers" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <span>Layers</span>
+            <span class="tab-badge" id="layers-count-badge">0</span>
+          </button>
+          <button class="sidebar-tab-btn" data-tab="filters" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span>Filters</span>
+          </button>
+          <button class="sidebar-tab-btn" data-tab="history" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>History</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: PROPERTIES (CONTEXTUAL) -->
+        <div class="sidebar-tab-pane active" id="pane-properties" role="tabpanel">
+          
+          <!-- Selection Status Header -->
+          <div class="panel-header-contextual">
+            <span class="selection-type-badge" id="selection-type-badge">Document</span>
+            <span class="selection-title" id="selection-title">Canvas Settings</span>
+          </div>
+
+          <div class="panel-scroll-content">
+            
+            <!-- SECTION: CANVAS / DOCUMENT SETTINGS (When Nothing Selected) -->
+            <div id="section-canvas-props" class="props-section">
+              <div class="section-title">Canvas Dimensions</div>
+              
+              <div class="form-row">
+                <div class="input-labeled">
+                  <label for="prop-canvas-w">Width</label>
+                  <input type="number" id="prop-canvas-w" min="50" max="8000" value="1920" class="num-input" />
+                </div>
+                <div class="input-labeled">
+                  <label for="prop-canvas-h">Height</label>
+                  <input type="number" id="prop-canvas-h" min="50" max="8000" value="1080" class="num-input" />
+                </div>
+              </div>
+
+              <!-- Quick Presets for Canvas -->
+              <div class="input-labeled mt-2">
+                <label for="canvas-preset-select">Preset Formats</label>
+                <select id="canvas-preset-select" class="full-select">
+                  <option value="">-- Choose Format Preset --</option>
+                  <option value="1920x1080">Full HD Landscape (1920 × 1080)</option>
+                  <option value="1280x720">HD YouTube Thumbnail (1280 × 720)</option>
+                  <option value="1080x1080">Instagram Square Post (1080 × 1080)</option>
+                  <option value="1080x1350">Instagram Portrait (1080 × 1350)</option>
+                  <option value="1080x1920">Instagram Story / Reel (1080 × 1920)</option>
+                  <option value="1200x630">Facebook / OpenGraph (1200 × 630)</option>
+                  <option value="1500x500">Twitter / X Header (1500 × 500)</option>
+                  <option value="800x800">Profile Avatar (800 × 800)</option>
+                  <option value="2560x1440">2K QHD (2560 × 1440)</option>
+                  <option value="3840x2160">4K UHD (3840 × 2160)</option>
+                </select>
+              </div>
+
+              <div class="section-title mt-4">Canvas Background</div>
+              <div class="form-row-compact">
+                <label class="color-picker-label" for="prop-canvas-bg-color">
+                  <input type="color" id="prop-canvas-bg-color" value="#ffffff" class="color-swatch-input" />
+                  <span class="color-hex-text" id="prop-canvas-bg-hex">#ffffff</span>
+                </label>
+                <label class="checkbox-label" for="prop-canvas-transparent">
+                  <input type="checkbox" id="prop-canvas-transparent" />
+                  <span>Transparent</span>
+                </label>
+              </div>
+
+              <div class="section-title mt-4">Quick Insert</div>
+              <div class="quick-insert-grid">
+                <button class="quick-add-card" id="btn-quick-add-img">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span>Upload Image</span>
+                </button>
+                <button class="quick-add-card" id="btn-quick-add-sample">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span>Stock Photos</span>
+                </button>
+                <button class="quick-add-card" id="btn-quick-add-text">
+                  <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                  <span>Add Text</span>
+                </button>
+                <button class="quick-add-card" id="btn-quick-add-shape">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+                  <span>Add Shape</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- SECTION: TRANSFORM & POSITION (When Layer Selected) -->
+            <div id="section-transform-props" class="props-section hidden">
+              <div class="section-title">Transform</div>
+              
+              <!-- X, Y, W, H -->
+              <div class="form-grid-2x2">
+                <div class="input-labeled">
+                  <label for="prop-layer-x">X (px)</label>
+                  <input type="number" id="prop-layer-x" class="num-input" />
+                </div>
+                <div class="input-labeled">
+                  <label for="prop-layer-y">Y (px)</label>
+                  <input type="number" id="prop-layer-y" class="num-input" />
+                </div>
+                <div class="input-labeled">
+                  <label for="prop-layer-w">Width</label>
+                  <input type="number" id="prop-layer-w" min="1" class="num-input" />
+                </div>
+                <div class="input-labeled">
+                  <label for="prop-layer-h">Height</label>
+                  <input type="number" id="prop-layer-h" min="1" class="num-input" />
+                </div>
+              </div>
+
+              <!-- Constrain proportions & Rotation -->
+              <div class="form-row mt-2">
+                <div class="input-labeled flex-1">
+                  <label for="prop-layer-rotation">Rotation (°)</label>
+                  <input type="number" id="prop-layer-rotation" min="-360" max="360" value="0" class="num-input" />
+                </div>
+                <button id="btn-prop-lock-aspect" class="toggle-icon-btn active" title="Lock Aspect Ratio" aria-label="Lock Aspect Ratio">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </button>
+              </div>
+
+              <!-- Flip & Align Buttons -->
+              <div class="section-subtitle mt-3">Alignment & Flip</div>
+              <div class="btn-grid-row">
+                <button class="icon-tool-btn" id="btn-align-left" title="Align Left" aria-label="Align Left">
+                  <svg viewBox="0 0 24 24"><line x1="4" y1="2" x2="4" y2="22"/><rect x="8" y="6" width="12" height="12" rx="1"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-align-center-h" title="Align Horizontal Center" aria-label="Align Horizontal Center">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-align-right" title="Align Right" aria-label="Align Right">
+                  <svg viewBox="0 0 24 24"><line x1="20" y1="2" x2="20" y2="22"/><rect x="4" y="6" width="12" height="12" rx="1"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-align-top" title="Align Top" aria-label="Align Top">
+                  <svg viewBox="0 0 24 24"><line x1="2" y1="4" x2="22" y2="4"/><rect x="6" y="8" width="12" height="12" rx="1"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-align-center-v" title="Align Vertical Middle" aria-label="Align Vertical Middle">
+                  <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="22" y2="12"/><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-align-bottom" title="Align Bottom" aria-label="Align Bottom">
+                  <svg viewBox="0 0 24 24"><line x1="2" y1="20" x2="22" y2="20"/><rect x="6" y="4" width="12" height="12" rx="1"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-prop-flip-h" title="Flip Horizontally" aria-label="Flip Horizontally">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="7 8 2 12 7 16"/><polyline points="17 8 22 12 17 16"/></svg>
+                </button>
+                <button class="icon-tool-btn" id="btn-prop-flip-v" title="Flip Vertically" aria-label="Flip Vertically">
+                  <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="8 7 12 2 16 7"/><polyline points="8 17 12 22 16 17"/></svg>
+                </button>
+              </div>
+
+              <!-- Layer Opacity & Blend Mode -->
+              <div class="section-title mt-4">Blending & Opacity</div>
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="prop-layer-opacity">Opacity</label>
+                  <span id="prop-opacity-val" class="slider-value-badge">100%</span>
+                </div>
+                <input type="range" id="prop-layer-opacity" min="0" max="100" value="100" class="custom-slider" />
+              </div>
+
+              <div class="input-labeled mt-2">
+                <label for="prop-layer-blend">Blend Mode</label>
+                <select id="prop-layer-blend" class="full-select">
+                  <option value="normal">Normal</option>
+                  <option value="multiply">Multiply</option>
+                  <option value="screen">Screen</option>
+                  <option value="overlay">Overlay</option>
+                  <option value="darken">Darken</option>
+                  <option value="lighten">Lighten</option>
+                  <option value="color-dodge">Color Dodge</option>
+                  <option value="color-burn">Color Burn</option>
+                  <option value="hard-light">Hard Light</option>
+                  <option value="soft-light">Soft Light</option>
+                  <option value="difference">Difference</option>
+                  <option value="exclusion">Exclusion</option>
+                  <option value="hue">Hue</option>
+                  <option value="saturation">Saturation</option>
+                  <option value="color">Color</option>
+                  <option value="luminosity">Luminosity</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- SECTION: TEXT PROPERTIES (When Text Layer Selected) -->
+            <div id="section-text-props" class="props-section hidden">
+              <div class="section-title">Typography</div>
+
+              <!-- Text Content Field -->
+              <div class="input-labeled">
+                <label for="prop-text-content">Text Content</label>
+                <textarea id="prop-text-content" rows="2" class="text-area-input"></textarea>
+              </div>
+
+              <!-- Font Family & Font Size -->
+              <div class="form-row mt-2">
+                <div class="input-labeled flex-2">
+                  <label for="prop-text-font-family">Font</label>
+                  <select id="prop-text-font-family" class="full-select font-select">
+                    <option value="Inter" style="font-family: 'Inter';">Inter</option>
+                    <option value="Montserrat" style="font-family: 'Montserrat';">Montserrat</option>
+                    <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
+                    <option value="Oswald" style="font-family: 'Oswald';">Oswald</option>
+                    <option value="Pacifico" style="font-family: 'Pacifico';">Pacifico</option>
+                    <option value="Fira Code" style="font-family: 'Fira Code';">Fira Code</option>
+                    <option value="Bebas Neue" style="font-family: 'Bebas Neue';">Bebas Neue</option>
+                    <option value="Caveat" style="font-family: 'Caveat';">Caveat</option>
+                    <option value="Cinzel" style="font-family: 'Cinzel';">Cinzel</option>
+                    <option value="Permanent Marker" style="font-family: 'Permanent Marker';">Permanent Marker</option>
+                    <option value="Righteous" style="font-family: 'Righteous';">Righteous</option>
+                    <option value="Satisfy" style="font-family: 'Satisfy';">Satisfy</option>
+                    <option value="Arial" style="font-family: Arial;">Arial</option>
+                    <option value="Georgia" style="font-family: Georgia;">Georgia</option>
+                    <option value="Impact" style="font-family: Impact;">Impact</option>
+                    <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+                  </select>
+                </div>
+                <div class="input-labeled flex-1">
+                  <label for="prop-text-size">Size</label>
+                  <input type="number" id="prop-text-size" min="6" max="500" value="48" class="num-input" />
+                </div>
+              </div>
+
+              <!-- Weight, Style & Align -->
+              <div class="form-row mt-2">
+                <div class="input-labeled flex-1">
+                  <label for="prop-text-weight">Weight</label>
+                  <select id="prop-text-weight" class="full-select">
+                    <option value="300">Light (300)</option>
+                    <option value="400" selected>Regular (400)</option>
+                    <option value="600">SemiBold (600)</option>
+                    <option value="700">Bold (700)</option>
+                    <option value="900">Black (900)</option>
+                  </select>
+                </div>
+                
+                <!-- Align Segmented Control -->
+                <div class="segmented-control mt-auto">
+                  <button class="seg-btn active" data-align="left" id="btn-text-align-l" title="Align Left" aria-label="Align Left">
+                    <svg viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                  </button>
+                  <button class="seg-btn" data-align="center" id="btn-text-align-c" title="Align Center" aria-label="Align Center">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+                  </button>
+                  <button class="seg-btn" data-align="right" id="btn-text-align-r" title="Align Right" aria-label="Align Right">
+                    <svg viewBox="0 0 24 24"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Line Height & Letter Spacing -->
+              <div class="form-row mt-2">
+                <div class="input-labeled">
+                  <label for="prop-text-line-height">Line Spacing</label>
+                  <input type="number" id="prop-text-line-height" min="0.5" max="3" step="0.1" value="1.2" class="num-input" />
+                </div>
+                <div class="input-labeled">
+                  <label for="prop-text-letter-spacing">Letter Spacing</label>
+                  <input type="number" id="prop-text-letter-spacing" min="-10" max="50" step="1" value="0" class="num-input" />
+                </div>
+              </div>
+
+              <!-- Text Colors: Fill & Stroke & Background Badge -->
+              <div class="section-subtitle mt-3">Text Colors & Stroke</div>
+              <div class="form-row">
+                <div class="color-picker-row flex-1">
+                  <label for="prop-text-color">Fill</label>
+                  <div class="color-swatch-picker">
+                    <input type="color" id="prop-text-color" value="#ffffff" class="color-swatch-input" />
+                    <span id="prop-text-color-hex" class="color-hex-text">#ffffff</span>
+                  </div>
+                </div>
+                <div class="color-picker-row flex-1">
+                  <label for="prop-text-stroke-color">Stroke</label>
+                  <div class="color-swatch-picker">
+                    <input type="color" id="prop-text-stroke-color" value="#000000" class="color-swatch-input" />
+                    <span id="prop-text-stroke-hex" class="color-hex-text">#000000</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-text-stroke-w">Stroke Width</label>
+                  <span id="prop-text-stroke-w-val" class="slider-value-badge">0px</span>
+                </div>
+                <input type="range" id="prop-text-stroke-w" min="0" max="20" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Drop Shadow Controls -->
+              <div class="section-subtitle mt-3">Drop Shadow</div>
+              <div class="form-row">
+                <label class="checkbox-label" for="prop-text-shadow-enable">
+                  <input type="checkbox" id="prop-text-shadow-enable" />
+                  <span>Enable Shadow</span>
+                </label>
+                <div class="color-swatch-picker">
+                  <input type="color" id="prop-text-shadow-color" value="#000000" class="color-swatch-input" aria-label="Shadow Color" />
+                </div>
+              </div>
+              <div class="slider-control mt-1">
+                <div class="slider-header">
+                  <label for="prop-text-shadow-blur">Shadow Blur</label>
+                  <span id="prop-text-shadow-blur-val" class="slider-value-badge">8px</span>
+                </div>
+                <input type="range" id="prop-text-shadow-blur" min="0" max="50" value="8" class="custom-slider" />
+              </div>
+            </div>
+
+            <!-- SECTION: SHAPE PROPERTIES (When Shape Selected) -->
+            <div id="section-shape-props" class="props-section hidden">
+              <div class="section-title">Shape Properties</div>
+
+              <!-- Fill Mode: Solid or Gradient -->
+              <div class="input-labeled">
+                <label for="prop-shape-fill-type">Fill Type</label>
+                <select id="prop-shape-fill-type" class="full-select">
+                  <option value="solid">Solid Color</option>
+                  <option value="linear-gradient">Linear Gradient</option>
+                  <option value="radial-gradient">Radial Gradient</option>
+                  <option value="none">No Fill (Transparent)</option>
+                </select>
+              </div>
+
+              <!-- Solid Fill Color -->
+              <div id="shape-solid-fill-row" class="form-row mt-2">
+                <div class="color-picker-row flex-1">
+                  <label for="prop-shape-fill-color">Fill Color</label>
+                  <div class="color-swatch-picker">
+                    <input type="color" id="prop-shape-fill-color" value="#3b82f6" class="color-swatch-input" />
+                    <span id="prop-shape-fill-hex" class="color-hex-text">#3b82f6</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradient Controls -->
+              <div id="shape-gradient-controls" class="gradient-editor-box mt-2 hidden">
+                <div class="form-row">
+                  <div class="color-picker-row flex-1">
+                    <label for="prop-shape-grad-c1">Color 1</label>
+                    <input type="color" id="prop-shape-grad-c1" value="#3b82f6" class="color-swatch-input" />
+                  </div>
+                  <div class="color-picker-row flex-1">
+                    <label for="prop-shape-grad-c2">Color 2</label>
+                    <input type="color" id="prop-shape-grad-c2" value="#8b5cf6" class="color-swatch-input" />
+                  </div>
+                </div>
+                <div class="slider-control mt-2">
+                  <div class="slider-header">
+                    <label for="prop-shape-grad-angle">Gradient Angle</label>
+                    <span id="prop-shape-grad-angle-val" class="slider-value-badge">45°</span>
+                  </div>
+                  <input type="range" id="prop-shape-grad-angle" min="0" max="360" value="45" class="custom-slider" />
+                </div>
+              </div>
+
+              <!-- Stroke Controls -->
+              <div class="section-subtitle mt-3">Border & Stroke</div>
+              <div class="form-row">
+                <div class="color-picker-row flex-1">
+                  <label for="prop-shape-stroke-color">Stroke Color</label>
+                  <div class="color-swatch-picker">
+                    <input type="color" id="prop-shape-stroke-color" value="#ffffff" class="color-swatch-input" />
+                    <span id="prop-shape-stroke-hex" class="color-hex-text">#ffffff</span>
+                  </div>
+                </div>
+                <div class="input-labeled flex-1">
+                  <label for="prop-shape-stroke-style">Style</label>
+                  <select id="prop-shape-stroke-style" class="full-select">
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-shape-stroke-w">Stroke Width</label>
+                  <span id="prop-shape-stroke-w-val" class="slider-value-badge">0px</span>
+                </div>
+                <input type="range" id="prop-shape-stroke-w" min="0" max="40" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Corner Radius (for Rectangles) -->
+              <div id="shape-corner-radius-control" class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-shape-radius">Corner Radius</label>
+                  <span id="prop-shape-radius-val" class="slider-value-badge">0px</span>
+                </div>
+                <input type="range" id="prop-shape-radius" min="0" max="200" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Polygon Sides / Star Points -->
+              <div id="shape-points-control" class="slider-control mt-2 hidden">
+                <div class="slider-header">
+                  <label id="shape-points-label" for="prop-shape-points">Points / Sides</label>
+                  <span id="prop-shape-points-val" class="slider-value-badge">5</span>
+                </div>
+                <input type="range" id="prop-shape-points" min="3" max="20" value="5" class="custom-slider" />
+              </div>
+            </div>
+
+            <!-- SECTION: BRUSH & DRAWING PROPERTIES (When Drawing Tool or Layer Selected) -->
+            <div id="section-brush-props" class="props-section hidden">
+              <div class="section-title">Brush Settings</div>
+              
+              <div class="color-picker-row mb-2">
+                <label for="prop-brush-color">Brush Color</label>
+                <div class="color-swatch-picker">
+                  <input type="color" id="prop-brush-color" value="#3b82f6" class="color-swatch-input" />
+                  <span id="prop-brush-color-hex" class="color-hex-text">#3b82f6</span>
+                </div>
+              </div>
+
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="prop-brush-size">Brush Size</label>
+                  <span id="prop-brush-size-val" class="slider-value-badge">12px</span>
+                </div>
+                <input type="range" id="prop-brush-size" min="1" max="150" value="12" class="custom-slider" />
+              </div>
+
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-brush-hardness">Brush Hardness / Smoothness</label>
+                  <span id="prop-brush-hardness-val" class="slider-value-badge">80%</span>
+                </div>
+                <input type="range" id="prop-brush-hardness" min="0" max="100" value="80" class="custom-slider" />
+              </div>
+
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-brush-opacity">Flow / Opacity</label>
+                  <span id="prop-brush-opacity-val" class="slider-value-badge">100%</span>
+                </div>
+                <input type="range" id="prop-brush-opacity" min="5" max="100" value="100" class="custom-slider" />
+              </div>
+
+              <div class="action-btn-row mt-3">
+                <button id="btn-clear-drawing-layer" class="action-btn secondary full-width">
+                  <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                  <span>Clear Drawing</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- SECTION: IMAGE ADJUSTMENTS (When Image Layer Selected) -->
+            <div id="section-image-props" class="props-section hidden">
+              <div class="section-title">Image Adjustments</div>
+
+              <!-- Brightness -->
+              <div class="slider-control">
+                <div class="slider-header">
+                  <label for="prop-adj-brightness">Brightness</label>
+                  <span id="prop-adj-brightness-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-brightness" min="-100" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Contrast -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-contrast">Contrast</label>
+                  <span id="prop-adj-contrast-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-contrast" min="-100" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Saturation -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-saturation">Saturation</label>
+                  <span id="prop-adj-saturation-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-saturation" min="-100" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Exposure -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-exposure">Exposure</label>
+                  <span id="prop-adj-exposure-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-exposure" min="-100" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Warmth / Temperature -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-warmth">Warmth (Temperature)</label>
+                  <span id="prop-adj-warmth-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-warmth" min="-100" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Blur -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-blur">Gaussian Blur</label>
+                  <span id="prop-adj-blur-val" class="slider-value-badge">0px</span>
+                </div>
+                <input type="range" id="prop-adj-blur" min="0" max="40" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Sharpen -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-sharpen">Sharpen</label>
+                  <span id="prop-adj-sharpen-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-sharpen" min="0" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Vignette -->
+              <div class="slider-control mt-2">
+                <div class="slider-header">
+                  <label for="prop-adj-vignette">Vignette</label>
+                  <span id="prop-adj-vignette-val" class="slider-value-badge">0</span>
+                </div>
+                <input type="range" id="prop-adj-vignette" min="0" max="100" value="0" class="custom-slider" />
+              </div>
+
+              <!-- Reset Adjustments Button -->
+              <div class="action-btn-row mt-3">
+                <button id="btn-reset-image-adjustments" class="action-btn secondary full-width">
+                  <svg viewBox="0 0 24 24"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38L-2.44 1.52"/></svg>
+                  <span>Reset All Adjustments</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: LAYERS PANEL -->
+        <div class="sidebar-tab-pane" id="pane-layers" role="tabpanel">
+          
+          <!-- Layers Header Actions -->
+          <div class="layers-toolbar">
+            <div class="layers-toolbar-left">
+              <span class="layers-heading">Layers</span>
+            </div>
+            <div class="layers-toolbar-right" role="toolbar" aria-label="Layer Actions">
+              <button class="layer-action-btn" id="btn-new-layer-image" title="Add Image Layer" aria-label="Add Image Layer">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+              <button class="layer-action-btn" id="btn-new-layer-text" title="Add Text Layer" aria-label="Add Text Layer">
+                <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              </button>
+              <button class="layer-action-btn" id="btn-new-layer-shape" title="Add Rectangle Shape" aria-label="Add Shape Layer">
+                <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+              </button>
+              <button class="layer-action-btn" id="btn-new-layer-drawing" title="Add Drawing Layer" aria-label="Add Drawing Layer">
+                <svg viewBox="0 0 24 24"><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.375-9.375z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Layer List (Stack) -->
+          <div class="layer-list-container" id="layer-list-container">
+            <div class="layer-list" id="layer-list" role="listbox" aria-label="Layers Stack">
+              <!-- Dynamically populated layers -->
+            </div>
+            <!-- Empty Layers State -->
+            <div id="layers-empty-state" class="layers-empty-state hidden">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              <p>No layers yet</p>
+              <span>Import an image, add text, or draw on canvas</span>
+            </div>
+          </div>
+
+          <!-- Bottom Layer Operations -->
+          <div class="layer-bottom-actions" role="toolbar" aria-label="Layer Stack Controls">
+            <button class="layer-action-btn" id="btn-layer-up" title="Move Layer Up (Ctrl+])" aria-label="Move Layer Up">
+              <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button class="layer-action-btn" id="btn-layer-down" title="Move Layer Down (Ctrl+[)" aria-label="Move Layer Down">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="layer-action-btn" id="btn-layer-duplicate" title="Duplicate Layer (Ctrl+D)" aria-label="Duplicate Layer">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="layer-action-btn" id="btn-layer-merge-down" title="Merge Layer Down" aria-label="Merge Layer Down">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l4-4m-4 4l-4-4"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+            </button>
+            <button class="layer-action-btn danger" id="btn-layer-delete" title="Delete Layer (Del)" aria-label="Delete Layer">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- TAB CONTENT: FILTERS & PRESETS -->
+        <div class="sidebar-tab-pane" id="pane-filters" role="tabpanel">
+          <div class="panel-header-contextual">
+            <span class="selection-type-badge">Styles</span>
+            <span class="selection-title">1-Click Filter Presets</span>
+          </div>
+
+          <div class="panel-scroll-content">
+            <div class="filter-preset-grid" id="filter-preset-grid">
+              <!-- Filter preset cards generated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: HISTORY -->
+        <div class="sidebar-tab-pane" id="pane-history" role="tabpanel">
+          <div class="panel-header-contextual">
+            <span class="selection-type-badge">Timeline</span>
+            <span class="selection-title">Action History</span>
+          </div>
+
+          <div class="panel-scroll-content">
+            <div class="history-list" id="history-list">
+              <!-- Dynamically populated history entries -->
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <!-- BOTTOM STATUS BAR -->
+    <footer class="bottom-bar" role="contentinfo">
+      <div class="bottom-bar-left">
+        <!-- Cursor Coordinate Readout -->
+        <div class="status-item" id="status-cursor-coords">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+          <span>X: <strong id="cursor-x">0</strong>, Y: <strong id="cursor-y">0</strong> px</span>
+        </div>
+
+        <!-- Current Color Hover Inspector -->
+        <div class="status-item hide-mobile" id="status-cursor-color">
+          <div class="mini-swatch" id="cursor-color-swatch"></div>
+          <span id="cursor-color-text">#------</span>
+        </div>
+
+        <!-- Selected Layer Info -->
+        <div class="status-item hide-mobile" id="status-selected-info">
+          <span id="status-selected-text">No layer selected</span>
+        </div>
+      </div>
+
+      <div class="bottom-bar-center">
+        <!-- Notification / Toast message in status bar -->
+        <span class="status-toast" id="status-bar-toast">Ready</span>
+      </div>
+
+      <div class="bottom-bar-right">
+        <!-- Zoom Slider & Controls -->
+        <div class="bottom-zoom-group">
+          <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out" aria-label="Zoom Out">-</button>
+          <input type="range" id="bottom-zoom-slider" min="10" max="500" value="100" class="zoom-range-input" aria-label="Zoom percentage slider" />
+          <button class="zoom-btn" id="btn-zoom-in" title="Zoom In" aria-label="Zoom In">+</button>
+          <button class="zoom-val-btn" id="btn-zoom-val" title="Click to reset zoom (100%)">100%</button>
+          <button class="zoom-btn fit-text" id="btn-zoom-fit-bottom" title="Fit Canvas">Fit</button>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- HIDDEN FILE INPUT FOR IMPORT -->
+  <input type="file" id="hidden-file-input" accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif" class="visually-hidden" aria-hidden="true" />
+  <input type="file" id="hidden-project-input" accept=".mediastudio, application/json" class="visually-hidden" aria-hidden="true" />
+
+  <!-- MODAL: EXPORT IMAGE -->
+  <div id="modal-export" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="modal-export-title">Export Image Artwork</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="export-preview-pane">
+          <div class="export-thumb-container">
+            <canvas id="export-preview-canvas" aria-label="Export Preview"></canvas>
+          </div>
+          <div class="export-meta-readout" id="export-meta-readout">
+            1920 &times; 1080 px &bull; Estimated ~340 KB
+          </div>
+        </div>
+        <div class="export-settings-pane">
+          <!-- Format Picker -->
+          <div class="input-labeled">
+            <label>Export Format</label>
+            <div class="segmented-control full-width" id="export-format-segmented">
+              <button class="seg-btn active" data-format="png">PNG</button>
+              <button class="seg-btn" data-format="jpeg">JPEG</button>
+              <button class="seg-btn" data-format="webp">WebP</button>
+            </div>
+          </div>
+
+          <!-- Quality Slider (for JPEG / WebP) -->
+          <div id="export-quality-group" class="slider-control mt-3 hidden">
+            <div class="slider-header">
+              <label for="export-quality-slider">Quality</label>
+              <span id="export-quality-val" class="slider-value-badge">92%</span>
+            </div>
+            <input type="range" id="export-quality-slider" min="10" max="100" value="92" class="custom-slider" />
+          </div>
+
+          <!-- Resolution Scale Multiplier -->
+          <div class="input-labeled mt-3">
+            <label>Scale Factor</label>
+            <div class="segmented-control full-width" id="export-scale-segmented">
+              <button class="seg-btn" data-scale="0.5">0.5x</button>
+              <button class="seg-btn active" data-scale="1">1x (Original)</button>
+              <button class="seg-btn" data-scale="2">2x (High Res)</button>
+              <button class="seg-btn" data-scale="3">3x (Print)</button>
+            </div>
+          </div>
+
+          <!-- Export Scope -->
+          <div class="input-labeled mt-3">
+            <label for="export-scope-select">Export Area</label>
+            <select id="export-scope-select" class="full-select">
+              <option value="canvas">Entire Canvas Artboard</option>
+              <option value="selection">Selected Layer Only</option>
+            </select>
+          </div>
+
+          <!-- Background options -->
+          <label class="checkbox-label mt-3" id="export-bg-transparent-label" for="export-transparent-check">
+            <input type="checkbox" id="export-transparent-check" checked />
+            <span>Preserve Alpha Transparency</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary" id="btn-export-copy-clipboard">
+          <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+          <span>Copy to Clipboard</span>
+        </button>
+        <button class="action-btn primary" id="btn-export-download">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download Image</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DESIGN TEMPLATES -->
+  <div id="modal-templates" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-templates-title">
+    <div class="modal-window large">
+      <div class="modal-header">
+        <h3 id="modal-templates-title">Design Project Templates</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Select a professionally structured layout to start your creative project:</p>
+        <div class="templates-grid" id="templates-grid">
+          <!-- Dynamically populated templates -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RESIZE CANVAS -->
+  <div id="modal-resize-canvas" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-resize-title">
+    <div class="modal-window small">
+      <div class="modal-header">
+        <h3 id="modal-resize-title">Resize Canvas Artboard</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="input-labeled">
+            <label for="modal-resize-w">Width (px)</label>
+            <input type="number" id="modal-resize-w" min="50" max="8000" class="num-input" />
+          </div>
+          <div class="input-labeled">
+            <label for="modal-resize-h">Height (px)</label>
+            <input type="number" id="modal-resize-h" min="50" max="8000" class="num-input" />
+          </div>
+        </div>
+
+        <div class="input-labeled mt-3">
+          <label for="modal-resize-preset">Standard Formats</label>
+          <select id="modal-resize-preset" class="full-select">
+            <option value="">-- Choose Standard Size --</option>
+            <option value="1920x1080">1920 × 1080 (Full HD Landscape)</option>
+            <option value="1080x1080">1080 × 1080 (Square Instagram)</option>
+            <option value="1080x1920">1080 × 1920 (Portrait Reel / Story)</option>
+            <option value="1280x720">1280 × 720 (YouTube Thumbnail)</option>
+            <option value="1200x630">1200 × 630 (Facebook / Social)</option>
+            <option value="800x600">800 × 600 (Compact Web)</option>
+          </select>
+        </div>
+
+        <label class="checkbox-label mt-3" for="modal-resize-scale-content">
+          <input type="checkbox" id="modal-resize-scale-content" />
+          <span>Scale layer contents proportionally</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary" data-close-modal>Cancel</button>
+        <button class="action-btn primary" id="btn-apply-resize-canvas">Apply Resize</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SAMPLE STOCK MEDIA PICKER -->
+  <div id="modal-sample-media" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-stock-title">
+    <div class="modal-window large">
+      <div class="modal-header">
+        <h3 id="modal-stock-title">Stock Photography Library</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Click any high-resolution curated asset to insert directly into your canvas:</p>
+        <div class="sample-media-grid" id="sample-media-grid">
+          <!-- Dynamically populated sample photos with fallback generators -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PROJECT LIBRARY (MY PROJECTS) -->
+  <div id="modal-projects-library" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-projects-title">
+    <div class="modal-window large">
+      <div class="modal-header">
+        <h3 id="modal-projects-title">My Saved Projects</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="projects-grid" id="projects-grid">
+          <!-- Dynamically populated from IndexedDB -->
+        </div>
+        <div id="projects-empty-msg" class="empty-placeholder-card hidden">
+          <p>No saved projects yet. Your artwork automatically saves to browser storage!</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KEYBOARD SHORTCUTS -->
+  <div id="modal-shortcuts" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-shortcuts-title">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="modal-shortcuts-title">Keyboard Shortcuts</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcuts-grid">
+          <div class="shortcut-row"><span class="shortcut-label">Select / Move Tool</span><kbd>V</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Hand / Pan Workspace</span><kbd>H</kbd> or <kbd>Space+Drag</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Crop Canvas Tool</span><kbd>C</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Brush Tool</span><kbd>B</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Eraser Tool</span><kbd>E</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Text Tool</span><kbd>T</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Shape Tool</span><kbd>U</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Color Eyedropper</span><kbd>I</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Swap Colors</span><kbd>X</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Undo / Redo</span><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Copy / Paste Layer</span><kbd>Ctrl+C</kbd> / <kbd>Ctrl+V</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Duplicate Layer</span><kbd>Ctrl+D</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Delete Layer</span><kbd>Del</kbd> or <kbd>Backspace</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Zoom In / Out</span><kbd>Ctrl++</kbd> / <kbd>Ctrl+-</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Fit to Screen</span><kbd>Ctrl+0</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">100% Zoom</span><kbd>Ctrl+1</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Save Project</span><kbd>Ctrl+S</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Export Dialog</span><kbd>Ctrl+E</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Copy Merged Image</span><kbd>Ctrl+Shift+C</kbd></div>
+          <div class="shortcut-row"><span class="shortcut-label">Nudge Layer</span><kbd>Arrow Keys</kbd> (<kbd>Shift</kbd> for 10px)</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn primary" data-close-modal>Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ABOUT -->
+  <div id="modal-about" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-about-title">
+    <div class="modal-window small">
+      <div class="modal-header">
+        <h3 id="modal-about-title">About MediaStudio Pro</h3>
+        <button class="modal-close-btn" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <svg class="brand-logo large mb-2" viewBox="0 0 24 24" style="width: 44px; height: 44px; margin: 0 auto; display: block;" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="4" fill="url(#brand-grad-about)" stroke="none"/>
+          <circle cx="8.5" cy="8.5" r="2" fill="#ffffff"/>
+          <path d="M21 15l-5-5L5 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="brand-grad-about" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3b82f6"/>
+              <stop offset="1" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <h4 style="margin-bottom: 4px; font-weight: 700; color: #fff;">MediaStudio Pro</h4>
+        <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 14px;">Browser-Based Creative Image & Graphics Editor</p>
+        <p style="font-size: 12px; line-height: 1.6; color: var(--text-secondary); text-align: left;">
+          Designed with high-performance Canvas 2D composition, non-destructive layer filtering, rich typography, precision vector shapes, smooth freehand drawing, and IndexedDB persistence. Runs entirely in your browser with zero backend dependency.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn primary" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- APPLICATION JAVASCRIPT BUNDLE (Works on file:/// and Web Servers) -->
+  <script src="js/app.bundle.js"></script>
+</body>
+</html>

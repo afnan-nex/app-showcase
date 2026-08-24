@@ -1,0 +1,464 @@
+/* ==========================================================================
+   MediaStudio — Canvas, Viewport, Rulers & Interactive Overlays
+   ========================================================================== */
+
+.center-canvas-area {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #0c0c0e;
+}
+
+/* ==========================================================================
+   INTERACTIVE RULERS
+   ========================================================================== */
+
+.ruler-corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--ruler-size);
+  height: var(--ruler-size);
+  background-color: var(--bg-surface-1);
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 40;
+}
+
+.ruler {
+  position: absolute;
+  background-color: var(--bg-surface-1);
+  z-index: 39;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+.ruler.ruler-h {
+  top: 0;
+  left: var(--ruler-size);
+  right: 0;
+  height: var(--ruler-size);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ruler.ruler-v {
+  top: var(--ruler-size);
+  left: 0;
+  bottom: 0;
+  width: var(--ruler-size);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.center-canvas-area.no-rulers .ruler-corner,
+.center-canvas-area.no-rulers .ruler {
+  display: none;
+}
+
+.center-canvas-area.no-rulers .viewport-surface {
+  top: 0;
+  left: 0;
+}
+
+/* ==========================================================================
+   VIEWPORT SURFACE & ARTBOARD
+   ========================================================================== */
+
+.viewport-surface {
+  position: absolute;
+  top: var(--ruler-size);
+  left: var(--ruler-size);
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: default;
+}
+
+.viewport-surface.cursor-hand {
+  cursor: grab;
+}
+
+.viewport-surface.cursor-grabbing {
+  cursor: grabbing;
+}
+
+.viewport-surface.cursor-crosshair {
+  cursor: crosshair;
+}
+
+.viewport-surface.cursor-text {
+  cursor: text;
+}
+
+.viewport-surface.cursor-eyedropper {
+  cursor: crosshair;
+}
+
+.viewport-surface.cursor-move {
+  cursor: move;
+}
+
+/* Artboard Positioning Wrapper */
+.artboard-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Artboard Outer Shadow & Border */
+.artboard-shadow-box {
+  position: relative;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-radius: 1px;
+}
+
+/* Transparency Checkerboard Pattern */
+.artboard-checkerboard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a1e;
+  background-image: 
+    linear-gradient(45deg, #24242a 25%, transparent 25%), 
+    linear-gradient(-45deg, #24242a 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #24242a 75%), 
+    linear-gradient(-45deg, transparent 75%, #24242a 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  overflow: hidden;
+}
+
+/* Layer Compositing Canvas */
+#main-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Interactive Overlay Canvas (Transform handles, Smart Guides, Selection Boxes) */
+#overlay-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   IN-PLACE TEXT EDITOR OVERLAY
+   ========================================================================== */
+
+.canvas-text-editor {
+  position: absolute;
+  display: none;
+  background: transparent;
+  outline: 2px dashed var(--accent-primary);
+  outline-offset: 4px;
+  color: #ffffff;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+  -webkit-user-select: text;
+  z-index: 60;
+  transform-origin: 0 0;
+}
+
+.canvas-text-editor.active {
+  display: block;
+}
+
+/* ==========================================================================
+   CROP HUD & OVERLAY
+   ========================================================================== */
+
+.crop-hud-overlay {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  pointer-events: auto;
+}
+
+.crop-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+.crop-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+}
+
+.compact-select {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  font-size: 11px;
+  padding: 3px 6px;
+}
+
+.compact-btn {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.compact-btn.primary {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+.compact-btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.compact-btn.secondary {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.compact-btn.secondary:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   FLOATING BADGES (Rotation Angle, Dimensions)
+   ========================================================================== */
+
+.floating-badge {
+  position: absolute;
+  padding: 3px 6px;
+  background: rgba(18, 18, 20, 0.88);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  pointer-events: none;
+  z-index: 70;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   EYEDROPPER MAGNIFIER LOUPE
+   ========================================================================== */
+
+.eyedropper-loupe {
+  position: fixed;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 9000;
+  transform: translate(18px, 18px);
+  background: #000;
+}
+
+#loupe-canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.loupe-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.loupe-color-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   FLOATING CANVAS CONTROLS (Bottom-left of center area)
+   ========================================================================== */
+
+.canvas-floating-controls {
+  position: absolute;
+  bottom: 12px;
+  left: calc(var(--ruler-size) + 12px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 45;
+}
+
+.floating-icon-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.floating-icon-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.floating-icon-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.zoom-floating-pill {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  box-shadow: var(--shadow-md);
+  gap: 2px;
+}
+
+.zoom-pill-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  transition: all 0.1s;
+}
+
+.zoom-pill-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.zoom-pill-btn.fit-btn {
+  width: auto;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.zoom-pill-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 44px;
+  text-align: center;
+  padding: 0 4px;
+}
+
+/* ==========================================================================
+   DRAG & DROP IMPORT OVERLAY
+   ========================================================================== */
+
+.drop-zone-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(18, 18, 20, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.drop-zone-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 48px;
+  border: 2px dashed var(--accent-primary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-1);
+  box-shadow: var(--shadow-lg);
+  animation: dropPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes dropPulse {
+  0%, 100% { transform: scale(1); border-color: var(--accent-primary); }
+  50% { transform: scale(1.02); border-color: #8b5cf6; }
+}
+
+.drop-zone-card svg {
+  width: 42px;
+  height: 42px;
+  stroke: var(--accent-primary);
+  fill: none;
+  stroke-width: 1.8;
+}
+
+.drop-zone-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.drop-zone-card p {
+  font-size: 12px;
+  color: var(--text-secondary);
+}

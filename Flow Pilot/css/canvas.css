@@ -1,0 +1,235 @@
+/* Canvas & Viewport */
+.canvas-viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.canvas-transform-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  width: 100000px;
+  height: 100000px;
+  pointer-events: none;
+}
+
+/* Background Grid */
+.canvas-grid-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-size: 24px 24px;
+  background-image: 
+    radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
+}
+
+.canvas-grid-bg.grid-lines {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+}
+
+.canvas-grid-bg.grid-off {
+  background-image: none;
+}
+
+/* SVG Connection Layer */
+.connections-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: var(--z-connections);
+}
+
+.connection-path {
+  fill: none;
+  stroke: var(--connection-default);
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  pointer-events: stroke;
+  cursor: pointer;
+  transition: stroke var(--transition-fast), stroke-width var(--transition-fast);
+}
+
+.connection-path-hitbox {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16px;
+  stroke-linecap: round;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.connection-group:hover .connection-path {
+  stroke: var(--connection-hover);
+  stroke-width: 3.5px;
+}
+
+.connection-group.selected .connection-path {
+  stroke: var(--connection-selected);
+  stroke-width: 3.5px;
+  filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.5));
+}
+
+.connection-group.running .connection-path {
+  stroke: var(--connection-pulse);
+  stroke-dasharray: 8 6;
+  animation: flowDashes 1s linear infinite;
+}
+
+.connection-group.success .connection-path {
+  stroke: var(--status-success);
+}
+
+.connection-group.error .connection-path {
+  stroke: var(--status-error);
+}
+
+.temp-connection-path {
+  fill: none;
+  stroke: var(--border-node-selected);
+  stroke-width: 2.5px;
+  stroke-dasharray: 6 4;
+  pointer-events: none;
+  animation: flowDashes 0.8s linear infinite;
+}
+
+@keyframes flowDashes {
+  from {
+    stroke-dashoffset: 28;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Connection delete button marker */
+.connection-delete-btn {
+  pointer-events: all;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.connection-group:hover .connection-delete-btn {
+  opacity: 1;
+}
+
+/* DOM Nodes Container */
+.nodes-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--z-nodes);
+}
+
+/* Marquee Selection Box */
+.marquee-selection-box {
+  position: absolute;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid #3b82f6;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  z-index: var(--z-marquee);
+  display: none;
+}
+
+/* Canvas Floating Controls */
+.canvas-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-canvas-controls);
+}
+
+.canvas-controls .control-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.canvas-controls .control-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.canvas-controls .control-btn.active {
+  background: var(--bg-active);
+  color: #3b82f6;
+}
+
+.zoom-level-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0 6px;
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Minimap Floating Window */
+.minimap-container {
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+  width: 180px;
+  height: 120px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-canvas-controls);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.minimap-container.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+}
+
+.minimap-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.minimap-viewport-box {
+  position: absolute;
+  border: 1.5px solid var(--border-node-selected);
+  background: rgba(59, 130, 246, 0.15);
+  cursor: grab;
+  border-radius: 2px;
+  pointer-events: all;
+}
+.minimap-viewport-box:active {
+  cursor: grabbing;
+}

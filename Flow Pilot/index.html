@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="FlowPilot — High performance browser-based visual workflow automation and simulation engine">
+  <title>FlowPilot — Visual Workflow Automation Engine</title>
+  
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/canvas.css">
+  <link rel="stylesheet" href="css/nodes.css">
+  <link rel="stylesheet" href="css/panels.css">
+  <link rel="stylesheet" href="css/modals.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Navigation Bar -->
+    <header class="topbar" id="topbar" role="banner">
+      <div class="topbar-left">
+        <button class="btn btn-ghost btn-sm btn-icon" id="btn-toggle-left-sidebar" title="Toggle Node Catalog" aria-label="Toggle Node Catalog">☰</button>
+        
+        <div class="brand" id="brand-logo" title="Open Workflow Manager">
+          <div class="brand-icon">⚡</div>
+          <span>FlowPilot</span>
+        </div>
+
+        <div class="workflow-meta">
+          <button class="btn btn-ghost btn-sm" id="btn-open-wf-manager" title="Switch or manage workflows" style="padding: 4px 6px;">🗂️</button>
+          <input type="text" id="workflow-title-input" class="workflow-title-input" value="Stripe Webhook & VIP Order Pipeline" title="Rename workflow" aria-label="Workflow Name" />
+          <span id="save-status-indicator" class="save-status-indicator hide-on-mobile">✓ Saved</span>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <!-- Run Controls -->
+        <div class="run-controls" role="toolbar" aria-label="Workflow Execution Controls">
+          <button class="btn btn-success btn-sm" id="btn-run-workflow" title="Run workflow simulation (Ctrl+Enter)" aria-label="Run Workflow">
+            <span>▶</span> <span>Run</span>
+          </button>
+          <button class="btn btn-danger btn-sm" id="btn-stop-workflow" style="display:none;" title="Stop simulation" aria-label="Stop Workflow">
+            <span>⏹</span> <span>Stop</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" id="btn-step-workflow" title="Step next in debug mode" aria-label="Step Next">
+            <span>⏭</span> <span>Step</span>
+          </button>
+        </div>
+
+        <!-- Simulation Speed Selector -->
+        <div class="speed-select-wrapper" title="Simulation step delay">
+          <span>Speed:</span>
+          <select id="select-sim-speed" aria-label="Simulation Speed">
+            <option value="0">Instant</option>
+            <option value="200">Fast (200ms)</option>
+            <option value="400" selected>Normal (400ms)</option>
+            <option value="1000">Slow (1s)</option>
+            <option value="2000">Debug (2s)</option>
+          </select>
+        </div>
+
+        <div class="topbar-divider hide-on-mobile"></div>
+
+        <!-- Undo / Redo -->
+        <button class="btn btn-ghost btn-sm btn-icon hide-on-mobile" id="btn-undo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>↩</button>
+        <button class="btn btn-ghost btn-sm btn-icon hide-on-mobile" id="btn-redo" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>↪</button>
+      </div>
+
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm hide-on-mobile" id="btn-open-templates" title="Pre-built Templates">📁 Templates</button>
+        <button class="btn btn-ghost btn-sm hide-on-mobile" id="btn-open-history" title="Version Snapshots">⏱️ History</button>
+        <button class="btn btn-ghost btn-sm hide-on-mobile" id="btn-open-db" title="Simulated Database Inspector">💾 DB</button>
+        <button class="btn btn-ghost btn-sm hide-on-mobile" id="btn-open-emails" title="Simulated Sent Emails">✉️ Inbox</button>
+        
+        <div class="topbar-divider"></div>
+
+        <button class="btn btn-ghost btn-sm" id="btn-open-palette" title="Command Palette (Ctrl+K)" aria-label="Command Palette">
+          <span>🔍</span> <span class="palette-item-shortcut hide-on-mobile">Ctrl+K</span>
+        </button>
+
+        <button class="btn btn-ghost btn-sm btn-icon hide-on-mobile" id="btn-export-json" title="Export Workflow JSON" aria-label="Export Workflow JSON">⬇</button>
+        <button class="btn btn-ghost btn-sm btn-icon hide-on-mobile" id="btn-import-json" title="Import Workflow JSON" aria-label="Import Workflow JSON">⬆</button>
+        <button class="btn btn-ghost btn-sm btn-icon" id="btn-toggle-theme" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">🌙</button>
+        <button class="btn btn-ghost btn-sm btn-icon" id="btn-shortcuts-help" title="Keyboard Shortcuts (?)" aria-label="Keyboard Shortcuts">?</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-workspace">
+      <!-- Left Sidebar: Node Library -->
+      <aside class="sidebar sidebar-left" id="sidebar-left" aria-label="Node Library">
+        <div class="sidebar-header">
+          <span class="sidebar-title">
+            <span>📦</span> Node Catalog
+          </span>
+          <span style="font-size:10px; color:var(--text-muted);">12 Types</span>
+        </div>
+
+        <div class="library-search-box">
+          <div class="library-search-input-wrapper">
+            <span class="library-search-icon">🔍</span>
+            <input type="search" id="library-search-input" placeholder="Search triggers, logic, DB..." aria-label="Search Nodes" />
+          </div>
+        </div>
+
+        <div class="library-categories" id="library-categories-list">
+          <!-- Populated by app.js -->
+        </div>
+      </aside>
+
+      <!-- Infinite Canvas Workspace -->
+      <section class="canvas-wrapper" id="canvas-wrapper" aria-label="Workflow Canvas">
+        <div class="canvas-viewport" id="canvas-viewport">
+          <div class="canvas-grid-bg" id="canvas-grid-bg"></div>
+
+          <!-- Canvas Transform Layer -->
+          <div class="canvas-transform-layer" id="canvas-transform-layer">
+            <!-- SVG Connectors Layer -->
+            <svg class="connections-svg" id="connections-svg"></svg>
+
+            <!-- DOM Nodes Layer -->
+            <div class="nodes-layer" id="nodes-layer"></div>
+          </div>
+
+          <!-- Marquee Selection Overlay Box -->
+          <div class="marquee-selection-box" id="marquee-selection-box"></div>
+
+          <!-- Interactive Minimap -->
+          <div class="minimap-container" id="minimap-container" aria-label="Canvas Minimap">
+            <canvas class="minimap-canvas" id="minimap-canvas"></canvas>
+            <div class="minimap-viewport-box" id="minimap-viewport-box" title="Drag to pan canvas"></div>
+          </div>
+
+          <!-- Floating Canvas Controls -->
+          <div class="canvas-controls" role="toolbar" aria-label="Canvas Navigation Controls">
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-zoom-in" title="Zoom In (Ctrl +)" aria-label="Zoom In">+</button>
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-zoom-out" title="Zoom Out (Ctrl -)" aria-label="Zoom Out">-</button>
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-zoom-reset" title="Reset Zoom (Ctrl 0)" aria-label="Reset Zoom">1:1</button>
+            <div class="topbar-divider" style="height:16px;"></div>
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-fit-view" title="Fit Workflow to View (Shift+1)" aria-label="Fit to View">⤢</button>
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-toggle-grid" title="Cycle Grid Mode (Dots/Lines/Off)" aria-label="Toggle Grid">▦</button>
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-toggle-snap" title="Toggle Grid Snap" aria-label="Toggle Snap">🧲</button>
+            <button class="btn btn-ghost btn-icon control-btn" id="btn-toggle-minimap" title="Toggle Minimap" aria-label="Toggle Minimap">🗺️</button>
+          </div>
+        </div>
+
+        <!-- Bottom Execution Logs Drawer -->
+        <div class="execution-drawer collapsed" id="execution-drawer" aria-label="Execution Drawer">
+          <!-- Populated by execution-drawer.js -->
+        </div>
+      </section>
+
+      <!-- Right Sidebar: Configuration Panel -->
+      <aside class="sidebar sidebar-right collapsed" id="sidebar-right" aria-label="Node Configuration Panel">
+        <!-- Populated dynamically by property-panel.js -->
+      </aside>
+    </main>
+  </div>
+
+  <!-- JavaScript Modules in Dependency Order -->
+  <script src="js/db.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/engine/interpolator.js"></script>
+  <script src="js/engine/graph.js"></script>
+  <script src="js/engine/node-executors.js"></script>
+  <script src="js/engine/simulation-engine.js"></script>
+  <script src="js/canvas/canvas-controller.js"></script>
+  <script src="js/canvas/drag-drop.js"></script>
+  <script src="js/canvas/connection-manager.js"></script>
+  <script src="js/canvas/minimap.js"></script>
+  <script src="js/ui/node-renderer.js"></script>
+  <script src="js/ui/property-panel.js"></script>
+  <script src="js/ui/execution-drawer.js"></script>
+  <script src="js/ui/toast.js"></script>
+  <script src="js/ui/workflow-manager-modal.js"></script>
+  <script src="js/ui/command-palette.js"></script>
+  <script src="js/ui/templates-modal.js"></script>
+  <script src="js/ui/version-history.js"></script>
+  <script src="js/ui/database-viewer.js"></script>
+  <script src="js/ui/email-viewer.js"></script>
+  <script src="js/ui/shortcuts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
