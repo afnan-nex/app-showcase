@@ -1,0 +1,192 @@
+/* Calendar View Styles */
+
+.calendar-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.calendar-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-month-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 160px;
+}
+
+.calendar-view-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: var(--bg-surface-subtle);
+  padding: 2px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.calendar-grid-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--bg-card);
+}
+
+/* Weekday header bar */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.calendar-weekday-cell {
+  padding: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border-color-subtle);
+}
+
+.calendar-weekday-cell:last-child {
+  border-right: none;
+}
+
+/* Month Grid */
+.calendar-days-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+  overflow-y: auto;
+}
+
+.calendar-day-cell {
+  border-right: 1px solid var(--border-color-subtle);
+  border-bottom: 1px solid var(--border-color-subtle);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 90px;
+  background-color: var(--bg-card);
+  transition: background-color var(--transition-fast);
+  position: relative;
+}
+
+.calendar-day-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar-day-cell.other-month {
+  background-color: var(--bg-surface-subtle);
+  opacity: 0.55;
+}
+
+.calendar-day-cell.today {
+  background-color: var(--color-primary-subtle);
+}
+
+.calendar-day-cell.drag-hover {
+  background-color: var(--kanban-drop-target);
+  outline: 2px dashed var(--color-primary);
+  outline-offset: -2px;
+}
+
+.calendar-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-day-number {
+  font-size: 12px;
+  font-weight: 600;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+}
+
+.calendar-day-cell.today .calendar-day-number {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.calendar-day-add-btn {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.calendar-day-cell:hover .calendar-day-add-btn {
+  opacity: 1;
+}
+
+/* Tasks inside day cell */
+.calendar-day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.calendar-task-chip {
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.calendar-task-chip:hover {
+  background-color: var(--bg-surface-active);
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-task-chip.priority-urgent { border-left: 3px solid var(--color-urgent); }
+.calendar-task-chip.priority-high { border-left: 3px solid var(--color-high); }
+.calendar-task-chip.priority-medium { border-left: 3px solid var(--color-medium); }
+.calendar-task-chip.priority-low { border-left: 3px solid var(--color-low); }
+.calendar-task-chip.priority-none { border-left: 3px solid var(--color-none); }
+
+.calendar-task-chip.status-done {
+  opacity: 0.6;
+  text-decoration: line-through;
+}

@@ -1,0 +1,331 @@
+/* ==========================================================================
+   WIREFRAMELAB - CANVAS WORKSPACE, ARTBOARDS & SELECTION
+   ========================================================================== */
+
+.canvas-viewport {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-canvas);
+  outline: none;
+  cursor: default;
+}
+
+.canvas-viewport.tool-hand {
+  cursor: grab;
+}
+
+.canvas-viewport.tool-hand:active {
+  cursor: grabbing;
+}
+
+.canvas-viewport.tool-crosshair {
+  cursor: crosshair;
+}
+
+/* Background Grid Pattern */
+.canvas-grid-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--z-canvas-bg);
+}
+
+/* Canvas World Container (Transformed via translate & scale) */
+.canvas-world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Rulers */
+.canvas-ruler {
+  position: absolute;
+  background: var(--canvas-ruler-bg);
+  z-index: var(--z-rulers);
+  user-select: none;
+}
+
+.canvas-ruler-h {
+  top: 0;
+  left: var(--ruler-size);
+  right: 0;
+  height: var(--ruler-size);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.canvas-ruler-v {
+  top: var(--ruler-size);
+  left: 0;
+  bottom: 0;
+  width: var(--ruler-size);
+  border-right: 1px solid var(--border-color);
+}
+
+.canvas-ruler-corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--ruler-size);
+  height: var(--ruler-size);
+  background: var(--canvas-ruler-bg);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  z-index: calc(var(--z-rulers) + 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--canvas-ruler-text);
+}
+
+/* Artboard Node */
+.artboard-node {
+  position: absolute;
+  background-color: var(--bg-artboard);
+  box-shadow: var(--shadow-artboard);
+  border-radius: 2px;
+  overflow: visible;
+  z-index: var(--z-canvas-artboard);
+}
+
+.artboard-node.theme-dark-bg {
+  background-color: var(--bg-artboard-dark);
+}
+
+.artboard-node.selected {
+  box-shadow: var(--shadow-artboard-selected);
+}
+
+/* Artboard Label Badge on Top */
+.artboard-label-badge {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-xs);
+  transition: color var(--transition-fast);
+}
+
+.artboard-label-badge:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.artboard-node.selected .artboard-label-badge {
+  color: var(--accent-primary);
+}
+
+.artboard-label-dims {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+/* Artboard Content Clip Box */
+.artboard-clip-box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Wireframe Object Container */
+.wf-object {
+  position: absolute;
+  box-sizing: border-box;
+  z-index: var(--z-canvas-object);
+  user-select: none;
+  cursor: move;
+  transition: outline var(--transition-fast);
+}
+
+.wf-object.hovered {
+  outline: 1px solid var(--accent-primary);
+}
+
+.wf-object.selected {
+  outline: 1px solid transparent; /* Highlighted by selection overlay */
+}
+
+.wf-object.locked {
+  cursor: not-allowed;
+}
+
+.wf-object.hidden {
+  display: none !important;
+}
+
+/* Prototype Hotspot Connector Pin on elements */
+.prototype-connector-pin {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #ffffff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: crosshair;
+  z-index: 1000;
+  box-shadow: 0 0 6px rgba(13, 153, 255, 0.6);
+  border: 2px solid #ffffff;
+}
+
+body.mode-prototype .wf-object:hover .prototype-connector-pin,
+body.mode-prototype .wf-object.selected .prototype-connector-pin {
+  display: flex;
+}
+
+/* Selection Box Overlay */
+.selection-overlay {
+  position: absolute;
+  pointer-events: none;
+  z-index: var(--z-canvas-selection);
+  border: 1.5px solid var(--accent-primary);
+  box-sizing: border-box;
+}
+
+.selection-overlay.multi-selection {
+  border-style: dashed;
+}
+
+/* Transform Handles */
+.transform-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 1px;
+  pointer-events: auto;
+  z-index: var(--z-canvas-handles);
+}
+
+.handle-nw { top: -4px; left: -4px; cursor: nwse-resize; }
+.handle-n  { top: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+.handle-ne { top: -4px; right: -4px; cursor: nesw-resize; }
+.handle-e  { top: calc(50% - 4px); right: -4px; cursor: ew-resize; }
+.handle-se { bottom: -4px; right: -4px; cursor: nwse-resize; }
+.handle-s  { bottom: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+.handle-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+.handle-w  { top: calc(50% - 4px); left: -4px; cursor: ew-resize; }
+
+/* Rotation Handle */
+.handle-rot {
+  position: absolute;
+  top: -24px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 50%;
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.handle-rot-line {
+  position: absolute;
+  top: -16px;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  height: 16px;
+  background: var(--accent-primary);
+  pointer-events: none;
+}
+
+/* Marquee / Rubber-band Selection Rect */
+.canvas-marquee {
+  position: absolute;
+  border: 1px solid var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  pointer-events: none;
+  z-index: var(--z-canvas-selection);
+}
+
+/* Smart Snapping Alignment Lines & Distance Guides */
+.guide-line-h, .guide-line-v {
+  position: absolute;
+  pointer-events: none;
+  z-index: var(--z-canvas-guides);
+}
+
+.guide-line-h {
+  height: 1px;
+  background-color: var(--guide-color);
+  left: 0;
+  width: 100%;
+}
+
+.guide-line-v {
+  width: 1px;
+  background-color: var(--guide-color);
+  top: 0;
+  height: 100%;
+}
+
+.distance-badge {
+  position: absolute;
+  background-color: var(--distance-badge-bg);
+  color: #ffffff;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+  padding: 1px 4px;
+  border-radius: 2px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: calc(var(--z-canvas-guides) + 1);
+  white-space: nowrap;
+}
+
+/* Prototype Wires SVG Layer */
+.prototype-wires-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--z-canvas-prototype-wires);
+  overflow: visible;
+}
+
+.prototype-wire-path {
+  fill: none;
+  stroke: var(--prototype-wire-color);
+  stroke-width: 2px;
+  stroke-dasharray: 4 2;
+  animation: wireFlow 1.5s linear infinite;
+}
+
+.prototype-wire-path.active {
+  stroke-dasharray: none;
+  stroke-width: 2.5px;
+}
+
+@keyframes wireFlow {
+  from { stroke-dashoffset: 12; }
+  to { stroke-dashoffset: 0; }
+}

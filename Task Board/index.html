@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskBoard — CloudScale Engineering Workspace</title>
+  <meta name="description" content="High-performance project management application inspired by Linear, Trello, and Asana.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><rect width='20' height='20' x='2' y='2' rx='5'/><path fill='white' d='M8 7h8v2H8zm0 4h8v2H8zm0 4h5v2H8z'/></svg>">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/kanban.css">
+  <link rel="stylesheet" href="css/list.css">
+  <link rel="stylesheet" href="css/calendar.css">
+  <link rel="stylesheet" href="css/analytics.css">
+  <link rel="stylesheet" href="css/modals.css">
+</head>
+<body>
+  <div id="app" class="app-layout">
+    <!-- Collapsible Sidebar -->
+    <aside id="sidebar" class="sidebar" aria-label="Main Navigation">
+      <div class="sidebar-header">
+        <div class="workspace-brand">
+          <div class="workspace-logo" id="workspaceLogo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="4" fill="var(--color-primary-subtle)" stroke="var(--color-primary)"/>
+              <path d="M8 8h8M8 12h8M8 16h5" stroke="var(--color-primary)"/>
+            </svg>
+          </div>
+          <div class="workspace-meta">
+            <span class="workspace-name" id="workspaceNameDisplay">CloudScale Networks</span>
+            <span class="workspace-plan">Enterprise Tier</span>
+          </div>
+        </div>
+        <button class="icon-btn sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar (Ctrl+\)" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9-3 3 3 3"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick Action: New Task -->
+      <div class="sidebar-action-bar">
+        <button class="btn btn-primary btn-block" id="sidebarNewTaskBtn" aria-label="Create New Task">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>New Task</span>
+          <kbd class="shortcut-badge">C</kbd>
+        </button>
+      </div>
+
+      <!-- Navigation Section -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Views</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button class="nav-link active" data-view="dashboard">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+              <span>Dashboard</span>
+              <kbd class="nav-shortcut">1</kbd>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-view="board">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7v10M13 7v10M18 7v6"/></svg>
+              <span>Kanban Board</span>
+              <kbd class="nav-shortcut">2</kbd>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-view="list">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              <span>List View</span>
+              <kbd class="nav-shortcut">3</kbd>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-view="calendar">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Calendar</span>
+              <kbd class="nav-shortcut">4</kbd>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-view="analytics">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>Analytics</span>
+              <kbd class="nav-shortcut">5</kbd>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-view="projects">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+              <span>All Projects</span>
+              <kbd class="nav-shortcut">6</kbd>
+            </button>
+          </li>
+        </ul>
+
+        <!-- Projects Section -->
+        <div class="nav-section-header">
+          <span class="nav-section-title">Projects</span>
+          <button class="icon-btn-sm" id="sidebarAddProjectBtn" title="Create New Project" aria-label="New Project">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+        <ul class="nav-list" id="sidebarProjectList">
+          <!-- Dynamic Project Items -->
+        </ul>
+
+        <!-- Favorites Section -->
+        <div class="nav-section-header">
+          <span class="nav-section-title">Favorites</span>
+        </div>
+        <ul class="nav-list" id="sidebarFavoritesList">
+          <!-- Dynamic Favorites -->
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="sidebar-footer-link" data-view="settings" id="sidebarSettingsBtn">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Settings</span>
+        </button>
+        <button class="sidebar-footer-link" id="sidebarShortcutsBtn" title="Keyboard Shortcuts (?)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M6 12h.001M18 12h.001M8 16h8"/></svg>
+          <span>Shortcuts</span>
+          <kbd class="shortcut-badge">?</kbd>
+        </button>
+        
+        <!-- User Profile Switcher Widget -->
+        <div class="user-profile-compact" id="currentUserWidget" title="Click to switch active profile">
+          <img src="" alt="Active User Profile" class="avatar-sm" id="currentUserAvatar">
+          <div class="user-info-text">
+            <span class="user-name" id="currentUserName">Sarah Chen</span>
+            <span class="user-role">Staff Product Manager</span>
+          </div>
+          <!-- User Switcher Dropdown -->
+          <div class="dropdown-menu user-select-menu hidden" id="userSelectMenu" style="bottom: calc(100% + 4px); top: auto; left: 0; min-width: 210px;">
+            <div class="dropdown-header">Switch Active Member</div>
+            <div id="userDropdownItems"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Mobile Menu">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          
+          <div class="breadcrumb-container" id="breadcrumbContainer">
+            <div class="project-selector-wrapper">
+              <button class="project-dropdown-btn" id="projectDropdownTrigger" aria-haspopup="true" aria-expanded="false">
+                <span class="project-color-dot" id="activeProjectColor"></span>
+                <span class="project-name-display" id="activeProjectName">All Projects</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <!-- Project Selector Dropdown Menu -->
+              <div class="dropdown-menu project-select-menu hidden" id="projectSelectMenu">
+                <div class="dropdown-header">Select Project Scope</div>
+                <div class="dropdown-item" data-project-id="all">
+                  <span class="project-color-dot all-projects-dot"></span>
+                  <span class="dropdown-item-title">All Projects</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div id="projectDropdownItems"></div>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item-action" id="dropdownCreateProjectBtn">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span>Create New Project</span>
+                </button>
+              </div>
+            </div>
+            <span class="breadcrumb-separator">/</span>
+            <span class="current-view-title" id="currentViewTitle">Dashboard</span>
+          </div>
+
+          <!-- View Switcher Tabs -->
+          <div class="view-tabs" id="viewTabsBar" role="tablist">
+            <button class="view-tab active" data-view="dashboard" role="tab" title="Dashboard (1)">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+              <span>Dashboard</span>
+            </button>
+            <button class="view-tab" data-view="board" role="tab" title="Kanban Board (2)">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7v10M13 7v10M18 7v6"/></svg>
+              <span>Board</span>
+            </button>
+            <button class="view-tab" data-view="list" role="tab" title="List View (3)">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              <span>List</span>
+            </button>
+            <button class="view-tab" data-view="calendar" role="tab" title="Calendar View (4)">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Calendar</span>
+            </button>
+            <button class="view-tab" data-view="analytics" role="tab" title="Analytics View (5)">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>Analytics</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Command Palette Trigger Button -->
+          <button class="search-command-btn" id="commandPaletteTrigger" title="Quick Search & Actions (Ctrl+K)" aria-label="Open Command Palette">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="search-placeholder">Search tasks, actions...</span>
+            <kbd class="shortcut-badge">Ctrl K</kbd>
+          </button>
+
+          <!-- Filter Dropdown Trigger -->
+          <div class="filter-dropdown-wrapper">
+            <button class="btn btn-secondary filter-btn" id="filterDropdownTrigger" title="Filter Tasks" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              <span>Filter</span>
+              <span class="filter-count-badge hidden" id="activeFilterBadge">0</span>
+            </button>
+            
+            <!-- Filter Popover Panel -->
+            <div class="popover filter-popover hidden" id="filterPopover">
+              <div class="popover-header">
+                <span>Filter Active Tasks</span>
+                <button class="text-btn-sm" id="resetFiltersBtn">Reset all</button>
+              </div>
+              <div class="popover-body filter-grid">
+                <div class="filter-group">
+                  <label class="filter-label" for="filterAssignee">Assignee</label>
+                  <select class="form-select form-select-sm" id="filterAssignee">
+                    <option value="">All Members</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label" for="filterPriority">Priority</label>
+                  <select class="form-select form-select-sm" id="filterPriority">
+                    <option value="">All Priorities</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                    <option value="none">No Priority</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label" for="filterStatus">Status</label>
+                  <select class="form-select form-select-sm" id="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="backlog">Backlog</option>
+                    <option value="todo">To Do</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="done">Done</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label" for="filterLabel">Label</label>
+                  <select class="form-select form-select-sm" id="filterLabel">
+                    <option value="">All Labels</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label" for="filterDueDate">Due Date</label>
+                  <select class="form-select form-select-sm" id="filterDueDate">
+                    <option value="">Any Time</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="today">Due Today</option>
+                    <option value="this-week">Due This Week</option>
+                    <option value="next-week">Due Next Week</option>
+                    <option value="no-date">No Due Date</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Switcher -->
+          <button class="icon-btn theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme (T)" aria-label="Toggle Dark/Light Mode">
+            <svg class="sun-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+
+          <!-- Create Task Primary Button -->
+          <button class="btn btn-primary topbar-create-btn" id="topbarNewTaskBtn" aria-label="Create Task">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Create Task</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Active Filter Pill Bar (Appears when filters applied) -->
+      <div class="active-filter-bar hidden" id="activeFilterBar" aria-live="polite">
+        <span class="active-filter-title">Active Filters:</span>
+        <div class="active-filter-pills" id="activeFilterPills"></div>
+        <button class="text-btn-sm" id="clearAllFiltersBtn">Clear all</button>
+      </div>
+
+      <!-- Main Dynamic Content Views Container -->
+      <main class="content-container" id="mainContent" role="region" aria-label="Active View Content">
+        <!-- Views are rendered dynamically into this container -->
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODALS & OVERLAYS ================= -->
+
+  <!-- Task Detail & Edit Modal / Drawer -->
+  <div class="modal-overlay hidden" id="taskDetailModalOverlay" role="presentation">
+    <div class="modal modal-lg task-detail-modal" id="taskDetailModal" role="dialog" aria-modal="true" aria-labelledby="taskModalKey">
+      <div class="task-modal-header">
+        <div class="task-modal-header-left">
+          <span class="task-key-tag" id="taskModalKey">TB-101</span>
+          <span class="project-pill-badge" id="taskModalProjectBadge">Mobile Core</span>
+          <div class="task-modal-meta-dates">
+            <span id="taskModalCreatedDate">Created 2 days ago</span>
+          </div>
+        </div>
+        <div class="task-modal-header-actions">
+          <button class="icon-btn-sm" id="taskModalDuplicateBtn" title="Duplicate Task" aria-label="Duplicate Task">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </button>
+          <button class="icon-btn-sm" id="taskModalArchiveBtn" title="Archive / Unarchive Task" aria-label="Archive Task">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+          </button>
+          <button class="icon-btn-sm icon-btn-danger" id="taskModalDeleteBtn" title="Delete Task" aria-label="Delete Task">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+          <button class="icon-btn-sm modal-close-btn" id="taskModalCloseBtn" title="Close (Esc)" aria-label="Close Task Details">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="task-modal-body">
+        <!-- Main Column: Title, Description, Checklist, Attachments, Comments -->
+        <div class="task-modal-main">
+          <!-- Title Input -->
+          <textarea class="task-title-input" id="taskModalTitle" rows="1" placeholder="Task title..." aria-label="Task Title"></textarea>
+
+          <!-- Description Section -->
+          <div class="task-section">
+            <div class="task-section-header">
+              <span class="task-section-title">Description</span>
+            </div>
+            <div class="description-editor-container">
+              <textarea class="task-desc-input" id="taskModalDesc" rows="4" placeholder="Add technical description, reproduction steps, or context... (Markdown supported)"></textarea>
+            </div>
+          </div>
+
+          <!-- Checklist Section -->
+          <div class="task-section" id="taskChecklistSection">
+            <div class="task-section-header">
+              <div class="checklist-header-title">
+                <span class="task-section-title">Checklist</span>
+                <span class="checklist-progress-text" id="checklistProgressText">0%</span>
+              </div>
+              <button class="text-btn-sm" id="addChecklistBtn">+ Add item</button>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="checklistProgressBar" style="width: 0%"></div>
+            </div>
+            <div class="checklist-items" id="taskChecklistItems">
+              <!-- Dynamic checklist items -->
+            </div>
+            <div class="checklist-add-row hidden" id="checklistAddRow">
+              <input type="text" class="form-input form-input-sm" id="newChecklistInput" placeholder="Checklist item title...">
+              <div class="checklist-add-actions">
+                <button class="btn btn-primary btn-xs" id="confirmAddChecklistBtn">Add</button>
+                <button class="btn btn-ghost btn-xs" id="cancelAddChecklistBtn">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attachments Section UI -->
+          <div class="task-section">
+            <div class="task-section-header">
+              <span class="task-section-title">Attachments</span>
+              <label class="text-btn-sm attachment-upload-btn">
+                <span>+ Attach file</span>
+                <input type="file" id="taskAttachmentInput" class="hidden-file-input" multiple>
+              </label>
+            </div>
+            <div class="attachments-grid" id="taskAttachmentsList">
+              <!-- Dynamic attachments -->
+            </div>
+          </div>
+
+          <!-- Comments & Discussion Section -->
+          <div class="task-section comments-section">
+            <div class="task-section-header">
+              <span class="task-section-title">Discussion & Activity</span>
+            </div>
+            <div class="comment-input-box">
+              <img src="" alt="Active User Avatar" class="avatar-sm" id="commentUserAvatar">
+              <div class="comment-input-wrapper">
+                <textarea class="comment-textarea" id="newCommentInput" rows="2" placeholder="Write a comment... (Enter to submit, Shift+Enter for new line)"></textarea>
+                <div class="comment-input-footer">
+                  <span class="comment-tip">Shift+Enter for newline</span>
+                  <button class="btn btn-primary btn-xs" id="submitCommentBtn">Comment</button>
+                </div>
+              </div>
+            </div>
+            <div class="comments-list" id="taskCommentsList">
+              <!-- Dynamic comments -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Column: Status, Priority, Assignee, Labels, Due Date, Dates -->
+        <div class="task-modal-sidebar">
+          <div class="task-sidebar-group">
+            <label class="task-sidebar-label" for="taskModalStatus">Status</label>
+            <select class="form-select form-select-sm" id="taskModalStatus">
+              <option value="backlog">Backlog</option>
+              <option value="todo">To Do</option>
+              <option value="in-progress">In Progress</option>
+              <option value="review">Review</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+
+          <div class="task-sidebar-group">
+            <label class="task-sidebar-label" for="taskModalPriority">Priority</label>
+            <select class="form-select form-select-sm" id="taskModalPriority">
+              <option value="urgent">🔴 Urgent</option>
+              <option value="high">🟠 High</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="low">🔵 Low</option>
+              <option value="none">⚪ None</option>
+            </select>
+          </div>
+
+          <div class="task-sidebar-group">
+            <label class="task-sidebar-label" for="taskModalAssignee">Assignee</label>
+            <select class="form-select form-select-sm" id="taskModalAssignee">
+              <option value="">Unassigned</option>
+            </select>
+          </div>
+
+          <div class="task-sidebar-group">
+            <label class="task-sidebar-label" for="taskModalProject">Project Scope</label>
+            <select class="form-select form-select-sm" id="taskModalProject">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="task-sidebar-group">
+            <label class="task-sidebar-label" for="taskModalDueDate">Due Date</label>
+            <input type="date" class="form-input form-input-sm" id="taskModalDueDate">
+          </div>
+
+          <div class="task-sidebar-group">
+            <label class="task-sidebar-label">Labels / Tags</label>
+            <div class="labels-selector-container" id="taskModalLabelsContainer">
+              <!-- Label tags toggle pills -->
+            </div>
+          </div>
+
+          <div class="task-sidebar-divider"></div>
+
+          <div class="task-sidebar-meta">
+            <div class="meta-row">
+              <span class="meta-label">Created:</span>
+              <span class="meta-value" id="taskModalFullCreated">Just now</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Updated:</span>
+              <span class="meta-value" id="taskModalFullUpdated">Just now</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Create / Edit Modal -->
+  <div class="modal-overlay hidden" id="projectModalOverlay" role="presentation">
+    <div class="modal modal-md" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+      <div class="modal-header">
+        <h3 class="modal-title" id="projectModalTitle">Create New Project</h3>
+        <button class="icon-btn-sm modal-close-btn" id="projectModalCloseBtn" aria-label="Close Project Modal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="projectModalForm" class="modal-form">
+        <input type="hidden" id="projectModalId" value="">
+        <div class="form-group">
+          <label class="form-label required" for="projectNameInput">Project Name</label>
+          <input type="text" id="projectNameInput" class="form-input" placeholder="e.g. Distributed Edge Compute" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="projectDescInput">Description</label>
+          <textarea id="projectDescInput" class="form-input" rows="3" placeholder="Project objectives, milestones, and architectural scope..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="projectStatusSelect">Status</label>
+            <select id="projectStatusSelect" class="form-select">
+              <option value="active">Active</option>
+              <option value="planning">Planning</option>
+              <option value="on-hold">On Hold</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Color Accent</label>
+            <div class="color-picker-palette" id="projectColorPalette">
+              <!-- Color radio dots -->
+            </div>
+            <input type="hidden" id="projectColorInput" value="#4f46e5">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="projectStartDate">Start Date</label>
+            <input type="date" id="projectStartDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="projectDeadline">Target Deadline</label>
+            <input type="date" id="projectDeadline" class="form-input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign Team Members</label>
+          <div class="members-multiselect" id="projectMembersSelect">
+            <!-- Dynamic member check chips -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="projectModalCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="projectModalSubmitBtn">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Command Palette Modal (Ctrl+K) -->
+  <div class="modal-overlay command-palette-overlay hidden" id="commandPaletteOverlay" role="presentation">
+    <div class="command-palette-modal" id="commandPaletteModal" role="dialog" aria-modal="true" aria-label="Command Palette">
+      <div class="command-search-header">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" class="command-palette-input" id="commandPaletteInput" placeholder="Type a command or search tasks, projects, actions..." autofocus aria-label="Search or type a command">
+        <kbd class="shortcut-badge">Esc</kbd>
+      </div>
+      <div class="command-results" id="commandResults" role="listbox">
+        <!-- Results populated dynamically -->
+      </div>
+      <div class="command-palette-footer">
+        <div class="command-keys-hint">
+          <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+          <span><kbd>↵</kbd> Select</span>
+          <span><kbd>Esc</kbd> Close</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Cheatsheet Modal (?) -->
+  <div class="modal-overlay hidden" id="shortcutsModalOverlay" role="presentation">
+    <div class="modal modal-md" id="shortcutsModal" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle">
+      <div class="modal-header">
+        <h3 class="modal-title" id="shortcutsModalTitle">Keyboard Shortcuts</h3>
+        <button class="icon-btn-sm modal-close-btn" id="shortcutsModalCloseBtn" aria-label="Close Shortcuts Modal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-group">
+          <h4 class="shortcut-group-title">Navigation</h4>
+          <div class="shortcut-row"><span>Dashboard</span><kbd>1</kbd></div>
+          <div class="shortcut-row"><span>Kanban Board</span><kbd>2</kbd></div>
+          <div class="shortcut-row"><span>List View</span><kbd>3</kbd></div>
+          <div class="shortcut-row"><span>Calendar</span><kbd>4</kbd></div>
+          <div class="shortcut-row"><span>Analytics</span><kbd>5</kbd></div>
+          <div class="shortcut-row"><span>All Projects</span><kbd>6</kbd></div>
+        </div>
+        <div class="shortcut-group">
+          <h4 class="shortcut-group-title">Actions & Tools</h4>
+          <div class="shortcut-row"><span>New Task</span><kbd>C</kbd> or <kbd>N</kbd></div>
+          <div class="shortcut-row"><span>Command Palette</span><kbd>Ctrl K</kbd> / <kbd>⌘K</kbd></div>
+          <div class="shortcut-row"><span>Toggle Sidebar</span><kbd>Ctrl \</kbd></div>
+          <div class="shortcut-row"><span>Toggle Theme</span><kbd>T</kbd></div>
+          <div class="shortcut-row"><span>Quick Search</span><kbd>/</kbd></div>
+          <div class="shortcut-row"><span>Undo Action</span><kbd>Ctrl Z</kbd></div>
+          <div class="shortcut-row"><span>Close Modal</span><kbd>Esc</kbd></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic Confirmation Modal -->
+  <div class="modal-overlay hidden" id="confirmModalOverlay" role="presentation">
+    <div class="modal modal-sm" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirmModalTitle">Confirm Action</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Click Context Menu -->
+  <div class="context-menu hidden" id="contextMenu" role="menu">
+    <!-- Populated dynamically based on target -->
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/icons.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/demo-data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui/notifications.js"></script>
+  <script src="js/ui/context-menu.js"></script>
+  <script src="js/ui/command-palette.js"></script>
+  <script src="js/ui/modals.js"></script>
+  <script src="js/views/dashboard-view.js"></script>
+  <script src="js/views/board-view.js"></script>
+  <script src="js/views/list-view.js"></script>
+  <script src="js/views/calendar-view.js"></script>
+  <script src="js/views/analytics-view.js"></script>
+  <script src="js/views/projects-view.js"></script>
+  <script src="js/views/settings-view.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

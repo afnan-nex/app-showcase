@@ -1,0 +1,168 @@
+/* ==========================================================================
+   WIREFRAMELAB - DESIGN TOKENS & THEMES
+   Professional Figma/Framer-inspired compact UI variables
+   ========================================================================== */
+
+:root {
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Fira Code", monospace;
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 22px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Radii */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Layout dimensions */
+  --header-height: 44px;
+  --left-panel-width: 280px;
+  --right-panel-width: 300px;
+  --footer-height: 32px;
+  --ruler-size: 20px;
+
+  /* Z-indices */
+  --z-canvas-bg: 1;
+  --z-canvas-artboard: 5;
+  --z-canvas-object: 10;
+  --z-canvas-guides: 20;
+  --z-canvas-prototype-wires: 30;
+  --z-canvas-selection: 40;
+  --z-canvas-handles: 50;
+  --z-rulers: 60;
+  --z-panels: 100;
+  --z-header: 110;
+  --z-footer: 110;
+  --z-dropdown: 200;
+  --z-modal: 500;
+  --z-toast: 1000;
+
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Accents (theme invariant) */
+  --accent-primary: #0d99ff;
+  --accent-primary-hover: #007be5;
+  --accent-primary-subtle: rgba(13, 153, 255, 0.15);
+  --accent-primary-glow: rgba(13, 153, 255, 0.35);
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+  --accent-purple: #8b5cf6;
+  --accent-pink: #ec4899;
+  --guide-color: #ff007a;
+  --distance-badge-bg: #ff007a;
+  --prototype-wire-color: #0d99ff;
+}
+
+/* ==========================================================================
+   DARK THEME (Default - Figma Dark Mode Vibe)
+   ========================================================================== */
+body.theme-dark {
+  --bg-app: #1e1e1e;
+  --bg-panel: #2c2c2c;
+  --bg-panel-header: #252525;
+  --bg-panel-subtle: #333333;
+  --bg-input: #1e1e1e;
+  --bg-input-hover: #262626;
+  --bg-input-focus: #181818;
+  --bg-button: #383838;
+  --bg-button-hover: #444444;
+  --bg-button-active: #2f2f2f;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(255, 255, 255, 0.1);
+  --bg-selected: rgba(13, 153, 255, 0.2);
+  --bg-canvas: #181818;
+  --bg-artboard: #ffffff;
+  --bg-artboard-dark: #222222;
+  --bg-modal-overlay: rgba(0, 0, 0, 0.7);
+  --bg-modal: #2c2c2c;
+  --bg-card: #333333;
+  --bg-tooltip: #111111;
+
+  --border-color: #383838;
+  --border-subtle: #2e2e2e;
+  --border-focus: #0d99ff;
+  --border-active: #555555;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  --text-disabled: #525252;
+  --text-inverse: #181818;
+  
+  --canvas-grid-dot: #2a2a2a;
+  --canvas-ruler-bg: #242424;
+  --canvas-ruler-text: #666666;
+  --canvas-ruler-line: #333333;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-artboard: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-artboard-selected: 0 0 0 2px #0d99ff, 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   LIGHT THEME
+   ========================================================================== */
+body.theme-light {
+  --bg-app: #f5f5f5;
+  --bg-panel: #ffffff;
+  --bg-panel-header: #fafafa;
+  --bg-panel-subtle: #f0f0f0;
+  --bg-input: #ffffff;
+  --bg-input-hover: #f9f9f9;
+  --bg-input-focus: #ffffff;
+  --bg-button: #f0f0f0;
+  --bg-button-hover: #e5e5e5;
+  --bg-button-active: #dcdcdc;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(0, 0, 0, 0.08);
+  --bg-selected: rgba(13, 153, 255, 0.12);
+  --bg-canvas: #e9e9e9;
+  --bg-artboard: #ffffff;
+  --bg-artboard-dark: #222222;
+  --bg-modal-overlay: rgba(0, 0, 0, 0.5);
+  --bg-modal: #ffffff;
+  --bg-card: #f9f9f9;
+  --bg-tooltip: #222222;
+
+  --border-color: #e5e5e5;
+  --border-subtle: #eeeeee;
+  --border-focus: #0d99ff;
+  --border-active: #b5b5b5;
+  
+  --text-primary: #181818;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --text-disabled: #cccccc;
+  --text-inverse: #ffffff;
+  
+  --canvas-grid-dot: #d0d0d0;
+  --canvas-ruler-bg: #ececec;
+  --canvas-ruler-text: #999999;
+  --canvas-ruler-line: #dddddd;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-artboard: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-artboard-selected: 0 0 0 2px #0d99ff, 0 8px 24px rgba(13, 153, 255, 0.15);
+}

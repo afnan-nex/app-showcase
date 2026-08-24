@@ -1,0 +1,339 @@
+/* ==========================================================================
+   WIREFRAMELAB - MAIN BASE & LAYOUT STYLES
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* App Root Structure */
+#app-root {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main Workspace (Left panel | Canvas | Right panel) */
+.workspace-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - var(--header-height) - var(--footer-height));
+  position: relative;
+  overflow: hidden;
+}
+
+/* Common UI Elements */
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: inherit;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--border-focus);
+}
+
+button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: var(--bg-button);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  font-weight: var(--font-weight-medium);
+}
+
+button:hover {
+  background-color: var(--bg-button-hover);
+}
+
+button:active {
+  background-color: var(--bg-button-active);
+}
+
+button.btn-primary {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+button.btn-primary:hover {
+  background-color: var(--accent-primary-hover);
+}
+
+button.btn-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+
+button.btn-icon:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+button.btn-icon.active {
+  background-color: var(--bg-selected);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary-subtle);
+}
+
+/* Tooltips */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  padding: 3px 8px;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  background-color: var(--bg-tooltip);
+  color: #ffffff;
+  border-radius: var(--radius-xs);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: 10000;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  transition-delay: 0.3s;
+}
+
+[data-tooltip-pos="top"]::after {
+  bottom: auto;
+  top: -28px;
+}
+
+[data-tooltip-pos="right"]::after {
+  bottom: auto;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.9);
+}
+
+[data-tooltip-pos="right"]:hover::after {
+  transform: translateY(-50%) scale(1);
+}
+
+/* Segmented Control / Button Groups */
+.segmented-control {
+  display: inline-flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.segmented-control button {
+  border: none;
+  background: transparent;
+  padding: 3px 8px;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+}
+
+.segmented-control button:hover {
+  color: var(--text-primary);
+}
+
+.segmented-control button.active {
+  background: var(--bg-panel-subtle);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-sm);
+}
+
+/* SVG Icon Helper */
+.icon {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.icon-sm {
+  width: 12px;
+  height: 12px;
+}
+
+.icon-lg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Scrubbable Number Inputs */
+.scrub-field {
+  display: flex;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  height: 26px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scrub-field:focus-within {
+  border-color: var(--border-focus);
+}
+
+.scrub-label {
+  width: 22px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  cursor: ew-resize;
+  background: var(--bg-panel-subtle);
+  border-right: 1px solid var(--border-color);
+  user-select: none;
+}
+
+.scrub-label:hover {
+  color: var(--text-primary);
+}
+
+.scrub-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0 6px;
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+  min-width: 0;
+  width: 100%;
+}
+
+.scrub-input:focus {
+  outline: none;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-xs);
+  background: var(--bg-panel-subtle);
+  color: var(--text-secondary);
+}
+
+.badge-primary {
+  background: var(--accent-primary-subtle);
+  color: var(--accent-primary);
+}
+
+/* Accessibility: Focus visible */
+:focus-visible {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 1px !important;
+}
+
+/* Accessibility: Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Responsive Viewport Rules */
+@media (max-width: 1024px) {
+  :root {
+    --left-panel-width: 240px;
+    --right-panel-width: 260px;
+  }
+  .status-shortcut-hint {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --left-panel-width: 200px;
+    --right-panel-width: 220px;
+  }
+  .command-palette-btn span,
+  .command-palette-btn kbd {
+    display: none;
+  }
+  .project-name-container {
+    max-width: 130px;
+  }
+  .brand-badge {
+    display: none;
+  }
+}

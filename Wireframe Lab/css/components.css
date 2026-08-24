@@ -1,0 +1,785 @@
+/* ==========================================================================
+   WIREFRAMELAB - WIREFRAME COMPONENT DEFINITIONS & STYLING
+   ========================================================================== */
+
+/* Universal Component Base */
+.wf-node {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  font-family: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   1. Text / Typography
+   -------------------------------------------------------------------------- */
+.wf-text {
+  align-items: flex-start;
+  word-break: break-word;
+  white-space: pre-wrap;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.wf-text.variant-heading-1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.wf-text.variant-heading-2 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.wf-text.variant-heading-3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.wf-text.variant-paragraph {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.wf-text.variant-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Buttons
+   -------------------------------------------------------------------------- */
+.wf-button {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #1f2937;
+  background-color: #1f2937;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.wf-button.variant-secondary {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+
+.wf-button.variant-outline {
+  background-color: transparent;
+  border-color: #1f2937;
+  color: #1f2937;
+}
+
+.wf-button.variant-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: #4b5563;
+}
+
+.wf-button.variant-danger {
+  background-color: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   3. Inputs & Forms
+   -------------------------------------------------------------------------- */
+.wf-input {
+  align-items: center;
+  padding: 0 12px;
+  background-color: #ffffff;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  color: #9ca3af;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.wf-input.has-value {
+  color: #1f2937;
+}
+
+.wf-input-icon {
+  width: 14px;
+  height: 14px;
+  stroke: #9ca3af;
+  flex-shrink: 0;
+}
+
+.wf-textarea {
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1.4;
+  align-items: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   4. Image Placeholder
+   -------------------------------------------------------------------------- */
+.wf-image {
+  background-color: #e5e7eb;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  color: #6b7280;
+}
+
+.wf-image-cross {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.wf-image-cross line {
+  stroke: #d1d5db;
+  stroke-width: 1;
+}
+
+.wf-image-icon {
+  width: 24px;
+  height: 24px;
+  stroke: #6b7280;
+  z-index: 2;
+}
+
+.wf-image-label {
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   5. Card
+   -------------------------------------------------------------------------- */
+.wf-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wf-card-header {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+}
+
+.wf-card-media {
+  height: 120px;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wf-card-body {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.wf-card-footer {
+  padding: 10px 16px;
+  background-color: #f9fafb;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Navigation Bar (Navbar)
+   -------------------------------------------------------------------------- */
+.wf-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 16px;
+}
+
+.wf-navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  color: #111827;
+}
+
+.wf-logo-box {
+  width: 24px;
+  height: 24px;
+  background: #111827;
+  border-radius: 4px;
+}
+
+.wf-navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.wf-navbar-links span.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.wf-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   7. Sidebar Menu
+   -------------------------------------------------------------------------- */
+.wf-sidebar {
+  background-color: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+  flex-direction: column;
+  padding: 16px 12px;
+  gap: 8px;
+}
+
+.wf-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.wf-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.wf-sidebar-item.active {
+  background-color: #e5e7eb;
+  color: #111827;
+  font-weight: 600;
+}
+
+.wf-sidebar-item svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   8. Modal Dialog
+   -------------------------------------------------------------------------- */
+.wf-modal {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wf-modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.wf-modal-close {
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.wf-modal-body {
+  padding: 18px;
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.wf-modal-footer {
+  padding: 12px 18px;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   9. Checkbox & Radio
+   -------------------------------------------------------------------------- */
+.wf-checkbox, .wf-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.wf-check-box {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #4b5563;
+  border-radius: 3px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wf-check-box.checked {
+  background: #1f2937;
+  border-color: #1f2937;
+}
+
+.wf-check-box.checked::after {
+  content: "✓";
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.wf-radio-box {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #4b5563;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wf-radio-box.checked::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: #1f2937;
+  border-radius: 50%;
+}
+
+/* --------------------------------------------------------------------------
+   10. Tabs
+   -------------------------------------------------------------------------- */
+.wf-tabs {
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 0 8px;
+}
+
+.wf-tab-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.wf-tab-item.active {
+  color: #111827;
+  font-weight: 600;
+  border-bottom-color: #111827;
+}
+
+/* --------------------------------------------------------------------------
+   11. Dropdown / Select
+   -------------------------------------------------------------------------- */
+.wf-dropdown {
+  background-color: #ffffff;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+/* --------------------------------------------------------------------------
+   12. Table
+   -------------------------------------------------------------------------- */
+.wf-table-container {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.wf-table-row {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
+}
+
+.wf-table-row:last-child {
+  border-bottom: none;
+}
+
+.wf-table-header {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  font-size: 12px;
+}
+
+.wf-table-cell {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: 1px solid #f3f4f6;
+}
+
+.wf-table-cell:last-child {
+  border-right: none;
+}
+
+/* --------------------------------------------------------------------------
+   13. Avatar & Avatar Group
+   -------------------------------------------------------------------------- */
+.wf-avatar {
+  background-color: #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #374151;
+  font-size: 13px;
+  border: 2px solid #ffffff;
+}
+
+.wf-avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.wf-avatar-group .wf-avatar {
+  margin-left: -8px;
+}
+
+.wf-avatar-group .wf-avatar:first-child {
+  margin-left: 0;
+}
+
+/* --------------------------------------------------------------------------
+   14. Divider
+   -------------------------------------------------------------------------- */
+.wf-divider {
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wf-divider-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.wf-divider-label {
+  position: relative;
+  background: #ffffff;
+  padding: 0 8px;
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   15. Toggle Switch
+   -------------------------------------------------------------------------- */
+.wf-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wf-toggle-track {
+  width: 36px;
+  height: 20px;
+  background-color: #d1d5db;
+  border-radius: 10px;
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+
+.wf-toggle-track.checked {
+  background-color: #1f2937;
+}
+
+.wf-toggle-thumb {
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform var(--transition-fast);
+}
+
+.wf-toggle-track.checked .wf-toggle-thumb {
+  transform: translateX(16px);
+}
+
+/* --------------------------------------------------------------------------
+   16. Badge & Chip
+   -------------------------------------------------------------------------- */
+.wf-chip {
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   17. Breadcrumbs & Pagination
+   -------------------------------------------------------------------------- */
+.wf-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.wf-breadcrumbs span.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.wf-pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wf-page-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #4b5563;
+  background: #ffffff;
+}
+
+.wf-page-btn.active {
+  background: #1f2937;
+  color: #ffffff;
+  border-color: #1f2937;
+}
+
+/* --------------------------------------------------------------------------
+   18. Slider & Progress Bar
+   -------------------------------------------------------------------------- */
+.wf-slider {
+  align-items: center;
+  position: relative;
+}
+
+.wf-slider-track {
+  width: 100%;
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  position: relative;
+}
+
+.wf-slider-fill {
+  height: 100%;
+  background-color: #1f2937;
+  border-radius: 3px;
+  width: 60%;
+}
+
+.wf-slider-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #1f2937;
+  position: absolute;
+  top: 50%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+}
+
+.wf-progress {
+  align-items: center;
+}
+
+.wf-progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wf-progress-fill {
+  height: 100%;
+  background-color: #1f2937;
+  width: 65%;
+}
+
+/* --------------------------------------------------------------------------
+   19. Alert / Notification Box
+   -------------------------------------------------------------------------- */
+.wf-alert {
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #374151;
+}
+
+.wf-alert-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   20. Chart Wireframe Placeholder
+   -------------------------------------------------------------------------- */
+.wf-chart {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wf-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  flex: 1;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 4px;
+}
+
+.wf-chart-bar {
+  width: 18px;
+  background: #9ca3af;
+  border-radius: 2px 2px 0 0;
+}
+
+.wf-chart-bar:nth-child(2) { background: #6b7280; }
+.wf-chart-bar:nth-child(3) { background: #4b5563; }
+.wf-chart-bar:nth-child(4) { background: #1f2937; }
+
+/* --------------------------------------------------------------------------
+   21. Video / Media Player Wireframe
+   -------------------------------------------------------------------------- */
+.wf-video {
+  background-color: #1f2937;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #ffffff;
+}
+
+.wf-video-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wf-video-play-icon {
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 12px solid #ffffff;
+  margin-left: 3px;
+}

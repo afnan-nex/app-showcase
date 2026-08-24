@@ -1,0 +1,155 @@
+/* ==========================================================================
+   TaskBoard Design System Tokens & CSS Variables
+   Engineered for ultra-crisp B2B precision (Linear, GitHub, Asana inspired)
+   ========================================================================== */
+
+:root {
+  /* Color Palette - Light Mode (Crisp White / Cool Slate) */
+  --bg-app: #f8fafc;
+  --bg-sidebar: #f1f5f9;
+  --bg-topbar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f1f5f9;
+  --bg-surface-active: #e2e8f0;
+  --bg-overlay: rgba(15, 23, 42, 0.5);
+
+  --border-color: #e2e8f0;
+  --border-color-subtle: #edf2f7;
+  --border-color-focus: #4f46e5;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Primary Brand Accent */
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-subtle: rgba(79, 70, 229, 0.09);
+  --color-primary-text: #4f46e5;
+
+  /* Strict Semantic Priority Tokens */
+  --color-urgent: #e11d48;
+  --color-urgent-subtle: rgba(225, 29, 72, 0.1);
+  --color-high: #ea580c;
+  --color-high-subtle: rgba(234, 88, 12, 0.1);
+  --color-medium: #d97706;
+  --color-medium-subtle: rgba(217, 119, 6, 0.1);
+  --color-low: #2563eb;
+  --color-low-subtle: rgba(37, 99, 235, 0.1);
+  --color-none: #64748b;
+  --color-none-subtle: rgba(100, 116, 139, 0.1);
+
+  /* Status Tokens */
+  --color-success: #059669;
+  --color-success-subtle: rgba(5, 150, 105, 0.1);
+  --color-warning: #d97706;
+  --color-warning-subtle: rgba(217, 119, 6, 0.1);
+  --color-danger: #e11d48;
+  --color-danger-subtle: rgba(225, 29, 72, 0.1);
+  --color-info: #0284c7;
+  --color-info-subtle: rgba(2, 132, 199, 0.1);
+
+  /* Kanban Specific */
+  --kanban-column-bg: #eaeff5;
+  --kanban-column-header: #e2e8f0;
+  --kanban-drop-target: rgba(79, 70, 229, 0.12);
+
+  /* Subtle Crisp Elevations */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.09), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-popover: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.15);
+
+  /* Typography System */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.8125rem;  /* 13px */
+  --font-size-base: 0.875rem; /* 14px */
+  --font-size-md: 0.9375rem;  /* 15px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.375rem;   /* 22px */
+  --font-size-2xl: 1.625rem;  /* 26px */
+
+  /* Radii */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* Dimensions */
+  --sidebar-width: 240px;
+  --topbar-height: 52px;
+
+  /* Transitions */
+  --transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Dark Theme (Obsidian & Deep Graphite Palette)
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-app: #090a0c;
+  --bg-sidebar: #0e1013;
+  --bg-topbar: #0e1013;
+  --bg-card: #14171c;
+  --bg-card-hover: #1b1f26;
+  --bg-surface: #14171c;
+  --bg-surface-subtle: #191c22;
+  --bg-surface-active: #222730;
+  --bg-overlay: rgba(0, 0, 0, 0.78);
+
+  --border-color: #232730;
+  --border-color-subtle: #191d24;
+  --border-color-focus: #6366f1;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #090a0c;
+
+  --color-primary: #6366f1;
+  --color-primary-hover: #7578ff;
+  --color-primary-subtle: rgba(99, 102, 241, 0.15);
+  --color-primary-text: #818cf8;
+
+  --color-urgent: #f43f5e;
+  --color-urgent-subtle: rgba(244, 63, 94, 0.15);
+  --color-high: #f97316;
+  --color-high-subtle: rgba(249, 115, 22, 0.15);
+  --color-medium: #eab308;
+  --color-medium-subtle: rgba(234, 179, 8, 0.15);
+  --color-low: #38bdf8;
+  --color-low-subtle: rgba(56, 189, 248, 0.15);
+  --color-none: #64748b;
+  --color-none-subtle: rgba(100, 116, 139, 0.15);
+
+  --color-success: #10b981;
+  --color-success-subtle: rgba(16, 185, 129, 0.15);
+  --color-warning: #f59e0b;
+  --color-warning-subtle: rgba(245, 158, 11, 0.15);
+  --color-danger: #f43f5e;
+  --color-danger-subtle: rgba(244, 63, 94, 0.15);
+  --color-info: #06b6d4;
+  --color-info-subtle: rgba(6, 182, 212, 0.15);
+
+  --kanban-column-bg: #0e1014;
+  --kanban-column-header: #15181e;
+  --kanban-drop-target: rgba(99, 102, 241, 0.18);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.65), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  --shadow-popover: 0 12px 36px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.08);
+}
