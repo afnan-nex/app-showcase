@@ -1,0 +1,223 @@
+/**
+ * SheetForge - Collapsible Formatting & Inspector Sidebar Styles
+ */
+
+.sf-sidebar-container {
+    width: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--sf-bg-surface);
+    border-left: 1px solid var(--sf-border-color);
+    transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    z-index: 30;
+}
+
+.sf-sidebar-container.sf-sidebar-open {
+    width: 280px;
+}
+
+.sf-sidebar-panel {
+    width: 280px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--sf-bg-surface);
+}
+
+.sf-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 38px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--sf-border-color);
+}
+
+.sf-sidebar-title {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--sf-text-primary);
+}
+
+.sf-sidebar-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--sf-text-muted);
+}
+
+.sf-sidebar-close:hover {
+    color: var(--sf-text-primary);
+}
+
+.sf-sidebar-tabs {
+    display: flex;
+    height: 32px;
+    border-bottom: 1px solid var(--sf-border-color);
+    background-color: var(--sf-bg-secondary);
+}
+
+.sf-sb-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--sf-text-secondary);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.sf-sb-tab:hover {
+    color: var(--sf-text-primary);
+}
+
+.sf-sb-tab.sf-sb-tab-active {
+    color: var(--sf-primary);
+    background-color: var(--sf-bg-surface);
+    border-bottom-color: var(--sf-primary);
+    font-weight: 600;
+}
+
+.sf-sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.sf-tab-content {
+    display: none;
+}
+
+.sf-tab-content.sf-content-active {
+    display: block;
+}
+
+.sf-sb-section {
+    margin-bottom: 16px;
+}
+
+.sf-sb-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--sf-text-muted);
+    margin-bottom: 6px;
+}
+
+.sf-sb-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sf-sb-btn-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.sf-sb-select {
+    flex: 1;
+    height: 28px;
+    font-size: 12px;
+    padding: 0 6px;
+    border-radius: 4px;
+    border: 1px solid var(--sf-border-strong);
+    background-color: var(--sf-bg-surface);
+    color: var(--sf-text-primary);
+    outline: none;
+}
+
+.sf-sb-select.sf-sb-short {
+    width: 70px;
+    flex: none;
+}
+
+.sf-sb-btn {
+    flex: 1;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--sf-bg-secondary);
+    border: 1px solid var(--sf-border-color);
+    border-radius: 4px;
+    color: var(--sf-text-primary);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.sf-sb-btn:hover {
+    background-color: var(--sf-bg-hover);
+}
+
+.sf-sb-btn.sf-sb-active {
+    background-color: var(--sf-primary-light);
+    color: var(--sf-primary);
+    border-color: var(--sf-primary-border);
+    font-weight: 600;
+}
+
+.sf-sb-color-row {
+    display: flex;
+    gap: 12px;
+}
+
+.sf-sb-color-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.sf-sb-color-field input[type="color"] {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.sf-sb-border-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.sf-sb-fullwidth {
+    width: 100%;
+}
+
+.sf-sb-textarea {
+    width: 100%;
+    height: 90px;
+    padding: 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--sf-border-strong);
+    background-color: var(--sf-bg-surface);
+    color: var(--sf-text-primary);
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+}
+
+.sf-rules-list {
+    margin-top: 8px;
+}
+
+.sf-empty-rules {
+    font-size: 11px;
+    color: var(--sf-text-muted);
+    font-style: italic;
+    padding: 8px 0;
+}

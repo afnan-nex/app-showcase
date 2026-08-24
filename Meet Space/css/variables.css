@@ -1,0 +1,216 @@
+/* ==========================================================================
+   MeetSpace - Design System Variables & Color Tokens
+   Calm, high-density, professional enterprise design system
+   Inspired by Linear, Notion Calendar, Cron, and Raycast
+   ========================================================================== */
+
+:root {
+  /* Typography Scale */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Spacing Scale (4px base) */
+  --space-05: 0.125rem; /* 2px */
+  --space-1: 0.25rem;   /* 4px */
+  --space-15: 0.375rem; /* 6px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-25: 0.625rem; /* 10px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* Border Radii - Restrained, clean enterprise standard */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+
+  /* Elevation Shadows - Crisp 1px border combined with subtle ambient occlusion */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+
+  /* Transitions */
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 260ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout dimensions */
+  --sidebar-width: 256px;
+  --header-height: 56px;
+  --live-header-height: 60px;
+}
+
+/* ==========================================================================
+   LIGHT THEME (Calm Slate / Neutral Executive)
+   ========================================================================== */
+:root, [data-theme="light"] {
+  --color-scheme: light;
+
+  /* Neutral Backgrounds */
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --bg-muted: #e2e8f0;
+  --bg-hover: #f1f5f9;
+  --bg-active: #e2e8f0;
+  --bg-overlay: rgba(15, 23, 42, 0.45);
+
+  /* Text Colors */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Borders & Dividers */
+  --border-subtle: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #4f46e5;
+
+  /* Brand / Primary Accent (Crisp Indigo) */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-active: #3730a3;
+  --primary-subtle: #eef2ff;
+  --primary-border: #c7d2fe;
+  --primary-text: #4338ca;
+
+  /* Semantic Accents */
+  /* Success / Confirmed / Done */
+  --success: #10b981;
+  --success-hover: #059669;
+  --success-subtle: #ecfdf5;
+  --success-border: #a7f3d0;
+  --success-text: #065f46;
+
+  /* Warning / Tentative / In Progress */
+  --warning: #f59e0b;
+  --warning-hover: #d97706;
+  --warning-subtle: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
+
+  /* Danger / Urgent / Declined / Blocked */
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-subtle: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+
+  /* Info / Low / Absent */
+  --info: #0284c7;
+  --info-hover: #0369a1;
+  --info-subtle: #f0f9ff;
+  --info-border: #bae6fd;
+  --info-text: #075985;
+
+  /* Purple / Strategic */
+  --purple: #8b5cf6;
+  --purple-subtle: #f5f3ff;
+  --purple-border: #ddd6fe;
+  --purple-text: #5b21b6;
+
+  /* Live Mode Dark Canvas */
+  --live-bg: #090d16;
+  --live-surface: #0f172a;
+  --live-surface-elevated: #1e293b;
+  --live-border: #1e293b;
+  --live-text: #f8fafc;
+}
+
+/* ==========================================================================
+   DARK THEME (Deep Slate / Precision Raycast)
+   ========================================================================== */
+[data-theme="dark"] {
+  --color-scheme: dark;
+
+  /* Neutral Backgrounds */
+  --bg-app: #080c14;
+  --bg-surface: #0f172a;
+  --bg-surface-elevated: #1e293b;
+  --bg-subtle: #162032;
+  --bg-muted: #243044;
+  --bg-hover: #1e293b;
+  --bg-active: #2a374d;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+
+  /* Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-inverse: #080c14;
+
+  /* Borders & Dividers */
+  --border-subtle: #162032;
+  --border-default: #243044;
+  --border-strong: #334155;
+  --border-focus: #6366f1;
+
+  /* Brand / Primary Accent (Bright Indigo) */
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --primary-active: #4f46e5;
+  --primary-subtle: rgba(99, 102, 241, 0.15);
+  --primary-border: rgba(99, 102, 241, 0.35);
+  --primary-text: #a5b4fc;
+
+  /* Semantic Accents */
+  --success: #10b981;
+  --success-hover: #34d399;
+  --success-subtle: rgba(16, 185, 129, 0.15);
+  --success-border: rgba(16, 185, 129, 0.3);
+  --success-text: #6ee7b7;
+
+  --warning: #f59e0b;
+  --warning-hover: #fbbf24;
+  --warning-subtle: rgba(245, 158, 11, 0.15);
+  --warning-border: rgba(245, 158, 11, 0.3);
+  --warning-text: #fcd34d;
+
+  --danger: #f43f5e;
+  --danger-hover: #fb7185;
+  --danger-subtle: rgba(244, 63, 94, 0.15);
+  --danger-border: rgba(244, 63, 94, 0.3);
+  --danger-text: #fda4af;
+
+  --info: #38bdf8;
+  --info-hover: #7dd3fc;
+  --info-subtle: rgba(56, 189, 248, 0.15);
+  --info-border: rgba(56, 189, 248, 0.3);
+  --info-text: #bae6fd;
+
+  --purple: #a78bfa;
+  --purple-subtle: rgba(167, 139, 250, 0.15);
+  --purple-border: rgba(167, 139, 250, 0.3);
+  --purple-text: #c4b5fd;
+
+  /* Live Mode Dark Canvas */
+  --live-bg: #04070d;
+  --live-surface: #0b111e;
+  --live-surface-elevated: #162032;
+  --live-border: #1e293b;
+  --live-text: #ffffff;
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

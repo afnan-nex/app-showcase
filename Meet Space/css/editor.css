@@ -1,0 +1,182 @@
+/* ==========================================================================
+   MeetSpace - Rich Notes Editor Styles
+   Clean, markdown-inspired WYSIWYG & autosaving notes workspace
+   ========================================================================== */
+
+.notes-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+/* Editor Toolbar */
+.notes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-default);
+  flex-wrap: wrap;
+}
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.toolbar-btn.active {
+  background: var(--primary-subtle);
+  color: var(--primary);
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-default);
+  margin: 0 4px;
+}
+
+.editor-status-indicator {
+  margin-left: auto;
+  font-size: 0.725rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot-saved {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.status-dot-saving {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--warning);
+  animation: pulse-saving 1s infinite alternate;
+}
+
+@keyframes pulse-saving {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+/* Editor Content Area */
+.notes-content-editable {
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
+  overflow-y: auto;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  outline: none;
+  min-height: 280px;
+}
+
+.notes-content-editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-dim);
+  pointer-events: none;
+  display: block;
+}
+
+/* Typography inside editable notes */
+.notes-content-editable h1 {
+  font-size: 1.4rem;
+  margin: 1.2rem 0 0.5rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 4px;
+}
+
+.notes-content-editable h2 {
+  font-size: 1.2rem;
+  margin: 1rem 0 0.4rem;
+  font-weight: 600;
+}
+
+.notes-content-editable h3 {
+  font-size: 1.05rem;
+  margin: 0.8rem 0 0.3rem;
+  font-weight: 600;
+}
+
+.notes-content-editable p {
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.notes-content-editable ul, .notes-content-editable ol {
+  margin: 0.5rem 0 0.75rem 1.5rem;
+}
+
+.notes-content-editable li {
+  margin-bottom: 0.25rem;
+}
+
+.notes-content-editable blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: var(--space-3);
+  margin: 0.75rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.notes-content-editable code {
+  font-family: var(--font-mono);
+  background: var(--bg-subtle);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 0.85em;
+  border: 1px solid var(--border-subtle);
+}
+
+.notes-content-editable pre {
+  background: var(--bg-subtle);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+.notes-content-editable pre code {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+/* Checklist items in editor */
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  list-style: none;
+  margin-bottom: 4px;
+}
+
+.checklist-checkbox {
+  margin-top: 4px;
+  cursor: pointer;
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SheetForge - Professional Browser-Based Spreadsheet Productivity Suite">
+    <title>SheetForge — Executive Spreadsheet Engine</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/toolbar.css">
+    <link rel="stylesheet" href="css/formulabar.css">
+    <link rel="stylesheet" href="css/grid.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/tabs.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div id="sfAppRoot">
+        <!-- 1. Top Header -->
+        <header class="sf-app-header">
+            <div class="sf-header-left">
+                <a href="#" class="sf-app-logo" title="SheetForge Home">
+                    <span class="sf-logo-icon">📊</span>
+                    <span>SheetForge</span>
+                </a>
+                <div class="sf-doc-title" id="sfDocTitle" contenteditable="true" spellcheck="false" title="Click to rename spreadsheet">
+                    SheetForge Executive Financial Model
+                </div>
+                <span class="sf-save-badge sf-saved" id="sfSaveStatus">Saved to browser</span>
+            </div>
+
+            <div class="sf-header-right">
+                <button class="sf-header-btn" id="btnThemeToggle" title="Toggle Dark / Light Theme">🌙</button>
+            </div>
+        </header>
+
+        <!-- 2. Menu Bar -->
+        <nav id="sfMenuBarContainer"></nav>
+
+        <!-- 3. Ribbon Formatting Toolbar -->
+        <section id="sfToolbarContainer"></section>
+
+        <!-- 4. Formula Bar & Name Box -->
+        <section id="sfFormulaBarContainer"></section>
+
+        <!-- 5. Workspace Area: Virtual Grid + Sidebar -->
+        <main class="sf-workspace-area">
+            <div class="sf-grid-container" id="sfGridContainer"></div>
+            <div class="sf-chart-layer" id="sfChartLayer"></div>
+            <aside class="sf-sidebar-container" id="sfSidebarContainer"></aside>
+        </main>
+
+        <!-- 6. Multi-Sheet Tabs Bar -->
+        <nav id="sfSheetTabsContainer"></nav>
+
+        <!-- 7. Status Bar with Live Aggregates -->
+        <footer id="sfStatusBarContainer"></footer>
+    </div>
+
+    <!-- Application Script (Standalone, works seamlessly across file://, http://, https://) -->
+    <script src="js/sheetforge.app.js"></script>
+</body>
+</html>

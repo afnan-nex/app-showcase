@@ -1,0 +1,479 @@
+/**
+ * SheetForge - Main Design System & Layout
+ * Crisp desktop productivity aesthetics inspired by Excel, Linear, and modern financial software
+ */
+
+:root {
+    /* Color Palette - Light Mode */
+    --sf-bg-app: #f8fafc;
+    --sf-bg-surface: #ffffff;
+    --sf-bg-secondary: #f1f5f9;
+    --sf-bg-hover: #e2e8f0;
+    --sf-bg-active: #cbd5e1;
+
+    --sf-border-color: #e2e8f0;
+    --sf-border-strong: #cbd5e1;
+    --sf-grid-line: #e2e8f0;
+
+    --sf-text-primary: #0f172a;
+    --sf-text-secondary: #475569;
+    --sf-text-muted: #94a3b8;
+    --sf-text-inverse: #ffffff;
+
+    --sf-primary: #107c41; /* Classic Excel Emerald */
+    --sf-primary-hover: #0b6a37;
+    --sf-primary-light: #dcfce7;
+    --sf-primary-border: #86efac;
+
+    --sf-accent-blue: #2563eb;
+    --sf-accent-blue-light: #eff6ff;
+    --sf-accent-red: #ef4444;
+
+    --sf-selection-border: #107c41;
+    --sf-selection-bg: rgba(16, 124, 65, 0.12);
+    --sf-selection-cell-active: #ffffff;
+
+    --sf-header-bg: #f8fafc;
+    --sf-header-active-bg: #e2e8f0;
+    --sf-header-text: #475569;
+    --sf-header-active-text: #0f172a;
+
+    --sf-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --sf-font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+
+    --sf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --sf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --sf-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] {
+    /* Color Palette - Dark Mode */
+    --sf-bg-app: #090d16;
+    --sf-bg-surface: #0f172a;
+    --sf-bg-secondary: #1e293b;
+    --sf-bg-hover: #334155;
+    --sf-bg-active: #475569;
+
+    --sf-border-color: #1e293b;
+    --sf-border-strong: #334155;
+    --sf-grid-line: #1e293b;
+
+    --sf-text-primary: #f8fafc;
+    --sf-text-secondary: #94a3b8;
+    --sf-text-muted: #64748b;
+    --sf-text-inverse: #0f172a;
+
+    --sf-primary: #22c55e;
+    --sf-primary-hover: #16a34a;
+    --sf-primary-light: rgba(34, 197, 94, 0.15);
+    --sf-primary-border: #15803d;
+
+    --sf-selection-border: #22c55e;
+    --sf-selection-bg: rgba(34, 197, 94, 0.18);
+    --sf-selection-cell-active: #0f172a;
+
+    --sf-header-bg: #0f172a;
+    --sf-header-active-bg: #1e293b;
+    --sf-header-text: #94a3b8;
+    --sf-header-active-text: #f8fafc;
+}
+
+/* Reset & Box Sizing */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--sf-font-sans);
+    font-size: 13px;
+    color: var(--sf-text-primary);
+    background-color: var(--sf-bg-app);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+}
+
+/* Main Application Shell Layout */
+#sfAppRoot {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--sf-bg-app);
+}
+
+/* Top App Header */
+.sf-app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 38px;
+    padding: 0 12px;
+    background-color: var(--sf-bg-surface);
+    border-bottom: 1px solid var(--sf-border-color);
+    flex-shrink: 0;
+}
+
+.sf-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sf-app-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--sf-primary);
+    letter-spacing: -0.3px;
+    text-decoration: none;
+}
+
+.sf-logo-icon {
+    font-size: 16px;
+}
+
+.sf-doc-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+    padding: 3px 8px;
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    cursor: text;
+}
+
+.sf-doc-title:hover {
+    background-color: var(--sf-bg-secondary);
+}
+
+.sf-doc-title:focus {
+    background-color: var(--sf-bg-surface);
+    border-color: var(--sf-accent-blue);
+    box-shadow: 0 0 0 2px var(--sf-accent-blue-light);
+}
+
+.sf-save-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 500;
+    background-color: var(--sf-bg-secondary);
+    color: var(--sf-text-muted);
+}
+
+.sf-save-badge.sf-saving {
+    color: #f59e0b;
+    background-color: #fef3c7;
+}
+
+.sf-save-badge.sf-saved {
+    color: #10b981;
+    background-color: #ecfdf5;
+}
+
+.sf-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sf-header-btn {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--sf-text-secondary);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.sf-header-btn:hover {
+    background-color: var(--sf-bg-secondary);
+    color: var(--sf-text-primary);
+}
+
+/* Center Workspace Area: Grid + Collapsible Sidebar */
+.sf-workspace-area {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.sf-grid-container {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    position: relative;
+    background-color: var(--sf-bg-surface);
+}
+
+/* Floating Chart Widget Layer */
+.sf-chart-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* Generic Utility Button Styles */
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.sf-btn-primary {
+    background-color: var(--sf-primary);
+    color: #ffffff;
+}
+
+.sf-btn-primary:hover {
+    background-color: var(--sf-primary-hover);
+}
+
+.sf-btn-secondary {
+    background-color: var(--sf-bg-secondary);
+    color: var(--sf-text-primary);
+    border-color: var(--sf-border-color);
+}
+
+.sf-btn-secondary:hover {
+    background-color: var(--sf-bg-hover);
+}
+
+.sf-btn-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.sf-btn-danger:hover {
+    background-color: #fecaca;
+}
+
+.sf-btn-sm {
+    padding: 3px 8px;
+    font-size: 11px;
+}
+
+.sf-input, .sf-select {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--sf-border-strong);
+    background-color: var(--sf-bg-surface);
+    color: var(--sf-text-primary);
+    outline: none;
+    font-family: inherit;
+}
+
+.sf-input:focus, .sf-select:focus {
+    border-color: var(--sf-accent-blue);
+    box-shadow: 0 0 0 2px var(--sf-accent-blue-light);
+}
+
+/* Toast Notifications */
+.sf-toast-container {
+    position: fixed;
+    bottom: 36px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.sf-toast {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background-color: var(--sf-bg-surface);
+    color: var(--sf-text-primary);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 6px;
+    box-shadow: var(--sf-shadow-lg);
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+}
+
+.sf-toast-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sf-toast-success .sf-toast-icon {
+    color: #10b981;
+}
+
+.sf-toast-error .sf-toast-icon {
+    color: #ef4444;
+}
+
+.sf-toast-warning .sf-toast-icon {
+    color: #f59e0b;
+}
+
+.sf-toast-info .sf-toast-icon {
+    color: var(--sf-accent-blue);
+}
+
+/* Cell Note Tooltip */
+.sf-note-tooltip {
+    position: fixed;
+    width: 220px;
+    background-color: #fefce8;
+    color: #713f12;
+    border: 1px solid #fde047;
+    border-radius: 4px;
+    box-shadow: var(--sf-shadow-md);
+    padding: 8px 10px;
+    z-index: 1000;
+    pointer-events: none;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .sf-note-tooltip {
+    background-color: #1e293b;
+    color: #f8fafc;
+    border-color: #334155;
+}
+
+.sf-note-header {
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    opacity: 0.8;
+}
+
+/* Color Palette Panels in Toolbar */
+.sf-color-palette-panel {
+    padding: 8px;
+    width: 176px;
+}
+
+.sf-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 14px);
+    gap: 3px;
+    justify-content: center;
+}
+
+.sf-palette-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.sf-palette-swatch:hover {
+    transform: scale(1.25);
+    z-index: 2;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.sf-palette-nofill-btn {
+    padding: 4px 6px;
+    font-size: 11px;
+    border-bottom: 1px solid var(--sf-border-color);
+    margin-bottom: 6px;
+    cursor: pointer;
+    border-radius: 3px;
+    color: var(--sf-text-secondary);
+}
+
+.sf-palette-nofill-btn:hover {
+    background-color: var(--sf-bg-secondary);
+    color: var(--sf-text-primary);
+}
+
+.sf-palette-footer {
+    border-top: 1px solid var(--sf-border-color);
+    margin-top: 6px;
+    padding-top: 4px;
+}
+
+.sf-custom-color-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--sf-text-secondary);
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.sf-custom-color-label input[type="color"] {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--sf-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--sf-border-strong);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sf-text-muted);
+}

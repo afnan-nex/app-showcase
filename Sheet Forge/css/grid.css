@@ -1,0 +1,353 @@
+/**
+ * SheetForge - Virtualized Grid & Cell Rendering Styles
+ */
+
+.sf-grid-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    outline: none;
+    background-color: var(--sf-bg-surface);
+}
+
+/* Corner Header (Top-Left 0,0) */
+.sf-corner-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46px;
+    height: 26px;
+    background-color: var(--sf-header-bg);
+    border-right: 1px solid var(--sf-border-strong);
+    border-bottom: 1px solid var(--sf-border-strong);
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sf-corner-header:hover {
+    background-color: var(--sf-header-active-bg);
+}
+
+.sf-corner-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 7px 7px;
+    border-color: transparent transparent var(--sf-text-muted) transparent;
+}
+
+/* Column Headers Track */
+.sf-col-headers-viewport {
+    position: absolute;
+    top: 0;
+    left: 46px;
+    right: 0;
+    height: 26px;
+    overflow: hidden;
+    background-color: var(--sf-header-bg);
+    border-bottom: 1px solid var(--sf-border-strong);
+    z-index: 10;
+}
+
+.sf-col-headers-track {
+    position: relative;
+    height: 100%;
+}
+
+.sf-col-header {
+    position: absolute;
+    top: 0;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sf-header-text);
+    border-right: 1px solid var(--sf-grid-line);
+    cursor: pointer;
+    user-select: none;
+}
+
+.sf-col-header:hover,
+.sf-col-header.sf-header-selected {
+    background-color: var(--sf-header-active-bg);
+    color: var(--sf-header-active-text);
+    border-bottom: 2px solid var(--sf-primary);
+}
+
+.sf-col-filter-btn {
+    position: absolute;
+    right: 6px;
+    background: transparent;
+    border: none;
+    font-size: 8px;
+    color: var(--sf-text-muted);
+    cursor: pointer;
+    padding: 2px;
+}
+
+.sf-col-filter-btn:hover {
+    color: var(--sf-primary);
+}
+
+.sf-col-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+}
+
+/* Row Headers Track */
+.sf-row-headers-viewport {
+    position: absolute;
+    top: 26px;
+    left: 0;
+    bottom: 0;
+    width: 46px;
+    overflow: hidden;
+    background-color: var(--sf-header-bg);
+    border-right: 1px solid var(--sf-border-strong);
+    z-index: 10;
+}
+
+.sf-row-headers-track {
+    position: relative;
+    width: 100%;
+}
+
+.sf-row-header {
+    position: absolute;
+    left: 0;
+    width: 46px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--sf-header-text);
+    border-bottom: 1px solid var(--sf-grid-line);
+    cursor: pointer;
+    user-select: none;
+}
+
+.sf-row-header:hover,
+.sf-row-header.sf-header-selected {
+    background-color: var(--sf-header-active-bg);
+    color: var(--sf-header-active-text);
+    border-right: 2px solid var(--sf-primary);
+}
+
+.sf-row-resizer {
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    cursor: row-resize;
+    z-index: 2;
+}
+
+/* Main Cells Viewport */
+.sf-cells-viewport {
+    position: absolute;
+    top: 26px;
+    left: 46px;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    background-color: var(--sf-bg-surface);
+}
+
+.sf-cells-canvas {
+    position: relative;
+    overflow: hidden;
+}
+
+.sf-cells-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Grid Cells */
+.sf-cell {
+    position: absolute;
+    box-sizing: border-box;
+    border-right: 1px solid var(--sf-grid-line);
+    border-bottom: 1px solid var(--sf-grid-line);
+    padding: 0 4px;
+    font-size: 13px;
+    color: var(--sf-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: auto;
+    background-color: var(--sf-bg-surface);
+}
+
+.sf-cell-inner {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: inherit;
+}
+
+.sf-cell-error {
+    color: #ef4444 !important;
+    font-weight: 600;
+}
+
+.sf-cell-merged {
+    z-index: 2;
+}
+
+.sf-has-comment::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 6px 6px 0;
+    border-color: transparent #ef4444 transparent transparent;
+}
+
+/* Selection Layers */
+.sf-selection-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.sf-selection-active-cell {
+    position: absolute;
+    border: 2px solid var(--sf-selection-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.sf-selection-range {
+    position: absolute;
+    background-color: var(--sf-selection-bg);
+    border: 1px solid var(--sf-selection-border);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 6;
+}
+
+/* Fill Handle */
+.sf-fill-handle {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 7px;
+    height: 7px;
+    background-color: var(--sf-selection-border);
+    border: 1px solid #ffffff;
+    cursor: crosshair;
+    pointer-events: auto;
+    z-index: 10;
+}
+
+/* Marching Ants Animation (Clipboard Cut/Copy) */
+@keyframes marchingAnts {
+    0% { background-position: 0 0, 100% 0, 100% 100%, 0 100%; }
+    100% { background-position: 20px 0, 100% 20px, calc(100% - 20px) 100%, 0 calc(100% - 20px); }
+}
+
+.sf-clipboard-ants {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    z-index: 7;
+    background-image: 
+        linear-gradient(90deg, var(--sf-primary) 50%, transparent 50%),
+        linear-gradient(180deg, var(--sf-primary) 50%, transparent 50%),
+        linear-gradient(90deg, var(--sf-primary) 50%, transparent 50%),
+        linear-gradient(180deg, var(--sf-primary) 50%, transparent 50%);
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    background-size: 8px 1.5px, 1.5px 8px, 8px 1.5px, 1.5px 8px;
+    background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+    animation: marchingAnts 0.8s linear infinite;
+}
+
+/* Autofill Drag Preview */
+.sf-autofill-preview {
+    position: absolute;
+    display: none;
+    border: 1px dashed var(--sf-text-secondary);
+    background-color: rgba(100, 116, 139, 0.08);
+    pointer-events: none;
+    z-index: 9;
+}
+
+/* In-Cell Editor */
+.sf-cell-editor-container {
+    position: absolute;
+    display: none;
+    z-index: 20;
+    box-shadow: var(--sf-shadow-md);
+    background-color: var(--sf-bg-surface);
+    border: 2px solid var(--sf-accent-blue);
+}
+
+.sf-cell-editor {
+    width: 100%;
+    height: 100%;
+    padding: 2px 4px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--sf-text-primary);
+    background-color: var(--sf-bg-surface);
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Freeze Panes Dividers */
+.sf-freeze-row-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--sf-border-strong);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 12;
+    display: none;
+}
+
+.sf-freeze-col-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--sf-border-strong);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    z-index: 12;
+    display: none;
+}
+
+/* Resize Guideline */
+.sf-resize-guideline {
+    position: absolute;
+    display: none;
+    background-color: var(--sf-primary);
+    z-index: 100;
+    pointer-events: none;
+}

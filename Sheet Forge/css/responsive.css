@@ -1,0 +1,126 @@
+/**
+ * SheetForge - Responsive Layout & Print Stylesheet
+ */
+
+/* Tablets & Smaller Screens (max-width: 900px) */
+@media (max-width: 900px) {
+    .sf-sidebar-container.sf-sidebar-open {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        box-shadow: var(--sf-shadow-xl);
+    }
+
+    .sf-chart-modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sf-shortcuts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .sf-num-format-select {
+        width: 100px;
+    }
+}
+
+/* Mobile Devices (max-width: 600px) */
+@media (max-width: 600px) {
+    .sf-app-header {
+        height: 36px;
+        padding: 0 8px;
+    }
+
+    .sf-doc-title {
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sf-menubar {
+        overflow-x: auto;
+    }
+
+    .sf-toolbar {
+        height: 34px;
+        padding: 0 6px;
+    }
+
+    .sf-font-family-select {
+        display: none;
+    }
+
+    .sf-namebox-wrapper {
+        width: 60px;
+    }
+
+    .sf-shortcuts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sf-status-center {
+        display: none;
+    }
+
+    .sf-sidebar-container.sf-sidebar-open {
+        width: 100%;
+    }
+
+    .sf-sidebar-panel {
+        width: 100%;
+    }
+}
+
+/* Print Stylesheet (Ctrl+P / File -> Print) */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .sf-app-header,
+    .sf-menubar,
+    .sf-toolbar,
+    .sf-formulabar,
+    .sf-sidebar-container,
+    .sf-tabs-container,
+    .sf-statusbar,
+    .sf-selection-layer,
+    .sf-cell-editor-container,
+    .sf-modal-backdrop,
+    .sf-filter-popover {
+        display: none !important;
+    }
+
+    .sf-workspace-area {
+        position: static !important;
+        display: block !important;
+        overflow: visible !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .sf-grid-wrapper,
+    .sf-cells-viewport {
+        position: static !important;
+        overflow: visible !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .sf-cells-canvas {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .sf-cell {
+        position: static !important;
+        display: inline-block !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+        page-break-inside: avoid;
+    }
+}

@@ -1,0 +1,356 @@
+/**
+ * SheetForge - Modals, Dialogs, Charts & Popovers Styles
+ */
+
+/* Modal Backdrop */
+.sf-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+}
+
+.sf-modal-dialog {
+    width: 440px;
+    max-width: 90vw;
+    background-color: var(--sf-bg-surface);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 8px;
+    box-shadow: var(--sf-shadow-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: sfModalSlideIn 0.15s ease-out;
+}
+
+.sf-modal-lg {
+    width: 680px;
+}
+
+@keyframes sfModalSlideIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sf-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 42px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--sf-border-color);
+}
+
+.sf-modal-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+}
+
+.sf-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    color: var(--sf-text-muted);
+    cursor: pointer;
+}
+
+.sf-modal-close:hover {
+    color: var(--sf-text-primary);
+}
+
+.sf-modal-body {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.sf-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--sf-border-color);
+    background-color: var(--sf-bg-secondary);
+}
+
+.sf-form-group {
+    margin-bottom: 12px;
+}
+
+.sf-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--sf-text-secondary);
+    margin-bottom: 4px;
+}
+
+.sf-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.sf-checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--sf-text-primary);
+    cursor: pointer;
+}
+
+.sf-fr-status {
+    font-size: 11px;
+    color: var(--sf-text-muted);
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Chart Modal Layout */
+.sf-chart-modal-grid {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+}
+
+.sf-chart-preview-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--sf-bg-secondary);
+    border: 1px solid var(--sf-border-color);
+    border-radius: 6px;
+    padding: 8px;
+}
+
+.sf-chart-canvas-preview {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+/* Movable Chart Widget on Grid */
+.sf-chart-widget {
+    position: absolute;
+    background-color: var(--sf-bg-surface);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 6px;
+    box-shadow: var(--sf-shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    pointer-events: auto;
+    cursor: default;
+}
+
+.sf-chart-widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    padding: 0 8px;
+    background-color: var(--sf-bg-secondary);
+    border-bottom: 1px solid var(--sf-border-color);
+    cursor: grab;
+    user-select: none;
+}
+
+.sf-chart-widget-header:active {
+    cursor: grabbing;
+}
+
+.sf-chart-widget-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+}
+
+.sf-chart-widget-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.sf-widget-btn {
+    background: transparent;
+    border: none;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: var(--sf-text-muted);
+}
+
+.sf-widget-btn:hover {
+    background-color: var(--sf-bg-hover);
+    color: var(--sf-text-primary);
+}
+
+.sf-chart-widget-body {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Shortcuts Dialog Grid */
+.sf-shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.sf-shortcut-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sf-primary);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--sf-border-color);
+    padding-bottom: 4px;
+}
+
+.sf-shortcut-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 6px;
+    color: var(--sf-text-secondary);
+}
+
+kbd {
+    display: inline-block;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-family: var(--sf-font-mono);
+    background-color: var(--sf-bg-secondary);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    color: var(--sf-text-primary);
+}
+
+/* Formulas List in Modal */
+.sf-fg-item {
+    padding: 8px;
+    border-bottom: 1px solid var(--sf-border-color);
+}
+
+.sf-fg-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sf-fg-name {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--sf-primary);
+}
+
+.sf-fg-syntax {
+    font-family: var(--sf-font-mono);
+    font-size: 11px;
+    color: var(--sf-text-muted);
+}
+
+.sf-fg-desc {
+    font-size: 11px;
+    color: var(--sf-text-secondary);
+    margin-top: 2px;
+}
+
+/* Filter Popover */
+.sf-filter-popover {
+    position: fixed;
+    width: 250px;
+    background-color: var(--sf-bg-surface);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 6px;
+    box-shadow: var(--sf-shadow-xl);
+    z-index: 1000;
+    padding: 10px;
+}
+
+.sf-filter-sort-group {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.sf-filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sf-text-secondary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.sf-filter-select-all-row {
+    font-size: 11px;
+    margin: 4px 0;
+}
+
+.sf-filter-select-all-row a {
+    color: var(--sf-accent-blue);
+    text-decoration: none;
+}
+
+.sf-filter-checklist {
+    max-height: 140px;
+    overflow-y: auto;
+    border: 1px solid var(--sf-border-color);
+    border-radius: 4px;
+    padding: 4px;
+    margin-top: 4px;
+}
+
+.sf-filter-check-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    padding: 2px 4px;
+    color: var(--sf-text-primary);
+    cursor: pointer;
+}
+
+.sf-filter-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+/* About Dialog */
+.sf-about-body {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--sf-text-secondary);
+}
+
+.sf-about-logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--sf-primary);
+    margin-bottom: 8px;
+}
+
+.sf-about-list {
+    margin-top: 10px;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}

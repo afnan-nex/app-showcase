@@ -1,0 +1,254 @@
+/**
+ * SheetForge - Menu Bar & Ribbon Toolbar Styles
+ */
+
+/* Menu Bar */
+.sf-menubar {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 8px;
+    background-color: var(--sf-bg-surface);
+    border-bottom: 1px solid var(--sf-border-color);
+    position: relative;
+    z-index: 40;
+}
+
+.sf-menu-item {
+    position: relative;
+}
+
+.sf-menu-label {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 12px;
+    color: var(--sf-text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.sf-menu-item:hover .sf-menu-label,
+.sf-menu-open .sf-menu-label {
+    background-color: var(--sf-bg-secondary);
+    color: var(--sf-text-primary);
+}
+
+/* Dropdown Menu */
+.sf-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px;
+    background-color: var(--sf-bg-surface);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 6px;
+    box-shadow: var(--sf-shadow-lg);
+    padding: 4px 0;
+    z-index: 50;
+}
+
+.sf-menu-open .sf-dropdown-menu {
+    display: block;
+}
+
+.sf-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--sf-text-primary);
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.sf-dropdown-item:hover {
+    background-color: var(--sf-bg-secondary);
+}
+
+.sf-shortcut {
+    font-size: 11px;
+    color: var(--sf-text-muted);
+    margin-left: 16px;
+}
+
+.sf-dropdown-divider {
+    height: 1px;
+    background-color: var(--sf-border-color);
+    margin: 4px 0;
+}
+
+/* Ribbon Toolbar */
+.sf-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 38px;
+    padding: 0 10px;
+    background-color: var(--sf-bg-surface);
+    border-bottom: 1px solid var(--sf-border-color);
+    overflow-x: auto;
+    flex-shrink: 0;
+    z-index: 30;
+}
+
+.sf-tool-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.sf-tool-divider {
+    width: 1px;
+    height: 18px;
+    background-color: var(--sf-border-color);
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.sf-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--sf-text-secondary);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.sf-tool-btn:hover:not(:disabled) {
+    background-color: var(--sf-bg-secondary);
+    color: var(--sf-text-primary);
+}
+
+.sf-tool-btn:active:not(:disabled),
+.sf-tool-btn.sf-tool-active {
+    background-color: var(--sf-primary-light);
+    color: var(--sf-primary);
+    border-color: var(--sf-primary-border);
+}
+
+.sf-tool-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sf-tool-select {
+    height: 26px;
+    padding: 0 6px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--sf-border-color);
+    background-color: var(--sf-bg-surface);
+    color: var(--sf-text-primary);
+    outline: none;
+    cursor: pointer;
+}
+
+.sf-font-family-select {
+    width: 120px;
+}
+
+.sf-font-size-select {
+    width: 52px;
+}
+
+.sf-num-format-select {
+    width: 140px;
+}
+
+/* Native Color Picker Wrappers */
+.sf-tool-color-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.sf-native-color-picker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Dropdown Panels (Borders & AutoSum) */
+.sf-dropdown-wrapper {
+    position: relative;
+}
+
+.sf-dropdown-caret {
+    font-size: 9px;
+    margin-left: 2px;
+    color: var(--sf-text-muted);
+}
+
+.sf-dropdown-panel {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background-color: var(--sf-bg-surface);
+    border: 1px solid var(--sf-border-strong);
+    border-radius: 6px;
+    box-shadow: var(--sf-shadow-lg);
+    z-index: 50;
+}
+
+.sf-dropdown-panel.sf-panel-open {
+    display: block;
+}
+
+.sf-borders-panel {
+    padding: 8px;
+    width: 180px;
+}
+
+.sf-border-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+}
+
+.sf-border-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    font-size: 11px;
+    background-color: var(--sf-bg-secondary);
+    border: 1px solid var(--sf-border-color);
+    border-radius: 4px;
+    color: var(--sf-text-primary);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.sf-border-item:hover {
+    background-color: var(--sf-primary-light);
+    border-color: var(--sf-primary);
+}
+
+.sf-functions-panel {
+    width: 130px;
+    padding: 4px 0;
+}
+
+.sf-toolbar-spacer {
+    flex: 1;
+}
+
+.sf-sidebar-toggle-btn {
+    gap: 6px;
+    padding: 0 8px;
+}

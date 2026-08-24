@@ -1,0 +1,177 @@
+/**
+ * NoteSpace - Typography & Design Tokens
+ * Defines CSS custom properties for Dark & Light modes, responsive scaling, and fonts.
+ */
+
+:root {
+  /* Default Font Stacks */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Merriweather", "Georgia", "Cambria", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --app-font: var(--font-sans);
+
+  /* Spacing Tokens */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-smooth: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+}
+
+/* --- Dark Theme (Default) --- */
+[data-theme="dark"], :root {
+  --bg-app: #191919;
+  --bg-sidebar: #202020;
+  --bg-sidebar-hover: #2c2c2c;
+  --bg-sidebar-active: #333333;
+  --bg-canvas: #191919;
+  --bg-card: #222222;
+  --bg-card-hover: #2a2a2a;
+  --bg-elevated: #262626;
+  --bg-surface-secondary: #2f2f2f;
+  
+  --text-primary: #ebebeb;
+  --text-secondary: #9b9b9b;
+  --text-muted: #6b6b6b;
+  --text-placeholder: #525252;
+
+  --border-subtle: #2f2f2f;
+  --border-medium: #3f3f3f;
+  --border-strong: #555555;
+
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  --accent-text: #ffffff;
+
+  --code-bg: #232323;
+  --code-border: #333333;
+  --quote-border: #4f4f4f;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.65);
+
+  --badge-gray-bg: #2d2d2d;
+  --badge-gray-text: #b5b5b5;
+  --badge-blue-bg: #1e3a8a;
+  --badge-blue-text: #93c5fd;
+  --badge-green-bg: #064e3b;
+  --badge-green-text: #6ee7b7;
+  --badge-yellow-bg: #78350f;
+  --badge-yellow-text: #fcd34d;
+  --badge-red-bg: #7f1d1d;
+  --badge-red-text: #fca5a5;
+  --badge-purple-bg: #581c87;
+  --badge-purple-text: #d8b4fe;
+  --badge-pink-bg: #831843;
+  --badge-pink-text: #f9a8d4;
+}
+
+/* --- Light Theme --- */
+[data-theme="light"] {
+  --bg-app: #ffffff;
+  --bg-sidebar: #f7f7f5;
+  --bg-sidebar-hover: #ebebeb;
+  --bg-sidebar-active: #e3e3e0;
+  --bg-canvas: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f9f9f8;
+  --bg-elevated: #ffffff;
+  --bg-surface-secondary: #f0f0ee;
+
+  --text-primary: #37352f;
+  --text-secondary: #787774;
+  --text-muted: #9b9a97;
+  --text-placeholder: #b4b3af;
+
+  --border-subtle: #e9e9e7;
+  --border-medium: #d7d7d4;
+  --border-strong: #b8b7b2;
+
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-text: #ffffff;
+
+  --code-bg: #f5f5f4;
+  --code-border: #e6e6e4;
+  --quote-border: #37352f;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 14px 34px rgba(0, 0, 0, 0.16);
+
+  --badge-gray-bg: #f1f1ef;
+  --badge-gray-text: #5a5a57;
+  --badge-blue-bg: #dbeafe;
+  --badge-blue-text: #1e40af;
+  --badge-green-bg: #d1fae5;
+  --badge-green-text: #065f46;
+  --badge-yellow-bg: #fef3c7;
+  --badge-yellow-text: #92400e;
+  --badge-red-bg: #fee2e2;
+  --badge-red-text: #991b1b;
+  --badge-purple-bg: #f3e8ff;
+  --badge-purple-text: #6b21a8;
+  --badge-pink-bg: #fce7f3;
+  --badge-pink-text: #9d174d;
+}
+
+/* Font Family Selection */
+[data-font="sans"] {
+  --app-font: var(--font-sans);
+}
+[data-font="serif"] {
+  --app-font: var(--font-serif);
+}
+[data-font="mono"] {
+  --app-font: var(--font-mono);
+}
+
+/* Global Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--app-font);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}

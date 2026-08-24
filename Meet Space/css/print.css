@@ -1,0 +1,80 @@
+/* ==========================================================================
+   MeetSpace - Print & PDF Export Stylesheet
+   Clean, professional executive summary format
+   ========================================================================== */
+
+@media print {
+  /* Hide interactive shell elements */
+  .app-sidebar,
+  .app-topbar,
+  .btn,
+  .cmd-k-trigger,
+  #toast-container,
+  .modal-backdrop,
+  .cmd-palette-backdrop,
+  .live-meeting-overlay,
+  .view-actions,
+  .notes-toolbar,
+  .agenda-drag-handle,
+  .agenda-item-actions,
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  body, #app-container, .app-main, .app-content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 11pt !important;
+  }
+
+  .meeting-detail-layout {
+    gap: 16pt !important;
+  }
+
+  .meeting-detail-header {
+    border: none !important;
+    border-bottom: 2pt solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 0 0 12pt 0 !important;
+    box-shadow: none !important;
+  }
+
+  .meeting-title-editable {
+    font-size: 20pt !important;
+  }
+
+  .meeting-detail-grid {
+    display: block !important;
+  }
+
+  .agenda-panel, .workspace-tabs-container, .card {
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    margin-bottom: 16pt !important;
+    page-break-inside: avoid;
+  }
+
+  .workspace-tab-body {
+    display: block !important;
+  }
+
+  .badge {
+    border: 1px solid #666666 !important;
+    color: #000000 !important;
+    background: transparent !important;
+  }
+
+  h1, h2, h3 {
+    color: #000000 !important;
+    page-break-after: avoid;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: #000000 !important;
+  }
+}

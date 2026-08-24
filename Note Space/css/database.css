@@ -1,0 +1,528 @@
+/**
+ * NoteSpace - Database Engine & Views Styles
+ * Table View, Kanban Board, List View, and Column Popovers.
+ */
+
+.ns-database-view-root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0;
+}
+
+/* Database Toolbar */
+.ns-db-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 12px;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.ns-db-view-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ns-db-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.ns-db-tab:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-sidebar-hover);
+}
+
+.ns-db-tab.is-active {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-secondary);
+  font-weight: 600;
+}
+
+.ns-db-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ns-db-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  color: var(--text-muted);
+}
+
+.ns-db-search-input {
+  border: none;
+  background: transparent;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  outline: none;
+  width: 120px;
+}
+
+.ns-db-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ns-db-tool-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-sidebar-hover);
+}
+
+/* --- Table View --- */
+.ns-db-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-card);
+}
+
+.ns-db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.ns-db-th {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface-secondary);
+  user-select: none;
+}
+
+.ns-th-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ns-th-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.ns-db-th-add {
+  width: 40px;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface-secondary);
+  text-align: center;
+}
+
+.ns-btn-add-prop-th {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ns-btn-add-prop-th:hover {
+  color: var(--text-primary);
+}
+
+.ns-db-row {
+  transition: background-color var(--transition-fast);
+}
+
+.ns-db-row:hover {
+  background-color: var(--bg-sidebar-hover);
+}
+
+.ns-db-td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.ns-cell-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.ns-cell-title-text {
+  flex: 1;
+  outline: none;
+}
+
+.ns-btn-cell-expand {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 2px;
+}
+
+.ns-db-row:hover .ns-btn-cell-expand {
+  display: flex;
+}
+
+.ns-btn-cell-expand:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-secondary);
+}
+
+.ns-cell-placeholder {
+  color: var(--text-placeholder);
+  font-style: italic;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ns-cell-editable {
+  outline: none;
+  display: block;
+  min-height: 18px;
+}
+
+.ns-multi-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ns-db-td-action {
+  width: 60px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.ns-row-actions {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.ns-db-row:hover .ns-row-actions {
+  display: flex;
+}
+
+.ns-btn-row-open, .ns-btn-row-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 3px;
+}
+
+.ns-btn-row-open:hover { color: var(--text-primary); }
+.ns-btn-row-delete:hover { color: #ef4444; }
+
+/* Table Footer */
+.ns-db-foot-td {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  background-color: var(--bg-surface-secondary);
+  border-right: 1px solid var(--border-subtle);
+}
+
+/* --- Kanban Board View --- */
+.ns-db-board-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: var(--space-md);
+}
+
+.ns-board-columns {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.ns-board-column {
+  width: 270px;
+  min-width: 270px;
+  background-color: var(--bg-surface-secondary);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ns-board-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.ns-board-col-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ns-board-col-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ns-btn-add-card-col {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.ns-btn-add-card-col:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-sidebar-hover);
+}
+
+.ns-board-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 80px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+}
+
+.ns-board-cards-list.is-drag-over {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+.ns-board-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  cursor: grab;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ns-board-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.ns-board-card.is-dragging-card {
+  opacity: 0.4;
+}
+
+.ns-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.ns-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.ns-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.ns-card-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* --- List View --- */
+.ns-db-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ns-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ns-list-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.ns-list-row-item:hover {
+  background-color: var(--bg-sidebar-hover);
+  border-color: var(--border-medium);
+}
+
+.ns-list-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ns-list-doc-icon {
+  color: var(--text-muted);
+  display: flex;
+}
+
+.ns-list-title {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.ns-list-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ns-list-tags {
+  display: flex;
+  gap: 4px;
+}
+
+.ns-list-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ns-btn-list-open {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+}
+
+.ns-btn-list-open:hover { color: var(--text-primary); }
+
+.ns-list-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.ns-list-add-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-sidebar-hover);
+}
+
+/* Cell Popovers */
+.ns-cell-popover {
+  position: absolute;
+  z-index: 1100;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 10px;
+  min-width: 180px;
+  animation: fadeIn 0.1s ease-out;
+}
+
+.ns-popover-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.ns-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ns-popover-item, .ns-popover-multi-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.ns-popover-item:hover, .ns-popover-multi-item:hover {
+  background-color: var(--bg-sidebar-hover);
+}
+
+.ns-popover-multi-item.is-selected {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.ns-multi-check {
+  font-size: 12px;
+  color: var(--accent-primary);
+  font-weight: bold;
+}
