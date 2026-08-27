@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TimeGrid — Visual Time-Blocking & Daily Schedule Workstation</title>
+  <meta name="description" content="Browser-based visual time-blocking, daily and weekly scheduling, conflict detection, routine templates, and focus timer workstation." />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Menu & Action Bar -->
+    <header class="editor-topbar">
+      <!-- Brand & Date Controls -->
+      <div class="toolbar-group">
+        <div class="brand-section">
+          <span class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </span>
+          <span>TimeGrid</span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="btn btn-xs btn-secondary" id="btn-prev-date" title="Previous Day/Week">&larr;</button>
+        <button class="btn btn-xs btn-secondary" id="btn-today-date" title="Jump to Today">Today</button>
+        <button class="btn btn-xs btn-secondary" id="btn-next-date" title="Next Day/Week">&rarr;</button>
+
+        <span class="font-bold text-xs text-primary px-2 font-mono" id="lbl-current-date-display">Today</span>
+      </div>
+
+      <!-- View Modes & Snapping Controls -->
+      <div class="toolbar-group">
+        <div class="view-mode-toggle-group flex bg-elevated p-0.5 rounded border border-subtle">
+          <button class="btn btn-xs btn-view-mode active" data-view="day">Day</button>
+          <button class="btn btn-xs btn-view-mode" data-view="workweek">Workweek</button>
+          <button class="btn btn-xs btn-view-mode" data-view="week">Week</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <span class="text-xs text-muted">Snap:</span>
+        <select id="select-grid-snap" class="form-control form-control-sm w-20 font-mono" title="Grid Snapping Increment">
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="15" selected>15 min</option>
+          <option value="30">30 min</option>
+        </select>
+
+        <button class="btn btn-xs btn-secondary font-mono" id="btn-toggle-24h" title="Toggle 12h / 24h Format">12h</button>
+      </div>
+
+      <!-- Action Buttons (New Block, Scenarios, Exports) -->
+      <div class="toolbar-group">
+        <button class="btn btn-sm btn-primary" id="btn-quick-new-block" title="Add Focus Block (+ Block)">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>New Block</span>
+        </button>
+
+        <button class="btn btn-sm btn-secondary" id="btn-open-scenarios" title="Compare Schedule Scenarios">Simulate</button>
+        <button class="btn btn-sm btn-secondary" id="btn-reset-schedule" title="Reset Demo Schedule">Reset</button>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="btn btn-sm btn-secondary" id="btn-export-ics" title="Export iCalendar (.ICS)">Export ICS</button>
+        <button class="btn btn-sm btn-secondary" id="btn-export-json" title="Save Backup JSON">Backup</button>
+        <button class="btn btn-sm btn-secondary" id="btn-import-json" title="Restore Backup JSON">Restore</button>
+        <input type="file" id="file-import-timegrid" accept=".json" style="display: none;" />
+      </div>
+    </header>
+
+    <!-- Main Workspace Body (Left Drawer + Central Time Grid + Right Inspector) -->
+    <div class="editor-main-body">
+      
+      <!-- Left Task Backlog & Routine Templates Drawer -->
+      <aside class="editor-drawer-left" id="task-drawer-container"></aside>
+
+      <!-- Center Time Grid Canvas Viewport -->
+      <main class="editor-center-workspace" id="time-grid-canvas-container"></main>
+
+      <!-- Right Block Property Inspector & Analytics -->
+      <aside class="editor-inspector-right" id="block-inspector-container"></aside>
+
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="editor-statusbar">
+      <div id="status-bar-readout">TimeGrid v1.0 &bull; Real-time Visual Time-Blocking Engine</div>
+      <div class="flex items-center gap-3">
+        <span>Double-click grid to add block &bull; Drag handles to resize &bull; Press <strong>F</strong> to Focus</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Focus Mode Fullscreen Overlay -->
+  <div class="focus-overlay-container" id="focus-mode-overlay-container"></div>
+
+  <!-- Scenario Simulation & Comparison Modal -->
+  <div class="modal-container" id="scenario-modal-container"></div>
+
+  <!-- Standalone Application Script Bundle (Works on both http:// and direct file:/// double-click) -->
+  <script src="bundle.js"></script>
+</body>
+</html>
