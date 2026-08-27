@@ -1,0 +1,268 @@
+/**
+ * AudioDeck - Piano Roll View Styles
+ */
+
+.pianoroll-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-panel);
+    overflow: hidden;
+}
+
+.pianoroll-toolbar {
+    height: 32px;
+    background-color: var(--bg-panel-header);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    flex-shrink: 0;
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pianoroll-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.pianoroll-tools {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.pr-tool-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.pr-tool-btn:hover {
+    color: #ffffff;
+    background-color: var(--bg-hover);
+}
+
+.pr-tool-btn.active {
+    background-color: var(--accent-emerald);
+    color: #000000;
+    font-weight: 700;
+}
+
+.pr-action-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.pr-action-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-blue);
+}
+
+.pr-transpose-group {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.btn-clear-notes {
+    color: var(--accent-red) !important;
+}
+
+/* Workspace */
+.pianoroll-workspace {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Keyboard Viewport */
+.pianoroll-keyboard-viewport {
+    width: 60px;
+    flex-shrink: 0;
+    background-color: #161820;
+    border-right: 1px solid var(--border-color);
+    overflow-y: hidden;
+}
+
+.pianoroll-keyboard {
+    position: relative;
+}
+
+.piano-key {
+    border-bottom: 1px solid #232736;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.piano-key.white-key {
+    background-color: #2b3040;
+}
+.piano-key.white-key:hover, .piano-key.white-key.pressed {
+    background-color: #434c66;
+}
+
+.piano-key.black-key {
+    background-color: #12141a;
+}
+.piano-key.black-key:hover, .piano-key.black-key.pressed {
+    background-color: #2b3040;
+}
+
+.piano-key.c-key {
+    background-color: #3b4359;
+}
+
+.key-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 800;
+    color: #38bdf8;
+}
+
+.key-label-sub {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-dim);
+}
+
+/* Grid Viewport */
+.pianoroll-grid-viewport {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    background-color: #141720;
+}
+
+.pianoroll-grid-content {
+    position: relative;
+}
+
+.pianoroll-grid-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.pianoroll-notes-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Piano Roll Notes */
+.piano-roll-note {
+    position: absolute;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    cursor: grab;
+    overflow: hidden;
+    user-select: none;
+}
+
+.piano-roll-note:active {
+    cursor: grabbing;
+}
+
+.piano-roll-note.selected {
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8) !important;
+}
+
+.note-name {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 800;
+    color: #000000;
+    pointer-events: none;
+}
+
+.note-resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+}
+.note-resize-handle:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Velocity Lane */
+.pianoroll-velocity-lane {
+    height: 60px;
+    flex-shrink: 0;
+    background-color: #11131a;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+}
+
+.velocity-label {
+    width: 60px;
+    flex-shrink: 0;
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border-color);
+}
+
+.velocity-viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    cursor: crosshair;
+}
+
+.velocity-content {
+    height: 100%;
+    position: relative;
+}
+
+.velocity-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}

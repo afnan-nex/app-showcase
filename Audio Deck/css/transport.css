@@ -1,0 +1,341 @@
+/**
+ * AudioDeck - Transport Bar Styles
+ */
+
+.transport-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 14px;
+    gap: 16px;
+}
+
+.transport-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Left Section: Logo & Project Name */
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: #ffffff;
+    padding-right: 8px;
+    border-right: 1px solid var(--border-color);
+}
+
+.project-name-input {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    outline: none;
+    width: 140px;
+    transition: border-color 0.15s;
+}
+
+.project-name-input:focus {
+    border-color: var(--accent-blue);
+}
+
+/* Transport Buttons Group */
+.transport-btn-group {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-surface);
+    border-radius: 4px;
+    padding: 2px;
+    gap: 2px;
+    border: 1px solid var(--border-color);
+}
+
+.transport-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 4px 7px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.transport-btn:hover {
+    color: #ffffff;
+    background-color: var(--bg-hover);
+}
+
+.transport-btn.active {
+    color: #ffffff;
+    background-color: var(--accent-blue);
+}
+
+.btn-export-highlight {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+}
+
+/* Center Section: Playback Cluster */
+.transport-playback-cluster {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-surface);
+    border-radius: 6px;
+    padding: 3px 6px;
+    gap: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.transport-play-btn {
+    width: 34px;
+    height: 30px;
+    border-radius: 4px;
+    background: var(--bg-active);
+    border: 1px solid var(--border-light);
+    color: #ffffff;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.transport-play-btn:hover {
+    background: var(--accent-emerald);
+    border-color: var(--accent-emerald);
+}
+
+.transport-play-btn.playing {
+    background: var(--accent-emerald);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.transport-rec-btn .rec-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--accent-red);
+    display: inline-block;
+}
+
+.transport-rec-btn.active {
+    background-color: var(--accent-red) !important;
+}
+.transport-rec-btn.active .rec-dot {
+    background-color: #ffffff;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* Time & Beat Readout Box */
+.transport-time-display {
+    background: #090a0f;
+    border: 1px solid #2d3345;
+    border-radius: 4px;
+    padding: 3px 10px;
+    cursor: pointer;
+    text-align: center;
+    min-width: 110px;
+}
+
+.time-primary {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: #38bdf8;
+    letter-spacing: 1px;
+}
+
+.time-secondary {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+}
+
+/* BPM & Metronome */
+.transport-tempo-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.tempo-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tempo-input-wrapper label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.tempo-input-wrapper input {
+    width: 46px;
+    background: #0b0c10;
+    border: 1px solid #333a4d;
+    color: #fbbf24;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 3px;
+    outline: none;
+}
+
+.transport-tap-btn {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.transport-tap-btn:active {
+    background: var(--accent-amber);
+    color: #000000;
+}
+
+.signature-box {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding-left: 4px;
+    border-left: 1px solid var(--border-color);
+}
+
+/* Right Section: Tools & Snapping */
+.transport-tools-group {
+    display: flex;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.tool-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    width: 26px;
+    height: 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-btn:hover {
+    color: #ffffff;
+    background-color: var(--bg-hover);
+}
+
+.tool-btn.active {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.transport-snap-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.transport-snap-box label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.snap-select {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 11px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Master Volume & Meter */
+.transport-master-meter-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.transport-master-meter-box label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.transport-master-meter-box input[type="range"] {
+    width: 60px;
+    accent-color: var(--accent-blue);
+    cursor: pointer;
+}
+
+.master-led-meter {
+    display: flex;
+    gap: 2px;
+    height: 22px;
+    width: 10px;
+    background: #090a0f;
+    padding: 1px;
+    border-radius: 2px;
+    border: 1px solid #2d3345;
+}
+
+.master-meter-fill {
+    width: 4px;
+    height: 0%;
+    align-self: flex-end;
+    background: linear-gradient(to top, var(--meter-green) 0%, var(--meter-green) 70%, var(--meter-yellow) 85%, var(--meter-red) 100%);
+    border-radius: 1px;
+    transition: height 0.04s ease-out;
+}
+
+.master-meter-fill.clipping {
+    box-shadow: 0 0 6px var(--meter-red);
+}

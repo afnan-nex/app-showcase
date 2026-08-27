@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioDeck — Web Digital Audio Workstation</title>
+    
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/transport.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="css/mixer.css">
+    <link rel="stylesheet" href="css/pianoroll.css">
+    <link rel="stylesheet" href="css/drumsequencer.css">
+    <link rel="stylesheet" href="css/effects.css">
+    <link rel="stylesheet" href="css/browser.css">
+    <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+    <div id="app">
+        <!-- TOP TRANSPORT BAR -->
+        <header id="transportContainer"></header>
+
+        <!-- MIDDLE WORKSPACE: LEFT BROWSER + TIMELINE -->
+        <main class="workspace-middle">
+            <aside id="browserContainer"></aside>
+            <section id="timelineContainer"></section>
+        </main>
+
+        <!-- BOTTOM WORKSPACE: MULTI-VIEW PANEL -->
+        <footer class="workspace-bottom">
+            <div class="bottom-panel-header">
+                <div class="bottom-tabs-left">
+                    <button class="bottom-tab-btn active" data-tab="mixer" title="Console Mixer View">
+                        <span class="tab-icon">🎛️</span> Mixer
+                    </button>
+                    <button class="bottom-tab-btn" data-tab="pianoroll" title="MIDI Piano Roll Editor">
+                        <span class="tab-icon">🎹</span> Piano Roll
+                    </button>
+                    <button class="bottom-tab-btn" data-tab="drumsequencer" title="16-Step Drum Sequencer">
+                        <span class="tab-icon">🥁</span> Drum Sequencer
+                    </button>
+                    <button class="bottom-tab-btn" data-tab="inspector" title="Track Effects & Synthesizer Editor">
+                        <span class="tab-icon">⚡</span> Track FX & Synth
+                    </button>
+                </div>
+                <div class="bottom-status-right">
+                    <span class="engine-info-tag">DSP 44.1 kHz • 24-bit PCM</span>
+                </div>
+            </div>
+            
+            <div class="bottom-views-content">
+                <div class="bottom-view-pane" id="bottomMixerContainer"></div>
+                <div class="bottom-view-pane" id="bottomPianoRollContainer" style="display: none;"></div>
+                <div class="bottom-view-pane" id="bottomDrumContainer" style="display: none;"></div>
+                <div class="bottom-view-pane" id="bottomInspectorContainer" style="display: none;"></div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- FIRST INTERACTION AUDIO UNLOCK OVERLAY -->
+    <div class="welcome-overlay" id="welcomeOverlay" onclick="this.classList.add('hidden'); window.audiodeck?.engine?.ensureContext();">
+        <div class="welcome-modal-card" onclick="event.stopPropagation();">
+            <div class="welcome-icon">🎛️</div>
+            <h1 class="welcome-title">AUDIODECK</h1>
+            <p class="welcome-desc">A professional browser-based Digital Audio Workstation with polyphonic synthesizers, drum machine, effects rack, and offline WAV rendering.</p>
+            <button class="welcome-start-btn" id="btnStartDeck" onclick="document.getElementById('welcomeOverlay')?.classList.add('hidden'); window.audiodeck?.engine?.ensureContext();">START AUDIO WORKSTATION</button>
+        </div>
+    </div>
+
+    <!-- Application Script Entry -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

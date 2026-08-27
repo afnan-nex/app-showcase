@@ -1,0 +1,370 @@
+/**
+ * AudioDeck - Main Theme & Base Layout
+ * Professional DAW Dark Theme inspired by Ableton Live, Logic Pro, Bitwig, and FL Studio.
+ */
+
+:root {
+    --bg-main: #13151b;
+    --bg-darker: #0c0d12;
+    --bg-panel: #1a1d26;
+    --bg-panel-header: #202430;
+    --bg-surface: #242938;
+    --bg-hover: #2e3447;
+    --bg-active: #373e54;
+
+    --border-color: #2b3142;
+    --border-light: #3b4259;
+
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+
+    --meter-green: #10b981;
+    --meter-yellow: #f59e0b;
+    --meter-red: #ef4444;
+
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body, html {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-darker);
+    color: var(--text-main);
+    font-family: var(--font-family);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Custom DAW Dark Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dim);
+}
+
+/* Master DAW Layout Grid */
+#app {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Top Transport Bar */
+#transportContainer {
+    height: 52px;
+    flex-shrink: 0;
+    background-color: var(--bg-panel-header);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
+}
+
+/* Middle DAW Workspace: Left Browser + Central Timeline */
+.workspace-middle {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+#browserContainer {
+    width: 240px;
+    flex-shrink: 0;
+    background-color: var(--bg-panel);
+    border-right: 1px solid var(--border-color);
+    transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+#browserContainer.collapsed {
+    width: 38px;
+}
+
+#timelineContainer {
+    flex: 1;
+    min-width: 0;
+    background-color: var(--bg-main);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Bottom Multi-View Workstation Panel */
+.workspace-bottom {
+    height: 270px;
+    min-height: 140px;
+    max-height: 70vh;
+    flex-shrink: 0;
+    background-color: var(--bg-panel);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.bottom-panel-header {
+    height: 32px;
+    background-color: var(--bg-panel-header);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+}
+
+.bottom-tabs-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bottom-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bottom-tab-btn:hover {
+    color: var(--text-main);
+    background-color: var(--bg-hover);
+}
+
+.bottom-tab-btn.active {
+    color: #ffffff;
+    background-color: var(--accent-blue);
+}
+
+.bottom-status-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.engine-info-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.bottom-views-content {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.bottom-view-pane {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+/* DSP Status Badge */
+.dsp-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #0f1118;
+    border: 1px solid #232736;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.dsp-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--accent-emerald);
+    box-shadow: 0 0 6px var(--accent-emerald);
+}
+
+.dsp-text {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+/* Tactile Rotary Knob Controls */
+.audio-knob-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: ns-resize;
+    position: relative;
+    user-select: none;
+}
+
+.audio-knob {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #3a4256 0%, #1a1d26 100%);
+    border: 2px solid #475569;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s;
+}
+
+.audio-knob-container:hover .audio-knob {
+    border-color: var(--accent-blue);
+}
+
+.audio-knob-indicator {
+    position: absolute;
+    top: 3px;
+    width: 3px;
+    height: 8px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+.audio-knob-val-tip {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+}
+
+/* Autoplay Welcome Overlay */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 12, 16, 0.88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.4s ease;
+}
+
+.welcome-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.welcome-modal-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 36px 44px;
+    text-align: center;
+    max-width: 500px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+}
+
+.welcome-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.welcome-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.welcome-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.welcome-start-btn {
+    background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.welcome-start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+/* -------------------------------------------------------------
+ * RESPONSIVE ADJUSTMENTS
+ * ------------------------------------------------------------- */
+@media (max-width: 1024px) {
+    #browserContainer {
+        width: 200px;
+    }
+    .transport-master-meter-box input[type="range"] {
+        width: 45px;
+    }
+}
+
+@media (max-width: 768px) {
+    #browserContainer {
+        width: 38px;
+    }
+    .project-name-input {
+        width: 100px;
+    }
+    .workspace-bottom {
+        height: 230px;
+    }
+}
