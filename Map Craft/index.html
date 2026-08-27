@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapCraft — Interactive Cartography & Map-Making Workstation</title>
+  <meta name="description" content="Professional cartography web workstation for creating custom maps, travel plans, fantasy RPG worlds, routes, regions, measurements, and legends." />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Cartography Toolbar -->
+    <header class="map-topbar">
+      <!-- Brand & Template Switcher -->
+      <div class="toolbar-group">
+        <div class="brand-section">
+          <span class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          </span>
+          <span>MapCraft</span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <select id="select-map-template" class="form-control form-control-sm w-44" title="Load Map Template">
+          <option value="fantasy">Map: Realm of Eldoria (Fantasy)</option>
+          <option value="travel">Map: Tokyo Planner (Travel)</option>
+          <option value="blueprint">Map: Lunar Colony Beta (Sci-Fi)</option>
+        </select>
+
+        <select id="select-map-theme" class="form-control form-control-sm w-36" title="Change Cartographic Theme">
+          <option value="parchment">Theme: Vintage Parchment</option>
+          <option value="dark">Theme: Dark Slate</option>
+          <option value="blueprint">Theme: Blueprint</option>
+          <option value="clean">Theme: Clean Modern</option>
+          <option value="terrain">Theme: Topographic Terrain</option>
+        </select>
+      </div>
+
+      <!-- Center Tool Buttons -->
+      <div class="toolbar-group">
+        <button class="btn btn-sm btn-secondary btn-map-tool active" data-tool="select" title="Select & Move (V)">Select</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="hand" title="Pan Map (H / Middle Click)">Pan</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="marker" title="Drop Marker Pin (M)">+ Marker</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="route" title="Plot Connected Route (R)">+ Route</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="region" title="Draw Polygon Region (P)">+ Region</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="circle" title="Draw Circular Zone (C)">+ Circle</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="label" title="Place Text Label (T)">+ Label</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="measure" title="Measure Distance & Area">Measure</button>
+      </div>
+
+      <!-- History, Zoom & Export Actions -->
+      <div class="toolbar-group">
+        <!-- Undo / Redo -->
+        <button class="btn btn-sm btn-secondary" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&larr; Undo</button>
+        <button class="btn btn-sm btn-secondary" id="btn-redo" title="Redo (Ctrl+Y)" disabled>Redo &rarr;</button>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Zoom -->
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-out" title="Zoom Out">&minus;</button>
+        <span class="badge badge-secondary font-mono text-xs" id="zoom-percentage-label">100%</span>
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-in" title="Zoom In">&plus;</button>
+        <button class="btn btn-sm btn-secondary" id="btn-fit-content" title="Fit to Map Elements">Fit</button>
+        <button class="btn btn-sm btn-secondary active" id="btn-toggle-grid" title="Toggle Grid">Grid</button>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Export / Import -->
+        <button class="btn btn-sm btn-primary" id="btn-export-png" title="Export High-Res PNG Image">Export PNG</button>
+        <button class="btn btn-sm btn-secondary" id="btn-export-json" title="Save Project JSON">Export JSON</button>
+        <button class="btn btn-sm btn-secondary" id="btn-import-json" title="Import Map JSON">Import</button>
+        <button class="btn btn-sm btn-secondary" id="btn-print-map" title="Printable Map View">Print</button>
+        <input type="file" id="file-import-map" accept=".json" style="display: none;" />
+      </div>
+    </header>
+
+    <!-- Main Workspace (Left Sidebar, Central Canvas, Right Inspector) -->
+    <div class="map-main-body">
+      
+      <!-- Left Sidebar: Layers & Legend -->
+      <aside class="map-sidebar-left">
+        <div class="sidebar-subtabs">
+          <button class="subtab-btn active" id="tab-btn-layers">Layers</button>
+          <button class="subtab-btn" id="tab-btn-legend">Legend & Search</button>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden" id="sidebar-panel-container"></div>
+      </aside>
+
+      <!-- Center: Map Viewport Canvas -->
+      <div class="map-viewport-container" id="map-viewport-container">
+        <canvas id="map-canvas"></canvas>
+      </div>
+
+      <!-- Right Panel: Properties Inspector -->
+      <aside class="map-inspector-right" id="inspector-panel-container"></aside>
+
+    </div>
+
+    <!-- Bottom Status Bar -->
+    <footer class="map-statusbar">
+      <div id="map-stats-readout">Elements: 0 &bull; Layers: 0</div>
+      <div id="map-coordinates-readout">X: 0, Y: 0</div>
+      <div class="flex items-center gap-3">
+        <span>Draw: Double-click to complete &bull; Pan: Space+Drag / Middle Click</span>
+        <span>MapCraft Cartography Engine</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Standalone Application Script Bundle (Works on both http:// and direct file:/// double-click) -->
+  <script src="bundle.js"></script>
+  <script>
+    // Tab switching for left sidebar
+    document.getElementById('tab-btn-layers')?.addEventListener('click', () => {
+      document.getElementById('tab-btn-layers').classList.add('active');
+      document.getElementById('tab-btn-legend').classList.remove('active');
+      if (window.mapCraftApp) {
+        window.mapCraftApp.activeSidebarTab = 'layers';
+        window.mapCraftApp.renderSidebar();
+      }
+    });
+    document.getElementById('tab-btn-legend')?.addEventListener('click', () => {
+      document.getElementById('tab-btn-legend').classList.add('active');
+      document.getElementById('tab-btn-layers').classList.remove('active');
+      if (window.mapCraftApp) {
+        window.mapCraftApp.activeSidebarTab = 'legend';
+        window.mapCraftApp.renderSidebar();
+      }
+    });
+  </script>
+</body>
+</html>
