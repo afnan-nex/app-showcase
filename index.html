@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web Apps Showcase — Afnan</title>
+<link rel="icon" href="https://raw.githubusercontent.com/afnan-nex/portfolio/main/assets/images/icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+<style>
+  :root {
+    --background-color: #ffffff;
+    --default-color: #272829;
+    --heading-color: #45505b;
+    --accent-color: #ffca12;
+    --surface-color: #ffffff;
+    --contrast-color: #45505B;
+    --afnan1-color: #000000;
+    --afnan2-color: #45505B;
+    --muted: #6c757d;
+    --border: rgba(69, 80, 91, .14);
+    --yellow-gradient: linear-gradient(45deg, #fef08a, #bef264, #fde047, #eab308);
+    --box-shadow1: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+    --ecard-shadow: 0px 8px 28px -9px rgba(0, 0, 0, 0.45);
+    --icon-bg: color-mix(in srgb, var(--accent-color), transparent 92%);
+  }
+  [data-theme="dark"] {
+    --background-color: #121212;
+    --default-color: #e0e0e0;
+    --heading-color: #f5f5f5;
+    --accent-color: #ffca12;
+    --surface-color: #1e1e1e;
+    --contrast-color: #ffffff;
+    --afnan1-color: #ffffff;
+    --afnan2-color: #f5f5f5;
+    --muted: #9aa0a6;
+    --border: rgba(255, 255, 255, .10);
+    --yellow-gradient: linear-gradient(45deg, #e0c75a, #a5c33c, #d4b427, #b98a06);
+    --box-shadow1: 4px 8px 19px -3px rgba(255, 255, 255, 0.15);
+    --ecard-shadow: 0px 8px 28px -9px rgba(255, 255, 255, 0.15);
+    --icon-bg: color-mix(in srgb, var(--accent-color), transparent 90%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--default-color);
+    min-height: 100vh;
+    padding: 60px 20px 50px;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+
+  /* ---------- Theme Toggle ---------- */
+  .theme-toggle {
+    position: fixed;
+    top: 22px; right: 22px;
+    width: 52px; height: 28px;
+    border-radius: 99px;
+    border: none;
+    cursor: pointer;
+    background: #8796a5;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    z-index: 100;
+    transition: background 250ms ease;
+  }
+  [data-theme="dark"] .theme-toggle { background: #3a3f47; }
+  .theme-toggle .knob {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fcca12;
+    display: grid; place-items: center;
+    font-size: 12px;
+    transform: translateX(0);
+    transition: transform 250ms ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  [data-theme="dark"] .theme-toggle .knob { transform: translateX(24px); }
+
+  /* ---------- Header ---------- */
+  header { text-align: center; max-width: 760px; margin: 0 auto 56px; }
+  header h1 {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(34px, 6vw, 64px);
+    font-weight: 800;
+    color: var(--afnan1-color);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+  }
+  header h1 span {
+    color: var(--accent-color);
+  }
+  header p {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(16px, 2.5vw, 26px);
+    font-weight: 400;
+    color: var(--afnan2-color);
+    margin-top: 14px;
+  }
+  header .rule {
+    width: 70px; height: 4px;
+    margin: 26px auto 0;
+    border-radius: 50px;
+    background: var(--yellow-gradient);
+  }
+
+  /* ---------- Grid & Cards ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  .card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 26px 24px;
+    text-decoration: none;
+    color: var(--default-color);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--box-shadow1);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 250ms ease;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: var(--yellow-gradient);
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  .card:hover {
+    box-shadow: var(--ecard-shadow);
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card .icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 24px;
+    color: var(--accent-color);
+    background: var(--icon-bg);
+    transition: background 250ms ease, color 250ms ease;
+  }
+  .card:hover .icon {
+    background: var(--accent-color);
+    color: var(--contrast-color);
+  }
+  .card h2 {
+    font-family: 'Raleway', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--heading-color);
+  }
+  .card .tag {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .btn-live {
+    margin-top: 8px;
+    align-self: flex-start;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    text-decoration: none;
+    background: var(--accent-color);
+    color: var(--contrast-color);
+    border-radius: 25px;
+    padding: 9px 18px;
+    box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+    transition: all 250ms ease;
+  }
+  .card:hover .btn-live {
+    background: var(--contrast-color);
+    color: var(--accent-color);
+  }
+  [data-theme="dark"] .card:hover .btn-live {
+    background: var(--accent-color);
+    color: var(--contrast-color);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  footer a {
+    color: var(--afnan2-color);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 2px solid var(--accent-color);
+    transition: color 250ms ease;
+  }
+  footer a:hover { color: var(--accent-color); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+  <span class="knob" id="knob"><i class="bi bi-sun"></i></span>
+</button>
+
+<header>
+  <h1>Afnan's <span>Web Apps</span></h1>
+  <p>A collection of my web app builds — open any project live in a new tab.</p>
+  <div class="rule"></div>
+</header>
+
+<main class="grid">
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-music-note-beamed"></i></div>
+    <h2>Audio Deck</h2>
+    <span class="tag">Audio / music player and management</span>
+    <a class="btn-live" href="Audio%20Deck/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-wallet2"></i></div>
+    <h2>Budget OS</h2>
+    <span class="tag">Budgeting / personal finance tracker</span>
+    <a class="btn-live" href="Budget%20OS/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-easel"></i></div>
+    <h2>Canvas Flow</h2>
+    <span class="tag">Collaborative canvas / whiteboard app</span>
+    <a class="btn-live" href="Canvas%20Flow/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-bar-chart-line"></i></div>
+    <h2>Data Lens</h2>
+    <span class="tag">Data visualization / analytics dashboard</span>
+    <a class="btn-live" href="Data%20Lens/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-code-slash"></i></div>
+    <h2>Dev Bench</h2>
+    <span class="tag">Developer tooling / code workspace</span>
+    <a class="btn-live" href="Dev%20Bench/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-diagram-3"></i></div>
+    <h2>Flow Pilot</h2>
+    <span class="tag">Workflow automation / builder tool</span>
+    <a class="btn-live" href="Flow%20Pilot/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-joystick"></i></div>
+    <h2>Game Smith</h2>
+    <span class="tag">Game builder / arcade collection</span>
+    <a class="btn-live" href="Game%20Smith/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-geo-alt"></i></div>
+    <h2>Map Craft</h2>
+    <span class="tag">Interactive maps / location explorer</span>
+    <a class="btn-live" href="Map%20Craft/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-camera-reels"></i></div>
+    <h2>Media Studio</h2>
+    <span class="tag">Media editing / creation studio</span>
+    <a class="btn-live" href="Media%20Studio/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-camera-video"></i></div>
+    <h2>Meet Space</h2>
+    <span class="tag">Video meetings / conferencing app</span>
+    <a class="btn-live" href="Meet%20Space/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-journal-text"></i></div>
+    <h2>Note Space</h2>
+    <span class="tag">Notes / note-taking workspace</span>
+    <a class="btn-live" href="Note%20Space/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-image"></i></div>
+    <h2>Pixel Forge</h2>
+    <span class="tag">Image editing / pixel art creator</span>
+    <a class="btn-live" href="Pixel%20Forge/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-database"></i></div>
+    <h2>Query Lab</h2>
+    <span class="tag">Database / query playground</span>
+    <a class="btn-live" href="Query%20Lab/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-receipt"></i></div>
+    <h2>Receipt Vault</h2>
+    <span class="tag">Receipt tracking / expense manager</span>
+    <a class="btn-live" href="Receipt%20Vault/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-house-door"></i></div>
+    <h2>Room Planr</h2>
+    <span class="tag">Room / floor plan designer</span>
+    <a class="btn-live" href="Room%20Planr/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-table"></i></div>
+    <h2>Sheet Forge</h2>
+    <span class="tag">Spreadsheet / data grid tool</span>
+    <a class="btn-live" href="Sheet%20Forge/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-kanban"></i></div>
+    <h2>Task Board</h2>
+    <span class="tag">Kanban / task management board</span>
+    <a class="btn-live" href="Task%20Board/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-calendar-event"></i></div>
+    <h2>Time Grid</h2>
+    <span class="tag">Calendar / schedule planner</span>
+    <a class="btn-live" href="Time%20Grid/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-shield-lock"></i></div>
+    <h2>Vault Pass</h2>
+    <span class="tag">Password vault / security manager</span>
+    <a class="btn-live" href="Vault%20Pass/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+  <div class="card">
+    <div class="icon"><i class="bi bi-grid-1x2"></i></div>
+    <h2>Wireframe Lab</h2>
+    <span class="tag">Wireframing / UI prototyping lab</span>
+    <a class="btn-live" href="Wireframe%20Lab/" target="_blank" rel="noopener noreferrer">Open Live ↗</a>
+  </div>
+
+</main>
+
+<footer>
+  <a href="https://github.com/afnan-nex" target="_blank" rel="noopener noreferrer">github.com/afnan-nex</a>
+</footer>
+
+<script>
+  const root = document.documentElement;
+  const knob = document.getElementById('knob');
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    knob.innerHTML = theme === 'dark' ? '<i class="bi bi-moon-stars"></i>' : '<i class="bi bi-sun"></i>';
+  }
+
+  applyTheme(localStorage.getItem('webapps-showcase-theme') || 'light');
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('webapps-showcase-theme', next);
+  });
+</script>
+
+</body>
+</html>
