@@ -1,0 +1,97 @@
+/**
+ * BudgetOS - Printable Financial Statement Stylesheet
+ */
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+
+  .app-sidebar,
+  .app-topbar,
+  .view-actions,
+  .toast-container,
+  .modal-container,
+  .metrics-grid,
+  .dashboard-grid,
+  .reports-main-grid,
+  .reports-secondary-grid,
+  .anomalies-report-card,
+  .view-header {
+    display: none !important;
+  }
+
+  .main-workspace {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-statement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #000000;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+
+  .print-brand h1 {
+    font-size: 24pt;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .print-brand p {
+    font-size: 10pt;
+    color: #555555;
+    margin-top: 4px;
+  }
+
+  .print-net-worth {
+    text-align: right;
+  }
+
+  .print-net-worth .print-lbl {
+    font-size: 9pt;
+    text-transform: uppercase;
+    color: #666666;
+  }
+
+  .print-net-worth h2 {
+    font-size: 20pt;
+    margin: 0;
+    font-family: monospace;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 24px;
+    font-size: 10pt;
+  }
+
+  .print-table th {
+    border-bottom: 1.5pt solid #333333;
+    padding: 8pt 6pt;
+    text-align: left;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .print-table td {
+    border-bottom: 0.5pt solid #cccccc;
+    padding: 8pt 6pt;
+  }
+
+  .print-table .font-mono {
+    font-family: monospace;
+  }
+}
