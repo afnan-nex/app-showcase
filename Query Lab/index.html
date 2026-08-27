@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QueryLab — Relational SQL Playground & Database IDE</title>
+  <meta name="description" content="Browser-based SQL playground, relational database simulator, visual ERD schema relationship viewer, and table designer." />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Menu & Action Bar -->
+    <header class="editor-topbar">
+      <!-- Brand & Database Selector -->
+      <div class="toolbar-group">
+        <div class="brand-section">
+          <span class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          </span>
+          <span>QueryLab</span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <span class="text-xs text-muted font-semibold">Active Database:</span>
+        <select id="select-active-database" class="form-control form-control-sm w-56 font-bold font-mono">
+          <option value="shopmart" selected>ShopMart (E-Commerce)</option>
+          <option value="techcorp">TechCorp (Enterprise HR)</option>
+          <option value="__new__">+ Create New Database...</option>
+        </select>
+
+        <button class="btn btn-sm btn-secondary" id="btn-reset-demo-db" title="Reset Active Database to Demo State">Reset Demo DB</button>
+      </div>
+
+      <!-- Export, Import & Global Actions -->
+      <div class="toolbar-group">
+        <button class="btn btn-sm btn-secondary" id="btn-export-database-json" title="Export Schema & Data as JSON">Export DB</button>
+        <button class="btn btn-sm btn-secondary" id="btn-import-database-json" title="Import Schema & Data from JSON">Import DB</button>
+        <input type="file" id="file-import-database" accept=".json" style="display: none;" />
+      </div>
+    </header>
+
+    <!-- Main Workspace (Left Sidebar + Center Work Area) -->
+    <div class="editor-main-body">
+      
+      <!-- Left Database Explorer Sidebar -->
+      <aside class="editor-sidebar-left" id="schema-browser-container"></aside>
+
+      <!-- Center Workspace Area -->
+      <main class="editor-center-workspace">
+        
+        <!-- Workspace Tabs Bar -->
+        <nav class="workspace-tabs-bar">
+          <button class="tab-nav-btn active" data-tab="editor">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            <span>Query Editor & Results</span>
+          </button>
+          <button class="tab-nav-btn" data-tab="erd">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="7" rx="1"></rect><rect x="14" y="3" width="8" height="7" rx="1"></rect><rect x="8" y="14" width="8" height="7" rx="1"></rect><line x1="6" y1="10" x2="6" y2="12"></line><line x1="18" y1="10" x2="18" y2="12"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="12" y1="12" x2="12" y2="14"></line></svg>
+            <span>Schema & ERD Visualizer</span>
+          </button>
+          <button class="tab-nav-btn" data-tab="history">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Query Execution History</span>
+          </button>
+        </nav>
+
+        <!-- Tab 1: SQL Editor & Results -->
+        <div class="workspace-tab-pane active" id="tab-content-editor">
+          <!-- Top Half: SQL Editor -->
+          <div id="sql-editor-container"></div>
+
+          <!-- Resizable Splitter -->
+          <div id="editor-results-splitter" title="Drag to Resize Splitter"></div>
+
+          <!-- Bottom Half: Results Grid -->
+          <div id="sql-results-container"></div>
+        </div>
+
+        <!-- Tab 2: Schema & ERD Visualizer -->
+        <div class="workspace-tab-pane" id="tab-content-erd" style="background-color: #0f1117;">
+          <canvas id="erd-canvas" style="display: block; width: 100%; height: 100%; cursor: grab;"></canvas>
+        </div>
+
+        <!-- Tab 3: Query Execution History -->
+        <div class="workspace-tab-pane p-4 overflow-y-auto" id="tab-content-history">
+          <div id="query-history-list" class="flex flex-col gap-2 max-w-4xl mx-auto"></div>
+        </div>
+
+      </main>
+
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="editor-statusbar">
+      <div id="status-engine-readout">SQL Engine: <strong>Relational Memory Engine v1.0</strong> (ANSI SQL Subset)</div>
+      <div class="flex items-center gap-3">
+        <span>Execute: <strong>Ctrl+Enter</strong> &bull; Auto-Complete &bull; Format Query</span>
+        <span>QueryLab</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Visual Table Designer Modal -->
+  <div class="modal-container" id="table-designer-modal-container"></div>
+
+  <!-- Standalone Application Script Bundle (Works on both http:// and direct file:/// double-click) -->
+  <script src="bundle.js"></script>
+</body>
+</html>
