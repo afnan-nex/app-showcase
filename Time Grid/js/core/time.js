@@ -7,7 +7,7 @@
  * Format minutes from midnight (0..1440) to time string
  */
 export function minutesToTimeString(minutes, is24Hour = false) {
-  if (minutes === null || minutes === undefined || isNaN(minutes)) return '12:00 AM';
+  if (minutes === null || minutes === undefined || isNaN(minutes)) return is24Hour ? '00:00' : '12:00 AM';
   let m = Math.max(0, Math.min(1440, Math.round(minutes)));
 
   if (m === 1440) {
@@ -28,10 +28,10 @@ export function minutesToTimeString(minutes, is24Hour = false) {
 }
 
 /**
- * Parse time string (e.g. "08:30", "8:30 AM", "14:15") to minutes from midnight (0..1440)
+ * Parse time string (e.g. "08:30", "8:30 AM", "14:15", "2:30pm") to minutes from midnight (0..1440)
  */
 export function timeStringToMinutes(timeStr) {
-  if (!timeStr) return 0;
+  if (!timeStr || typeof timeStr !== 'string') return 0;
   const trimmed = timeStr.trim();
 
   // Check 12-hour format with AM/PM
@@ -47,6 +47,14 @@ export function timeStringToMinutes(timeStr) {
     return Math.max(0, Math.min(1440, hours * 60 + mins));
   }
 
+  // Check 24-hour format (e.g. "14:30" or "9:15")
+  const match24 = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+  if (match24) {
+    const hours = parseInt(match24[1], 10);
+    const mins = parseInt(match24[2], 10);
+    return Math.max(0, Math.min(1440, hours * 60 + mins));
+  }
+
   return 0;
 }
 
@@ -54,7 +62,7 @@ export function timeStringToMinutes(timeStr) {
  * Format duration in minutes into clean readable string (e.g. "1h 30m" or "45m")
  */
 export function formatDuration(durationMinutes) {
-  const m = Math.max(0, Math.round(durationMinutes));
+  const m = Math.max(0, Math.round(durationMinutes || 0));
   const hours = Math.floor(m / 60);
   const mins = m % 60;
 
@@ -71,8 +79,8 @@ export function formatDuration(durationMinutes) {
  * Snap minutes to configurable interval step (e.g. 5, 10, 15, 30 min)
  */
 export function snapMinutes(minutes, step = 15) {
-  if (!step || step <= 1) return Math.round(minutes);
-  return Math.round(minutes / step) * step;
+  if (!step || step <= 1) return Math.round(minutes || 0);
+  return Math.round((minutes || 0) / step) * step;
 }
 
 /**
@@ -80,6 +88,7 @@ export function snapMinutes(minutes, step = 15) {
  */
 export function formatDateKey(date) {
   const d = new Date(date);
+  if (isNaN(d.getTime())) return formatDateKey(new Date());
   const year = d.getFullYear();
   const month = (d.getMonth() + 1).toString().padStart(2, '0');
   const day = d.getDate().toString().padStart(2, '0');
@@ -91,6 +100,7 @@ export function formatDateKey(date) {
  */
 export function formatDateDisplay(date) {
   const d = new Date(date);
+  if (isNaN(d.getTime())) return 'Today';
   return d.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -99,13 +109,34 @@ export function formatDateDisplay(date) {
 }
 
 /**
+ * Format Date to full detailed title (e.g. "Wednesday, June 12, 2024")
+ */
+export function formatFullDateDisplay(date) {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return 'Today';
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+/**
+ * Check if two dates represent the exact same calendar day
+ */
+export function isSameDay(date1, date2) {
+  return formatDateKey(date1) === formatDateKey(date2);
+}
+
+/**
  * Get array of 7 Date objects representing Monday-Sunday for the given reference date
  */
 export function getWeekDates(referenceDate) {
   const curr = new Date(referenceDate);
-  // Get day index: 0 = Sun, 1 = Mon, ..., 6 = Sat
-  const day = curr.getDay();
-  // Calculate distance to previous Monday (if Sunday, distance is 6)
+  if (isNaN(curr.getTime())) return getWeekDates(new Date());
+
+  const day = curr.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
   const diffToMonday = day === 0 ? -6 : 1 - day;
 
   const monday = new Date(curr);
@@ -118,4 +149,41 @@ export function getWeekDates(referenceDate) {
     week.push(nextDay);
   }
   return week;
+}
+
+/**
+ * Find continuous free slots between blocks within workday hours (0-1440 min)
+ */
+export function findFreeTimeSlots(blocks = [], workStartMin = 540, workEndMin = 1080) {
+  const sorted = [...blocks].sort((a, b) => a.startMinute - b.startMinute);
+  const freeSlots = [];
+  let currentPointer = workStartMin;
+
+  for (const b of sorted) {
+    if (b.endMinute <= currentPointer) continue;
+    if (b.startMinute > currentPointer) {
+      const freeDur = b.startMinute - currentPointer;
+      if (freeDur >= 15) {
+        freeSlots.push({
+          startMinute: currentPointer,
+          endMinute: b.startMinute,
+          duration: freeDur
+        });
+      }
+    }
+    currentPointer = Math.max(currentPointer, b.endMinute);
+  }
+
+  if (currentPointer < workEndMin) {
+    const freeDur = workEndMin - currentPointer;
+    if (freeDur >= 15) {
+      freeSlots.push({
+        startMinute: currentPointer,
+        endMinute: workEndMin,
+        duration: freeDur
+      });
+    }
+  }
+
+  return freeSlots;
 }

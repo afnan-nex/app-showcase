@@ -7,7 +7,7 @@ import { TOKEN_TYPES } from './lexer.js';
 
 export class SQLParser {
   constructor(tokens) {
-    this.tokens = tokens;
+    this.tokens = tokens || [];
     this.pos = 0;
   }
 
@@ -37,7 +37,7 @@ export class SQLParser {
   expectKeyword(keyword) {
     const t = this.current();
     if (t.type !== TOKEN_TYPES.KEYWORD || t.value !== keyword.toUpperCase()) {
-      throw new Error(`Expected '${keyword}' at line ${t.line}, col ${t.col}, got '${t.value}'`);
+      throw new Error(`Expected '${keyword}' at line ${t.line || 1}, col ${t.col || 1}, got '${t.value}'`);
     }
     return this.advance();
   }
@@ -45,7 +45,7 @@ export class SQLParser {
   expectPunctuation(char) {
     const t = this.current();
     if (t.type !== TOKEN_TYPES.PUNCTUATION || t.value !== char) {
-      throw new Error(`Expected '${char}' at line ${t.line}, col ${t.col}, got '${t.value}'`);
+      throw new Error(`Expected '${char}' at line ${t.line || 1}, col ${t.col || 1}, got '${t.value}'`);
     }
     return this.advance();
   }
@@ -55,14 +55,14 @@ export class SQLParser {
     if (t.type === TOKEN_TYPES.IDENTIFIER || t.type === TOKEN_TYPES.KEYWORD) {
       return this.advance().value;
     }
-    throw new Error(`Expected identifier name at line ${t.line}, col ${t.col}, got '${t.value}'`);
+    throw new Error(`Expected identifier name at line ${t.line || 1}, col ${t.col || 1}, got '${t.value}'`);
   }
 
-  // --- Parse Statement Dispatcher ---
+  // --- Parse Statements Dispatcher ---
   parse() {
     const statements = [];
     while (this.current().type !== TOKEN_TYPES.EOF) {
-      // Skip leading semicolons
+      // Skip extra semicolons
       if (this.current().type === TOKEN_TYPES.PUNCTUATION && this.current().value === ';') {
         this.advance();
         continue;
@@ -80,8 +80,10 @@ export class SQLParser {
 
   parseStatement() {
     const t = this.current();
+    if (t.type === TOKEN_TYPES.EOF) return null;
+
     if (t.type !== TOKEN_TYPES.KEYWORD) {
-      throw new Error(`Expected SQL statement keyword at line ${t.line}, col ${t.col}, got '${t.value}'`);
+      throw new Error(`Expected SQL statement keyword at line ${t.line || 1}, col ${t.col || 1}, got '${t.value}'`);
     }
 
     switch (t.value) {
@@ -99,8 +101,17 @@ export class SQLParser {
         return this.parseDrop();
       case 'ALTER':
         return this.parseAlter();
+      case 'TRUNCATE':
+        return this.parseTruncate();
+      case 'SHOW':
+        return this.parseShow();
+      case 'DESCRIBE':
+      case 'DESC':
+        return this.parseDescribe();
+      case 'EXPLAIN':
+        return this.parseExplain();
       default:
-        throw new Error(`Unsupported SQL command '${t.value}' at line ${t.line}, col ${t.col}`);
+        throw new Error(`Unsupported SQL command '${t.value}' at line ${t.line || 1}, col ${t.col || 1}`);
     }
   }
 
@@ -116,7 +127,10 @@ export class SQLParser {
       let alias = null;
       if (this.matchKeyword('AS')) {
         alias = this.expectIdentifierOrKeyword();
-      } else if (this.current().type === TOKEN_TYPES.IDENTIFIER && !['FROM', 'WHERE', 'JOIN', 'GROUP', 'ORDER', 'LIMIT'].includes(this.current().value.toUpperCase())) {
+      } else if (
+        this.current().type === TOKEN_TYPES.IDENTIFIER &&
+        !['FROM', 'WHERE', 'JOIN', 'GROUP', 'ORDER', 'LIMIT', 'HAVING', 'UNION'].includes(this.current().value.toUpperCase())
+      ) {
         alias = this.advance().value;
       }
       columns.push({ expr, alias });
@@ -128,27 +142,45 @@ export class SQLParser {
       }
     }
 
-    // FROM clause
+    // FROM clause (optional for standalone expressions like SELECT 1+1)
     let from = null;
     if (this.matchKeyword('FROM')) {
       const tableName = this.expectIdentifierOrKeyword();
       let tableAlias = null;
       if (this.matchKeyword('AS')) {
         tableAlias = this.expectIdentifierOrKeyword();
-      } else if (this.current().type === TOKEN_TYPES.IDENTIFIER && !['WHERE', 'JOIN', 'INNER', 'LEFT', 'GROUP', 'ORDER', 'LIMIT'].includes(this.current().value.toUpperCase())) {
+      } else if (
+        this.current().type === TOKEN_TYPES.IDENTIFIER &&
+        !['WHERE', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'CROSS', 'GROUP', 'ORDER', 'LIMIT', 'HAVING', 'UNION'].includes(this.current().value.toUpperCase())
+      ) {
         tableAlias = this.advance().value;
       }
       from = { table: tableName, alias: tableAlias || tableName };
     }
 
-    // JOIN clauses (INNER JOIN, LEFT JOIN)
+    // JOIN clauses (INNER, LEFT, RIGHT, CROSS, plain JOIN)
     const joins = [];
-    while (this.matchKeyword('JOIN') || this.matchKeyword('INNER') || this.matchKeyword('LEFT')) {
+    while (
+      this.matchKeyword('JOIN') ||
+      this.matchKeyword('INNER') ||
+      this.matchKeyword('LEFT') ||
+      this.matchKeyword('RIGHT') ||
+      this.matchKeyword('CROSS')
+    ) {
       let joinType = 'INNER';
       const prevVal = this.tokens[this.pos - 1].value.toUpperCase();
+
       if (prevVal === 'LEFT') {
+        this.matchKeyword('OUTER');
         this.matchKeyword('JOIN');
         joinType = 'LEFT';
+      } else if (prevVal === 'RIGHT') {
+        this.matchKeyword('OUTER');
+        this.matchKeyword('JOIN');
+        joinType = 'RIGHT';
+      } else if (prevVal === 'CROSS') {
+        this.matchKeyword('JOIN');
+        joinType = 'CROSS';
       } else if (prevVal === 'INNER') {
         this.expectKeyword('JOIN');
         joinType = 'INNER';
@@ -158,13 +190,26 @@ export class SQLParser {
       let joinAlias = null;
       if (this.matchKeyword('AS')) {
         joinAlias = this.expectIdentifierOrKeyword();
-      } else if (this.current().type === TOKEN_TYPES.IDENTIFIER && this.current().value.toUpperCase() !== 'ON') {
+      } else if (
+        this.current().type === TOKEN_TYPES.IDENTIFIER &&
+        this.current().value.toUpperCase() !== 'ON' &&
+        this.current().value.toUpperCase() !== 'WHERE'
+      ) {
         joinAlias = this.advance().value;
       }
 
-      this.expectKeyword('ON');
-      const onCond = this.parseExpression();
-      joins.push({ type: joinType, table: joinTable, alias: joinAlias || joinTable, on: onCond });
+      let onCond = null;
+      if (joinType !== 'CROSS') {
+        this.expectKeyword('ON');
+        onCond = this.parseExpression();
+      }
+
+      joins.push({
+        type: joinType,
+        table: joinTable,
+        alias: joinAlias || joinTable,
+        on: onCond
+      });
     }
 
     // WHERE clause
@@ -224,6 +269,8 @@ export class SQLParser {
       if (this.matchKeyword('OFFSET')) {
         offset = Number(this.advance().value);
       }
+    } else if (this.matchKeyword('OFFSET')) {
+      offset = Number(this.advance().value);
     }
 
     return {
@@ -298,7 +345,7 @@ export class SQLParser {
     const assignments = [];
     while (true) {
       const col = this.expectIdentifierOrKeyword();
-      const op = this.advance(); // '='
+      this.advance(); // '='
       const expr = this.parseExpression();
       assignments.push({ column: col, expr });
 
@@ -374,7 +421,8 @@ export class SQLParser {
           } else if (this.matchKeyword('UNIQUE')) {
             isUnique = true;
           } else if (this.matchKeyword('DEFAULT')) {
-            defaultValue = this.advance().value;
+            const defTok = this.advance();
+            defaultValue = defTok.value;
           } else {
             this.advance();
           }
@@ -429,7 +477,39 @@ export class SQLParser {
     throw new Error(`Unsupported ALTER TABLE operation near '${this.current().value}'`);
   }
 
-  // --- Expression Parser (Arithmetic, Logic, Functions) ---
+  // --- 8. TRUNCATE TABLE Statement ---
+  parseTruncate() {
+    this.expectKeyword('TRUNCATE');
+    this.matchKeyword('TABLE');
+    const table = this.expectIdentifierOrKeyword();
+    return { type: 'TRUNCATE_TABLE', table };
+  }
+
+  // --- 9. SHOW TABLES Statement ---
+  parseShow() {
+    this.expectKeyword('SHOW');
+    this.expectKeyword('TABLES');
+    return { type: 'SHOW_TABLES' };
+  }
+
+  // --- 10. DESCRIBE / DESC Statement ---
+  parseDescribe() {
+    if (this.matchKeyword('DESCRIBE') || this.matchKeyword('DESC')) {
+      this.matchKeyword('TABLE');
+      const table = this.expectIdentifierOrKeyword();
+      return { type: 'DESCRIBE_TABLE', table };
+    }
+    throw new Error('Expected DESCRIBE statement');
+  }
+
+  // --- 11. EXPLAIN Statement ---
+  parseExplain() {
+    this.expectKeyword('EXPLAIN');
+    const innerStmt = this.parseStatement();
+    return { type: 'EXPLAIN', innerStatement: innerStmt };
+  }
+
+  // --- Expression Parser ---
   parseExpression() {
     return this.parseOr();
   }
@@ -455,16 +535,35 @@ export class SQLParser {
   parseComparison() {
     let left = this.parseAdditive();
 
-    // LIKE, IS NULL, IN, BETWEEN
-    if (this.matchKeyword('LIKE')) {
-      const right = this.parseAdditive();
-      return { type: 'BINARY_OP', op: 'LIKE', left, right };
+    // NOT BETWEEN, NOT LIKE, NOT IN
+    let isNegated = false;
+    if (this.matchKeyword('NOT')) {
+      isNegated = true;
     }
+
+    // BETWEEN a AND b
+    if (this.matchKeyword('BETWEEN')) {
+      const low = this.parseAdditive();
+      this.expectKeyword('AND');
+      const high = this.parseAdditive();
+      return { type: 'BETWEEN', expr: left, low, high, not: isNegated };
+    }
+
+    // LIKE / ILIKE
+    if (this.matchKeyword('LIKE') || this.matchKeyword('ILIKE')) {
+      const right = this.parseAdditive();
+      const node = { type: 'BINARY_OP', op: 'LIKE', left, right };
+      return isNegated ? { type: 'UNARY_OP', op: 'NOT', expr: node } : node;
+    }
+
+    // IS NULL / IS NOT NULL
     if (this.matchKeyword('IS')) {
       const isNot = this.matchKeyword('NOT');
       this.expectKeyword('NULL');
       return { type: 'IS_NULL', expr: left, not: isNot };
     }
+
+    // IN (val1, val2, ...)
     if (this.matchKeyword('IN')) {
       this.expectPunctuation('(');
       const list = [];
@@ -472,13 +571,23 @@ export class SQLParser {
         list.push(this.parseExpression());
         if (this.current().type === TOKEN_TYPES.PUNCTUATION && this.current().value === ',') {
           this.advance();
-        } else break;
+        } else {
+          break;
+        }
       }
       this.expectPunctuation(')');
-      return { type: 'IN', expr: left, list };
+      return { type: 'IN', expr: left, list, not: isNegated };
     }
 
-    if (this.current().type === TOKEN_TYPES.OPERATOR && ['=', '!=', '<', '<=', '>', '>='].includes(this.current().value)) {
+    if (isNegated) {
+      left = { type: 'UNARY_OP', op: 'NOT', expr: left };
+    }
+
+    // Binary comparison operators
+    if (
+      this.current().type === TOKEN_TYPES.OPERATOR &&
+      ['=', '!=', '<', '<=', '>', '>='].includes(this.current().value)
+    ) {
       const op = this.advance().value;
       const right = this.parseAdditive();
       return { type: 'BINARY_OP', op, left, right };
@@ -489,7 +598,10 @@ export class SQLParser {
 
   parseAdditive() {
     let left = this.parseMultiplicative();
-    while (this.current().type === TOKEN_TYPES.OPERATOR && ['+', '-'].includes(this.current().value)) {
+    while (
+      this.current().type === TOKEN_TYPES.OPERATOR &&
+      ['+', '-', '||'].includes(this.current().value)
+    ) {
       const op = this.advance().value;
       const right = this.parseMultiplicative();
       left = { type: 'BINARY_OP', op, left, right };
@@ -499,7 +611,10 @@ export class SQLParser {
 
   parseMultiplicative() {
     let left = this.parsePrimary();
-    while (this.current().type === TOKEN_TYPES.OPERATOR && ['*', '/', '%'].includes(this.current().value)) {
+    while (
+      this.current().type === TOKEN_TYPES.OPERATOR &&
+      ['*', '/', '%'].includes(this.current().value)
+    ) {
       const op = this.advance().value;
       const right = this.parsePrimary();
       left = { type: 'BINARY_OP', op, left, right };
@@ -516,7 +631,27 @@ export class SQLParser {
       return { type: 'WILDCARD' };
     }
 
-    // Parentheses
+    // CASE WHEN ... THEN ... ELSE ... END
+    if (t.type === TOKEN_TYPES.KEYWORD && t.value === 'CASE') {
+      this.advance();
+      const cases = [];
+      while (this.matchKeyword('WHEN')) {
+        const cond = this.parseExpression();
+        this.expectKeyword('THEN');
+        const res = this.parseExpression();
+        cases.push({ when: cond, then: res });
+      }
+
+      let elseExpr = null;
+      if (this.matchKeyword('ELSE')) {
+        elseExpr = this.parseExpression();
+      }
+
+      this.expectKeyword('END');
+      return { type: 'CASE_EXPR', cases, elseExpr };
+    }
+
+    // Parentheses (expr)
     if (t.type === TOKEN_TYPES.PUNCTUATION && t.value === '(') {
       this.advance();
       const expr = this.parseExpression();
@@ -536,23 +671,7 @@ export class SQLParser {
       return { type: 'LITERAL', value: t.value, rawType: 'NUMBER' };
     }
 
-    // Aggregations & Function Calls (COUNT, SUM, AVG, MIN, MAX)
-    if (t.type === TOKEN_TYPES.KEYWORD && ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX'].includes(t.value)) {
-      const funcName = this.advance().value;
-      this.expectPunctuation('(');
-      const isDistinct = this.matchKeyword('DISTINCT');
-      let argExpr = null;
-      if (this.current().type === TOKEN_TYPES.OPERATOR && this.current().value === '*') {
-        this.advance();
-        argExpr = { type: 'WILDCARD' };
-      } else {
-        argExpr = this.parseExpression();
-      }
-      this.expectPunctuation(')');
-      return { type: 'AGGREGATE', func: funcName, arg: argExpr, isDistinct };
-    }
-
-    // Boolean Literals
+    // Boolean / Null Literals
     if (t.type === TOKEN_TYPES.KEYWORD && (t.value === 'TRUE' || t.value === 'FALSE')) {
       this.advance();
       return { type: 'LITERAL', value: t.value === 'TRUE', rawType: 'BOOLEAN' };
@@ -560,6 +679,58 @@ export class SQLParser {
     if (t.type === TOKEN_TYPES.KEYWORD && t.value === 'NULL') {
       this.advance();
       return { type: 'LITERAL', value: null, rawType: 'NULL' };
+    }
+
+    // Functions (Aggregates & Scalars)
+    const knownFunctions = new Set([
+      'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'ROUND', 'COALESCE', 'CONCAT', 'LOWER', 'UPPER',
+      'LENGTH', 'LEN', 'TRIM', 'ABS', 'SUBSTR', 'SUBSTRING', 'NOW', 'CAST'
+    ]);
+
+    if (
+      (t.type === TOKEN_TYPES.KEYWORD || t.type === TOKEN_TYPES.IDENTIFIER) &&
+      this.peek().type === TOKEN_TYPES.PUNCTUATION &&
+      this.peek().value === '('
+    ) {
+      const funcName = this.advance().value.toUpperCase();
+      this.expectPunctuation('(');
+
+      const isAggregate = ['COUNT', 'SUM', 'AVG', 'MIN', 'MAX'].includes(funcName);
+      const isDistinct = isAggregate && this.matchKeyword('DISTINCT');
+
+      const args = [];
+      if (!(this.current().type === TOKEN_TYPES.PUNCTUATION && this.current().value === ')')) {
+        while (true) {
+          if (this.current().type === TOKEN_TYPES.OPERATOR && this.current().value === '*') {
+            this.advance();
+            args.push({ type: 'WILDCARD' });
+          } else {
+            args.push(this.parseExpression());
+          }
+
+          if (this.current().type === TOKEN_TYPES.PUNCTUATION && this.current().value === ',') {
+            this.advance();
+          } else {
+            break;
+          }
+        }
+      }
+      this.expectPunctuation(')');
+
+      if (isAggregate) {
+        return {
+          type: 'AGGREGATE',
+          func: funcName,
+          arg: args[0] || { type: 'WILDCARD' },
+          isDistinct
+        };
+      } else {
+        return {
+          type: 'FUNCTION_CALL',
+          func: funcName,
+          args
+        };
+      }
     }
 
     // Column / Table.Column Identifier
@@ -573,6 +744,6 @@ export class SQLParser {
       return { type: 'COLUMN', column: first };
     }
 
-    throw new Error(`Unexpected token '${t.value}' at line ${t.line}, col ${t.col}`);
+    throw new Error(`Unexpected token '${t.value}' at line ${t.line || 1}, col ${t.col || 1}`);
   }
 }

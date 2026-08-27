@@ -1,6 +1,6 @@
 /**
- * PixelForge - Pre-Built Demonstration Projects
- * 3 rich pixel art projects: "Cyber Knight Run" (Animation), "Retro Dungeon Tileset" (Tilemap), "Pixel City Skyline" (Multi-Layer).
+ * PixelForge - Curated Demonstration Projects
+ * Production-quality pixel art projects with animations, multi-layer scenes, and game tilesets.
  */
 
 export const TEMPLATES = {
@@ -21,7 +21,7 @@ export const TEMPLATES = {
     ]
   },
 
-  // 2. Retro Dungeon Tileset (32x32 Sprite for Slicing)
+  // 2. Retro Dungeon Tileset (32x32 Sprite for Slicing into 16x16 tiles)
   dungeon: {
     id: 'proj_dungeon_tiles',
     name: 'Dungeon Tileset (16x16 Tiles)',
@@ -36,6 +36,7 @@ export const TEMPLATES = {
           visible: true,
           locked: false,
           opacity: 1,
+          blendMode: 'normal',
           pixels: createDungeonBricksPixels(32, 32)
         },
         {
@@ -44,13 +45,14 @@ export const TEMPLATES = {
           visible: true,
           locked: false,
           opacity: 1,
+          blendMode: 'normal',
           pixels: createDungeonPropsPixels(32, 32)
         }
       ])
     ]
   },
 
-  // 3. Pixel City Skyline (Multi-layer 32x32 Scene)
+  // 3. Pixel City Skyline (Multi-layer 32x32 Cyberpunk Scene)
   city: {
     id: 'proj_pixel_city',
     name: 'Cyberpunk Skyline',
@@ -65,6 +67,7 @@ export const TEMPLATES = {
           visible: true,
           locked: false,
           opacity: 1,
+          blendMode: 'normal',
           pixels: createCitySkyPixels(32, 32)
         },
         {
@@ -73,9 +76,47 @@ export const TEMPLATES = {
           visible: true,
           locked: false,
           opacity: 1,
+          blendMode: 'normal',
           pixels: createCityBuildingsPixels(32, 32)
         }
       ])
+    ]
+  },
+
+  // 4. RPG Relics & Potions (24x24 Item Sprite)
+  potions: {
+    id: 'proj_rpg_potions',
+    name: 'RPG Relics & Potions',
+    width: 24,
+    height: 24,
+    fps: 8,
+    frames: [
+      createFrame([
+        {
+          id: 'layer_potions',
+          name: 'Health & Mana Potions',
+          visible: true,
+          locked: false,
+          opacity: 1,
+          blendMode: 'normal',
+          pixels: createPotionsPixels(24, 24)
+        }
+      ])
+    ]
+  },
+
+  // 5. Retro 8-bit Hero (4-Frame Walk, 16x16)
+  hero8bit: {
+    id: 'proj_8bit_hero',
+    name: '8-Bit Hero Walk',
+    width: 16,
+    height: 16,
+    fps: 8,
+    frames: [
+      createFrame([create8BitHeroLayer(0)]),
+      createFrame([create8BitHeroLayer(1)]),
+      createFrame([create8BitHeroLayer(2)]),
+      createFrame([create8BitHeroLayer(3)])
     ]
   }
 };
@@ -87,12 +128,11 @@ function createFrame(layers) {
   };
 }
 
-// Procedural Sprite Pixel Generators for Crisp Template Demonstration
+// 1. Procedural Cyber Knight
 function createKnightLayer(frameIdx) {
   const w = 24, h = 24;
   const pixels = new Array(w * h).fill('transparent');
 
-  // Bobbing offset for running animation
   const bob = frameIdx % 2 === 0 ? 0 : 1;
   const legOffset = (frameIdx % 4) - 2;
 
@@ -143,10 +183,12 @@ function createKnightLayer(frameIdx) {
     visible: true,
     locked: false,
     opacity: 1,
+    blendMode: 'normal',
     pixels
   };
 }
 
+// 2. Dungeon Tiles
 function createDungeonBricksPixels(w, h) {
   const pixels = new Array(w * h).fill('transparent');
 
@@ -182,9 +224,21 @@ function createDungeonPropsPixels(w, h) {
   pixels[24 * w + 8] = '#f59e0b';
   pixels[25 * w + 8] = '#f59e0b';
 
+  // Torch (Bottom Right 16x16)
+  for (let y = 22; y <= 28; y++) {
+    pixels[y * w + 24] = '#78350f';
+  }
+  // Flame
+  pixels[19 * w + 24] = '#f59e0b';
+  pixels[20 * w + 23] = '#ef4444';
+  pixels[20 * w + 24] = '#fbbf24';
+  pixels[20 * w + 25] = '#ef4444';
+  pixels[21 * w + 24] = '#f59e0b';
+
   return pixels;
 }
 
+// 3. Cyber City
 function createCitySkyPixels(w, h) {
   const pixels = new Array(w * h).fill('#090d16');
 
@@ -212,7 +266,7 @@ function createCityBuildingsPixels(w, h) {
   for (let y = 14; y < h; y++) {
     for (let x = 2; x < 10; x++) {
       pixels[y * w + x] = '#1e1b4b';
-      if (y % 3 === 0 && x % 2 === 0) pixels[y * w + x] = '#ff007f'; // Neon Windows
+      if (y % 3 === 0 && x % 2 === 0) pixels[y * w + x] = '#ff007f';
     }
   }
 
@@ -225,4 +279,84 @@ function createCityBuildingsPixels(w, h) {
   }
 
   return pixels;
+}
+
+// 4. Potions & Relics
+function createPotionsPixels(w, h) {
+  const pixels = new Array(w * h).fill('transparent');
+
+  // Health Potion (Left)
+  for (let y = 8; y <= 18; y++) {
+    for (let x = 4; x <= 10; x++) {
+      if (y >= 10 && y <= 17) pixels[y * w + x] = '#e11d48'; // Red liquid
+      if (x === 4 || x === 10 || y === 18) pixels[y * w + x] = '#cbd5e1'; // Glass
+    }
+  }
+  // Cork
+  pixels[6 * w + 6] = '#92400e';
+  pixels[6 * w + 7] = '#92400e';
+  pixels[7 * w + 7] = '#92400e';
+
+  // Mana Potion (Right)
+  for (let y = 8; y <= 18; y++) {
+    for (let x = 14; x <= 20; x++) {
+      if (y >= 10 && y <= 17) pixels[y * w + x] = '#2563eb'; // Blue liquid
+      if (x === 14 || x === 20 || y === 18) pixels[y * w + x] = '#cbd5e1'; // Glass
+    }
+  }
+  // Cork
+  pixels[6 * w + 16] = '#92400e';
+  pixels[6 * w + 17] = '#92400e';
+
+  return pixels;
+}
+
+// 5. 8-Bit Hero
+function create8BitHeroLayer(frameIdx) {
+  const w = 16, h = 16;
+  const pixels = new Array(w * h).fill('transparent');
+  const leg = (frameIdx % 2 === 0) ? 1 : -1;
+
+  // Red Cap
+  for (let x = 5; x <= 11; x++) pixels[2 * w + x] = '#ef4444';
+  for (let x = 5; x <= 13; x++) pixels[3 * w + x] = '#ef4444';
+
+  // Face / Skin
+  for (let x = 5; x <= 10; x++) {
+    pixels[4 * w + x] = '#fed7aa';
+    pixels[5 * w + x] = '#fed7aa';
+  }
+  pixels[4 * w + 9] = '#1e293b'; // Eye
+  pixels[5 * w + 8] = '#92400e'; // Mustache
+  pixels[5 * w + 9] = '#92400e';
+
+  // Shirt (Red)
+  for (let y = 6; y <= 9; y++) {
+    for (let x = 5; x <= 11; x++) {
+      pixels[y * w + x] = '#ef4444';
+    }
+  }
+
+  // Overalls (Blue)
+  for (let y = 8; y <= 11; y++) {
+    for (let x = 6; x <= 10; x++) {
+      pixels[y * w + x] = '#2563eb';
+    }
+  }
+
+  // Legs & Boots
+  pixels[12 * w + (7 + leg)] = '#2563eb';
+  pixels[13 * w + (7 + leg)] = '#78350f';
+  pixels[12 * w + (9 - leg)] = '#2563eb';
+  pixels[13 * w + (9 - leg)] = '#78350f';
+
+  return {
+    id: 'layer_hero',
+    name: '8-Bit Hero',
+    visible: true,
+    locked: false,
+    opacity: 1,
+    blendMode: 'normal',
+    pixels
+  };
 }

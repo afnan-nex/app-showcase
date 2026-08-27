@@ -1,7 +1,7 @@
 /**
  * TimeGrid - Interactive Visual Time Grid Component
  * Renders 24h vertical grid, Day/Workweek/Full Week columns, live current-time indicator,
- * and direct drag-and-drop / duration-resizing handlers.
+ * live drag ghost / time snap tooltips, touch support, and duration-resizing handlers.
  */
 
 import { getIcon, escapeHTML } from '../core/icons.js';
@@ -17,6 +17,8 @@ export const GRID_VIEWS = {
 
 const HOUR_HEIGHT = 56; // 56px per hour
 const TOTAL_HEIGHT = HOUR_HEIGHT * 24; // 1344px for full 24h
+const WORK_START_MIN = 540; // 9:00 AM
+const WORK_END_MIN = 1080;  // 6:00 PM
 
 export class TimeGridView {
   constructor(container, {
@@ -38,6 +40,24 @@ export class TimeGridView {
     this.currentDate = new Date();
     this.is24Hour = false;
     this.gridSnap = 15; // 15 min default
+    this.hasScrolled = false;
+
+    // Start live clock ticker
+    this.startLiveClock();
+  }
+
+  startLiveClock() {
+    setInterval(() => {
+      const line = this.container.querySelector('.current-time-line');
+      if (line) {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const topPx = (currentMinutes / 60) * HOUR_HEIGHT;
+        line.style.top = `${topPx}px`;
+        const tooltip = line.querySelector('.current-time-tooltip');
+        if (tooltip) tooltip.textContent = minutesToTimeString(currentMinutes, this.is24Hour);
+      }
+    }, 30000);
   }
 
   render({
@@ -55,12 +75,14 @@ export class TimeGridView {
     this.gridSnap = gridSnap;
 
     const days = this.getColumnsForView();
+    const workStartTop = (WORK_START_MIN / 60) * HOUR_HEIGHT;
+    const workHeight = ((WORK_END_MIN - WORK_START_MIN) / 60) * HOUR_HEIGHT;
 
     this.container.innerHTML = `
       <div class="time-grid-wrapper flex flex-col h-full overflow-hidden">
         
         <!-- Header: Day / Column Titles -->
-        <div class="grid-columns-header flex border-b bg-panel">
+        <div class="grid-columns-header flex border-b bg-panel shrink-0 select-none">
           <!-- Time Gutter Spacer -->
           <div class="time-gutter-header w-16 border-r text-center py-2 text-xs font-bold text-muted uppercase">
             Time
@@ -70,9 +92,9 @@ export class TimeGridView {
             ${days.map(d => {
               const isToday = formatDateKey(d) === formatDateKey(new Date());
               return `
-                <div class="day-header-cell p-2 text-center border-r ${isToday ? 'bg-primary-subtle' : ''}">
-                  <span class="text-xs font-semibold text-muted block">${d.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                  <span class="font-bold text-sm ${isToday ? 'text-primary' : 'text-secondary'}">${d.getDate()}</span>
+                <div class="day-header-cell p-2 text-center border-r transition-colors ${isToday ? 'bg-primary-subtle' : ''}">
+                  <span class="text-xs font-semibold text-muted block uppercase" style="font-size: 10px;">${d.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                  <span class="font-bold text-sm font-mono ${isToday ? 'text-primary' : 'text-secondary'}">${d.getDate()}</span>
                 </div>
               `;
             }).join('')}
@@ -84,10 +106,10 @@ export class TimeGridView {
           <div class="grid-canvas-inner flex relative" style="height: ${TOTAL_HEIGHT}px;">
             
             <!-- Left Time Gutter (00:00 to 23:00) -->
-            <div class="time-gutter-column w-16 border-r flex flex-col shrink-0 select-none">
+            <div class="time-gutter-column w-16 border-r flex flex-col shrink-0 select-none bg-panel">
               ${Array.from({ length: 24 }).map((_, h) => `
                 <div class="time-hour-label flex items-start justify-center text-xs font-mono text-muted" style="height: ${HOUR_HEIGHT}px; margin-top: -7px;">
-                  ${minutesToTimeString(h * 60, this.is24Hour)}
+                  <span>${minutesToTimeString(h * 60, this.is24Hour)}</span>
                 </div>
               `).join('')}
             </div>
@@ -95,6 +117,11 @@ export class TimeGridView {
             <!-- Day Columns Grid -->
             <div class="grid-days-container flex-1 grid ${days.length === 1 ? 'grid-cols-1' : (days.length === 5 ? 'grid-cols-5' : 'grid-cols-7')} relative">
               
+              <!-- Workday Core Hours Highlight Background -->
+              <div class="workday-highlight-bg absolute pointer-events-none w-full"
+                   style="top: ${workStartTop}px; height: ${workHeight}px; background-color: rgba(56, 189, 248, 0.02); border-top: 1px dashed rgba(56, 189, 248, 0.2); border-bottom: 1px dashed rgba(56, 189, 248, 0.2);">
+              </div>
+
               <!-- Horizontal Hour Grid Background Lines -->
               <div class="grid-bg-hour-lines absolute inset-0 pointer-events-none">
                 ${Array.from({ length: 24 }).map((_, h) => `
@@ -107,7 +134,7 @@ export class TimeGridView {
               <!-- Live Current Time Indicator Line (If today is in view) -->
               ${this.renderCurrentTimeLine(days)}
 
-              <!-- Interactive Columns -->
+              <!-- Interactive Day Columns -->
               ${days.map(d => {
                 const dateKey = formatDateKey(d);
                 const dayBlocks = blocks.filter(b => b.date === dateKey);
@@ -115,6 +142,11 @@ export class TimeGridView {
 
                 return `
                   <div class="day-time-column relative border-r" data-date="${dateKey}" style="height: ${TOTAL_HEIGHT}px;">
+                    ${dayBlocks.length === 0 ? `
+                      <div class="empty-day-cue absolute inset-x-2 p-3 text-center pointer-events-none text-muted" style="top: ${workStartTop + 20}px;">
+                        <span class="text-xs opacity-60 font-sans block">&plus; Double-click or drop task</span>
+                      </div>
+                    ` : ''}
                     ${dayBlocks.map(b => this.renderBlockCard(b, conflictMap.get(b.id))).join('')}
                   </div>
                 `;
@@ -157,6 +189,9 @@ export class TimeGridView {
       <div class="current-time-line absolute z-20 pointer-events-none flex items-center" style="top: ${topPx}px; left: ${leftPct}%; width: ${colWidthPct}%;">
         <div class="current-time-dot w-2.5 h-2.5 bg-rose rounded-full -ml-1 shadow-glow"></div>
         <div class="flex-1 h-0.5 bg-rose"></div>
+        <span class="current-time-tooltip font-mono text-xs bg-rose text-white px-1 rounded absolute right-1 -top-3" style="font-size: 9px;">
+          ${minutesToTimeString(currentMinutes, this.is24Hour)}
+        </span>
       </div>
     `;
   }
@@ -172,25 +207,38 @@ export class TimeGridView {
     const isSelected = block.id === this.selectedBlockId;
     const hasConflict = conflictInfo && conflictInfo.hasConflict;
     const catDef = CATEGORIES[block.category] || { color: '#0284c7', bg: 'rgba(2, 132, 199, 0.2)' };
+    const priorityColor = block.priority === 'High' ? 'var(--accent-rose)' : (block.priority === 'Med' ? 'var(--accent-amber)' : 'var(--text-muted)');
 
     return `
       <div class="time-block-card absolute rounded select-none cursor-move ${isSelected ? 'selected' : ''} ${hasConflict ? 'has-conflict' : ''}"
+           role="button"
+           tabindex="0"
+           aria-label="${escapeHTML(block.title)}, ${minutesToTimeString(startMin, this.is24Hour)} to ${minutesToTimeString(endMin, this.is24Hour)}, ${block.category}"
            data-id="${block.id}"
            data-date="${block.date}"
            style="top: ${topPx}px; height: ${heightPx}px; background-color: ${block.color || catDef.color}; border-left: 4px solid ${block.color || catDef.color};">
         
         <!-- Top Resize Handle -->
-        <div class="block-resize-handle top-handle absolute top-0 inset-x-0 h-1.5 cursor-ns-resize" data-handle="top"></div>
+        <div class="block-resize-handle top-handle absolute top-0 inset-x-0 h-2 cursor-ns-resize" data-handle="top" title="Drag to resize start time"></div>
 
         <!-- Block Content -->
         <div class="block-content-inner p-1.5 flex flex-col h-full overflow-hidden justify-between pointer-events-none">
           <div class="flex items-center justify-between gap-1">
-            <span class="block-title font-bold text-xs text-white truncate">${escapeHTML(block.title)}</span>
-            ${hasConflict ? `
-              <span class="badge badge-conflict flex items-center gap-0.5 text-xs text-amber font-bold" title="Overlap: ${conflictInfo.totalOverlapMinutes}m with ${conflictInfo.conflictingWith.map(c => c.title).join(', ')}">
-                ${getIcon('alert', 'icon-xs')}
-              </span>
-            ` : ''}
+            <div class="flex items-center gap-1 min-w-0">
+              <span class="block-title font-bold text-xs text-white truncate">${escapeHTML(block.title)}</span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              ${block.recurrence && block.recurrence !== 'none' ? `
+                <span class="text-white-muted" title="Recurring: ${block.recurrence}">
+                  ${getIcon('repeat', 'icon-xs')}
+                </span>
+              ` : ''}
+              ${hasConflict ? `
+                <span class="badge badge-conflict flex items-center gap-0.5 text-xs text-amber font-bold" title="Conflict: ${conflictInfo.totalOverlapMinutes}m overlap with ${conflictInfo.conflictingWith.map(c => c.title).join(', ')}">
+                  ${getIcon('alert', 'icon-xs')}
+                </span>
+              ` : ''}
+            </div>
           </div>
 
           <!-- Time Span & Duration -->
@@ -203,7 +251,7 @@ export class TimeGridView {
         </div>
 
         <!-- Bottom Resize Handle -->
-        <div class="block-resize-handle bottom-handle absolute bottom-0 inset-x-0 h-1.5 cursor-ns-resize" data-handle="bottom"></div>
+        <div class="block-resize-handle bottom-handle absolute bottom-0 inset-x-0 h-2 cursor-ns-resize" data-handle="bottom" title="Drag to resize end time"></div>
       </div>
     `;
   }
@@ -217,17 +265,16 @@ export class TimeGridView {
       this.hasScrolled = true;
     }
 
-    // Click on Block -> Select
+    // Click & Touch on Block -> Select / Drag
     this.container.querySelectorAll('.time-block-card').forEach(el => {
+      const blockId = el.dataset.id;
+
+      // Mouse Drag / Resize
       el.addEventListener('mousedown', (e) => {
         const handle = e.target.dataset.handle;
-        const blockId = el.dataset.id;
-
         if (handle) {
-          // Resizing top or bottom
           this.startResizing(e, blockId, handle);
         } else {
-          // Dragging block
           this.startDragging(e, blockId);
         }
 
@@ -235,6 +282,29 @@ export class TimeGridView {
           this.onSelectBlock(blockId);
         }
         e.stopPropagation();
+      });
+
+      // Touch Drag / Resize
+      el.addEventListener('touchstart', (e) => {
+        const handle = e.target.dataset.handle;
+        if (handle) {
+          this.startTouchResizing(e, blockId, handle);
+        } else {
+          this.startTouchDragging(e, blockId);
+        }
+
+        if (this.onSelectBlock) {
+          this.onSelectBlock(blockId);
+        }
+        e.stopPropagation();
+      }, { passive: false });
+
+      // Keyboard focus
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (this.onSelectBlock) this.onSelectBlock(blockId);
+          e.preventDefault();
+        }
       });
     });
 
@@ -250,8 +320,8 @@ export class TimeGridView {
         if (this.onCreateBlockAt) {
           this.onCreateBlockAt({
             date,
-            startMinute: snappedMin,
-            endMinute: Math.min(1440, snappedMin + 60)
+            startMinute: Math.max(0, Math.min(1380, snappedMin)),
+            endMinute: Math.min(1440, Math.max(0, snappedMin) + 60)
           });
         }
       });
@@ -259,16 +329,23 @@ export class TimeGridView {
 
     // Drag-and-Drop Task from Left Backlog
     this.container.querySelectorAll('.day-time-column').forEach(col => {
-      col.addEventListener('dragover', (e) => e.preventDefault());
+      col.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        col.classList.add('drag-over-active');
+      });
+      col.addEventListener('dragleave', () => {
+        col.classList.remove('drag-over-active');
+      });
       col.addEventListener('drop', (e) => {
         e.preventDefault();
+        col.classList.remove('drag-over-active');
         const taskId = e.dataTransfer.getData('text/plain');
         if (taskId && this.onDropTask) {
           const rect = col.getBoundingClientRect();
           const y = e.clientY - rect.top;
           const clickedMin = (y / HOUR_HEIGHT) * 60;
           const snappedMin = Math.round(clickedMin / this.gridSnap) * this.gridSnap;
-          this.onDropTask(taskId, col.dataset.date, snappedMin);
+          this.onDropTask(taskId, col.dataset.date, Math.max(0, Math.min(1380, snappedMin)));
         }
       });
     });
@@ -282,8 +359,9 @@ export class TimeGridView {
     const initialY = e.clientY;
     const initialTop = parseFloat(blockEl.style.top) || 0;
     const initialHeight = parseFloat(blockEl.style.height) || 0;
-    const initialStartMin = Math.round((initialTop / HOUR_HEIGHT) * 60);
     const durationMin = Math.round((initialHeight / HOUR_HEIGHT) * 60);
+
+    blockEl.classList.add('is-dragging');
 
     const onMouseMove = (moveEv) => {
       const deltaY = moveEv.clientY - initialY;
@@ -296,6 +374,7 @@ export class TimeGridView {
     const onMouseUp = (upEv) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      blockEl.classList.remove('is-dragging');
 
       const finalTop = parseFloat(blockEl.style.top) || 0;
       const finalStartMin = Math.round((finalTop / HOUR_HEIGHT) * 60);
@@ -315,13 +394,53 @@ export class TimeGridView {
         this.onMoveBlock(blockId, {
           date: finalDate,
           startMinute: finalStartMin,
-          endMinute: finalStartMin + durationMin
+          endMinute: Math.min(1440, finalStartMin + durationMin)
         });
       }
     };
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+  }
+
+  startTouchDragging(e, blockId) {
+    const touch = e.touches[0];
+    const blockEl = this.container.querySelector(`.time-block-card[data-id="${blockId}"]`);
+    if (!blockEl || !touch) return;
+
+    const initialY = touch.clientY;
+    const initialTop = parseFloat(blockEl.style.top) || 0;
+    const initialHeight = parseFloat(blockEl.style.height) || 0;
+    const durationMin = Math.round((initialHeight / HOUR_HEIGHT) * 60);
+
+    const onTouchMove = (moveEv) => {
+      const curTouch = moveEv.touches[0];
+      if (!curTouch) return;
+      const deltaY = curTouch.clientY - initialY;
+      const newTop = initialTop + deltaY;
+      const rawMin = (newTop / HOUR_HEIGHT) * 60;
+      const snappedStart = Math.max(0, Math.min(1440 - durationMin, Math.round(rawMin / this.gridSnap) * this.gridSnap));
+      blockEl.style.top = `${(snappedStart / 60) * HOUR_HEIGHT}px`;
+    };
+
+    const onTouchEnd = (endEv) => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+
+      const finalTop = parseFloat(blockEl.style.top) || 0;
+      const finalStartMin = Math.round((finalTop / HOUR_HEIGHT) * 60);
+
+      if (this.onMoveBlock) {
+        this.onMoveBlock(blockId, {
+          date: blockEl.dataset.date,
+          startMinute: finalStartMin,
+          endMinute: Math.min(1440, finalStartMin + durationMin)
+        });
+      }
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
   }
 
   startResizing(e, blockId, handle) {
@@ -346,7 +465,6 @@ export class TimeGridView {
         blockEl.style.top = `${(snappedStart / 60) * HOUR_HEIGHT}px`;
         blockEl.style.height = `${newHeight}px`;
       } else {
-        // Bottom handle
         const newHeight = initialHeight + deltaY;
         const rawEndMin = initialStartMin + (newHeight / HOUR_HEIGHT) * 60;
         const snappedEnd = Math.min(1440, Math.max(initialStartMin + 15, Math.round(rawEndMin / this.gridSnap) * this.gridSnap));
@@ -373,5 +491,57 @@ export class TimeGridView {
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+  }
+
+  startTouchResizing(e, blockId, handle) {
+    const touch = e.touches[0];
+    const blockEl = this.container.querySelector(`.time-block-card[data-id="${blockId}"]`);
+    if (!blockEl || !touch) return;
+
+    const initialY = touch.clientY;
+    const initialTop = parseFloat(blockEl.style.top) || 0;
+    const initialHeight = parseFloat(blockEl.style.height) || 0;
+    const initialStartMin = Math.round((initialTop / HOUR_HEIGHT) * 60);
+    const initialEndMin = initialStartMin + Math.round((initialHeight / HOUR_HEIGHT) * 60);
+
+    const onTouchMove = (moveEv) => {
+      const curTouch = moveEv.touches[0];
+      if (!curTouch) return;
+      const deltaY = curTouch.clientY - initialY;
+
+      if (handle === 'top') {
+        const newTop = initialTop + deltaY;
+        const rawMin = (newTop / HOUR_HEIGHT) * 60;
+        const snappedStart = Math.max(0, Math.min(initialEndMin - 15, Math.round(rawMin / this.gridSnap) * this.gridSnap));
+        const newHeight = ((initialEndMin - snappedStart) / 60) * HOUR_HEIGHT;
+        blockEl.style.top = `${(snappedStart / 60) * HOUR_HEIGHT}px`;
+        blockEl.style.height = `${newHeight}px`;
+      } else {
+        const newHeight = initialHeight + deltaY;
+        const rawEndMin = initialStartMin + (newHeight / HOUR_HEIGHT) * 60;
+        const snappedEnd = Math.min(1440, Math.max(initialStartMin + 15, Math.round(rawEndMin / this.gridSnap) * this.gridSnap));
+        blockEl.style.height = `${((snappedEnd - initialStartMin) / 60) * HOUR_HEIGHT}px`;
+      }
+    };
+
+    const onTouchEnd = () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+
+      const finalTop = parseFloat(blockEl.style.top) || 0;
+      const finalHeight = parseFloat(blockEl.style.height) || 0;
+      const finalStart = Math.round((finalTop / HOUR_HEIGHT) * 60);
+      const finalEnd = finalStart + Math.round((finalHeight / HOUR_HEIGHT) * 60);
+
+      if (this.onResizeBlock) {
+        this.onResizeBlock(blockId, {
+          startMinute: finalStart,
+          endMinute: finalEnd
+        });
+      }
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
   }
 }

@@ -1,6 +1,6 @@
 /**
  * ReceiptVault - Master Application Orchestrator
- * Integrates Navigation, Document Library, Warranty Engine, Viewer Studio, Dashboard, and Reports.
+ * Integrates Navigation, Document Library, Warranty Engine, Viewer Studio, Dashboard, Reports, and Toast System.
  */
 
 import { getIcon, escapeHTML } from './core/icons.js';
@@ -10,13 +10,16 @@ import { renderDocumentLibrary } from './editor/document-library.js';
 import { DocumentViewer } from './editor/document-viewer.js';
 import { UploadModal } from './editor/upload-modal.js';
 import { renderReports } from './editor/reports.js';
+import { calculateVaultMetrics, getWarrantyInfo, WARRANTY_STATUS } from './core/warranty.js';
 
 class ReceiptVaultApp {
   constructor() {
     this.documents = [];
     this.selectedDocId = null;
     this.activeTab = 'dashboard'; // 'dashboard', 'library', 'warranties', 'reports'
-    this.filters = { search: '', category: '', warranty: '', sort: 'date_desc' };
+    this.filters = { search: '', category: '', warranty: '', quickTag: '', sort: 'date_desc' };
+    this.recentlyDeleted = null;
+    this.isMobileInspectorOpen = false;
   }
 
   async init() {
@@ -32,19 +35,22 @@ class ReceiptVaultApp {
     this.viewer = new DocumentViewer(
       viewerContainer,
       (updatedDoc) => this.saveDocument(updatedDoc),
-      (docId) => this.deleteDocument(docId)
+      (docId) => this.deleteDocument(docId),
+      () => this.closeInspector()
     );
 
     const uploadModalContainer = document.getElementById('upload-modal-container');
     this.uploadModal = new UploadModal(
       uploadModalContainer,
       this.documents,
-      (newDoc) => this.saveDocument(newDoc)
+      (newDoc) => this.saveDocument(newDoc, true)
     );
 
     this.setupNavigation();
     this.setupTopActions();
     this.setupSplitter();
+    this.setupKeyboardShortcuts();
+    this.updateTabBadges();
     this.renderActiveTab();
     this.updateInspector();
   }
@@ -60,14 +66,18 @@ class ReceiptVaultApp {
   setTab(tabKey) {
     this.activeTab = tabKey;
     document.querySelectorAll('.nav-tab-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.tab === tabKey);
+      const isActive = b.dataset.tab === tabKey;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
     // Handle Warranties tab shortcut
     if (tabKey === 'warranties') {
       this.filters.warranty = 'ACTIVE';
+      this.filters.quickTag = '';
     } else if (tabKey === 'library') {
       this.filters.warranty = '';
+      this.filters.quickTag = '';
     }
 
     this.renderActiveTab();
@@ -76,18 +86,19 @@ class ReceiptVaultApp {
   setupTopActions() {
     // New Receipt Button
     document.getElementById('btn-new-receipt')?.addEventListener('click', () => {
-      this.uploadModal.setExistingDocs(this.documents);
-      this.uploadModal.open();
+      this.openNewReceiptModal();
     });
 
     // Reset Demo Vault
     document.getElementById('btn-reset-demo-vault')?.addEventListener('click', async () => {
-      if (confirm('Reset ReceiptVault to demo receipts and warranties?')) {
+      if (confirm('Reset ReceiptVault to default demonstration receipts and warranties?')) {
         await db.resetDemoData();
         this.documents = await db.getAllDocuments();
         this.selectedDocId = this.documents[0]?.id || null;
+        this.updateTabBadges();
         this.renderActiveTab();
         this.updateInspector();
+        this.showToast('Demo filing cabinet restored successfully.', 'info');
       }
     });
 
@@ -98,8 +109,10 @@ class ReceiptVaultApp {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `receiptvault_backup_${new Date().toISOString().split('T')[0]}.json`;
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.download = `receiptvault_backup_${dateStr}.json`;
       a.click();
+      this.showToast(`Exported backup (${this.documents.length} records)`, 'success');
     });
 
     // Import Backup JSON
@@ -112,20 +125,21 @@ class ReceiptVaultApp {
       reader.onload = async (ev) => {
         try {
           const parsed = JSON.parse(ev.target.result);
-          if (Array.isArray(parsed)) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             for (const doc of parsed) {
               await db.saveDocument(doc);
             }
             this.documents = await db.getAllDocuments();
             this.selectedDocId = this.documents[0]?.id || null;
+            this.updateTabBadges();
             this.renderActiveTab();
             this.updateInspector();
-            alert(`Successfully imported ${parsed.length} document records.`);
+            this.showToast(`Successfully imported ${parsed.length} document records.`, 'success');
           } else {
-            alert('Invalid ReceiptVault backup JSON format.');
+            this.showToast('Invalid ReceiptVault backup JSON format.', 'error');
           }
         } catch (err) {
-          alert('Failed to parse backup JSON: ' + err.message);
+          this.showToast('Failed to parse backup JSON: ' + err.message, 'error');
         }
       };
       reader.readAsText(file);
@@ -151,7 +165,7 @@ class ReceiptVaultApp {
     window.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       const dx = startX - e.clientX;
-      const newW = Math.max(280, Math.min(600, startW + dx));
+      const newW = Math.max(300, Math.min(650, startW + dx));
       viewerPane.style.width = `${newW}px`;
     });
 
@@ -161,6 +175,59 @@ class ReceiptVaultApp {
         document.body.style.cursor = '';
       }
     });
+  }
+
+  setupKeyboardShortcuts() {
+    window.addEventListener('keydown', (e) => {
+      // Ctrl+S / Cmd+S: Save current doc
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (this.viewer) this.viewer.collectAndSave();
+      }
+
+      // Ctrl+N / Cmd+N: New receipt
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        this.openNewReceiptModal();
+      }
+
+      // Escape: Close modals
+      if (e.key === 'Escape') {
+        if (this.uploadModal) this.uploadModal.close();
+        if (window.innerWidth <= 1024) this.closeInspector();
+      }
+    });
+  }
+
+  openNewReceiptModal() {
+    this.uploadModal.setExistingDocs(this.documents);
+    this.uploadModal.open();
+  }
+
+  closeInspector() {
+    const rightInspector = document.getElementById('document-viewer-container');
+    if (rightInspector) {
+      rightInspector.style.display = 'none';
+    }
+    this.isMobileInspectorOpen = false;
+  }
+
+  updateTabBadges() {
+    const totalBadge = document.getElementById('badge-total-docs');
+    if (totalBadge) {
+      totalBadge.textContent = this.documents.length;
+    }
+
+    const expiringBadge = document.getElementById('badge-expiring-warranties');
+    if (expiringBadge) {
+      const expiringCount = this.documents.filter(d => getWarrantyInfo(d.warrantyExpirationDate).status === WARRANTY_STATUS.EXPIRING_SOON).length;
+      if (expiringCount > 0) {
+        expiringBadge.textContent = `${expiringCount} urgent`;
+        expiringBadge.style.display = 'inline-flex';
+      } else {
+        expiringBadge.style.display = 'none';
+      }
+    }
   }
 
   renderActiveTab() {
@@ -178,7 +245,8 @@ class ReceiptVaultApp {
           this.selectedDocId = id;
           this.setTab('library');
         },
-        onNavigateTab: (tab) => this.setTab(tab)
+        onNavigateTab: (tab) => this.setTab(tab),
+        onNewReceipt: () => this.openNewReceiptModal()
       });
     } else if (this.activeTab === 'reports') {
       if (rightInspector) rightInspector.style.display = 'none';
@@ -190,8 +258,11 @@ class ReceiptVaultApp {
       });
     } else {
       // 'library' or 'warranties'
-      if (rightInspector) rightInspector.style.display = 'flex';
-      if (splitter) splitter.style.display = 'block';
+      const isMobile = window.innerWidth <= 1024;
+      if (rightInspector) {
+        rightInspector.style.display = isMobile ? (this.isMobileInspectorOpen ? 'flex' : 'none') : 'flex';
+      }
+      if (splitter) splitter.style.display = isMobile ? 'none' : 'block';
 
       renderDocumentLibrary(mainContainer, {
         documents: this.documents,
@@ -199,6 +270,10 @@ class ReceiptVaultApp {
         filters: this.filters,
         onSelectDoc: (id) => {
           this.selectedDocId = id;
+          if (isMobile) {
+            this.isMobileInspectorOpen = true;
+            if (rightInspector) rightInspector.style.display = 'flex';
+          }
           this.renderActiveTab();
           this.updateInspector();
         },
@@ -215,32 +290,77 @@ class ReceiptVaultApp {
     this.viewer.setDocument(doc);
   }
 
-  async saveDocument(doc) {
-    await db.saveDocument(doc);
+  async saveDocument(doc, isNew = false) {
+    const saved = await db.saveDocument(doc);
     this.documents = await db.getAllDocuments();
-    this.selectedDocId = doc.id;
+    this.selectedDocId = saved ? saved.id : doc.id;
+    this.updateTabBadges();
     this.renderActiveTab();
     this.updateInspector();
+    this.showToast(isNew ? `Added receipt "${doc.title}"` : `Saved changes to "${doc.title}"`, 'success');
   }
 
   async deleteDocument(id) {
+    const deletedDoc = this.documents.find(d => d.id === id);
+    this.recentlyDeleted = deletedDoc;
+
     await db.deleteDocument(id);
     this.documents = await db.getAllDocuments();
     this.selectedDocId = this.documents[0]?.id || null;
+    this.updateTabBadges();
     this.renderActiveTab();
     this.updateInspector();
+
+    this.showToast(`Deleted receipt record.`, 'warning', 6000, {
+      label: 'Undo',
+      onClick: async () => {
+        if (this.recentlyDeleted) {
+          await db.saveDocument(this.recentlyDeleted);
+          this.documents = await db.getAllDocuments();
+          this.selectedDocId = this.recentlyDeleted.id;
+          this.updateTabBadges();
+          this.renderActiveTab();
+          this.updateInspector();
+          this.showToast(`Restored "${this.recentlyDeleted.title}"`, 'success');
+          this.recentlyDeleted = null;
+        }
+      }
+    });
   }
 
   exportCSV() {
-    const headers = ['Title', 'Vendor', 'Amount', 'Currency', 'Purchase Date', 'Category', 'Payment Method', 'Warranty Expiration', 'Return Deadline', 'Tags', 'Notes'];
+    const headers = [
+      'Document ID',
+      'Title',
+      'Merchant/Vendor',
+      'Invoice/Order #',
+      'Serial/License #',
+      'Amount',
+      'Tax Amount',
+      'Currency',
+      'Purchase Date',
+      'Category',
+      'Payment Method',
+      'Warranty Policy',
+      'Warranty Expiration',
+      'Return Deadline',
+      'Tags',
+      'Notes'
+    ];
+
     const rows = this.documents.map(d => [
+      `"${d.id}"`,
       `"${(d.title || '').replace(/"/g, '""')}"`,
       `"${(d.vendor || '').replace(/"/g, '""')}"`,
-      d.amount || 0,
+      `"${(d.invoiceNumber || '').replace(/"/g, '""')}"`,
+      `"${(d.serialNumber || '').replace(/"/g, '""')}"`,
+      Number(d.amount || 0).toFixed(2),
+      Number(d.taxAmount || 0).toFixed(2),
       `"${d.currency || '$'}"`,
       `"${d.purchaseDate || ''}"`,
       `"${d.category || ''}"`,
       `"${d.paymentMethod || ''}"`,
+      `"${(d.warrantyType || '').replace(/"/g, '""')}"`,
       `"${d.warrantyExpirationDate || ''}"`,
       `"${d.returnDeadlineDate || ''}"`,
       `"${(d.tags || []).join('; ')}"`,
@@ -252,8 +372,55 @@ class ReceiptVaultApp {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `receiptvault_ledger_${new Date().toISOString().split('T')[0]}.csv`;
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.download = `receiptvault_ledger_${dateStr}.csv`;
     a.click();
+    this.showToast(`Exported CSV ledger (${this.documents.length} records)`, 'success');
+  }
+
+  showToast(message, type = 'info', duration = 3500, action = null) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let iconName = 'info';
+    if (type === 'success') iconName = 'check';
+    if (type === 'warning') iconName = 'alertTriangle';
+    if (type === 'error') iconName = 'close';
+
+    toast.innerHTML = `
+      <div class="flex items-center gap-2">
+        ${getIcon(iconName, `icon-xs ${type === 'success' ? 'text-emerald' : (type === 'warning' ? 'text-amber' : (type === 'error' ? 'text-rose' : 'text-primary'))}`)}
+        <span class="text-xs font-semibold text-primary">${escapeHTML(message)}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        ${action ? `<button class="btn btn-xs btn-primary font-bold toast-action-btn">${escapeHTML(action.label)}</button>` : ''}
+        <button class="btn-icon-xs text-muted toast-close-btn" aria-label="Dismiss toast">${getIcon('close', 'icon-xs')}</button>
+      </div>
+    `;
+
+    if (action) {
+      toast.querySelector('.toast-action-btn')?.addEventListener('click', () => {
+        action.onClick();
+        toast.remove();
+      });
+    }
+
+    toast.querySelector('.toast-close-btn')?.addEventListener('click', () => {
+      toast.remove();
+    });
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.2s ease';
+        setTimeout(() => toast.remove(), 200);
+      }
+    }, duration);
   }
 }
 

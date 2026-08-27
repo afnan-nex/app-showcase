@@ -1,7 +1,7 @@
 /**
  * PixelForge - Standalone Bundle Builder
  * Compiles all modular JavaScript files into a single standalone bundle.js
- * allowing PixelForge to run seamlessly offline and via direct file:/// double-click.
+ * allowing PixelForge to run seamlessly offline, on GitHub Pages, and via direct file:/// double-click.
  */
 
 import fs from 'fs';
@@ -17,6 +17,7 @@ const filesToBundle = [
   'js/engine/canvas-renderer.js',
   'js/engine/animation.js',
   'js/engine/tilemap.js',
+  'js/editor/modals.js',
   'js/editor/layer-manager.js',
   'js/editor/color-picker.js',
   'js/editor/timeline.js',

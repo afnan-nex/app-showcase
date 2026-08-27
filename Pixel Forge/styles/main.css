@@ -1,19 +1,20 @@
 /**
  * PixelForge - Master Layout & Pixel Art IDE Design Tokens
  * Specialized pixel art editor layout inspired by Aseprite and PyxelEdit.
+ * Fully responsive, accessible, high performance, and touch-optimized.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-app: #0c0e14;
-  --bg-panel: #151821;
-  --bg-elevated: #1e222f;
-  --bg-hover: #2a3042;
-  --bg-canvas: #090b10;
+  --bg-app: #0c0d12;
+  --bg-panel: #141721;
+  --bg-elevated: #1c202e;
+  --bg-hover: #262c3e;
+  --bg-canvas: #090a0f;
 
-  --border-subtle: #2a3042;
-  --border-muted: #1a1e2b;
+  --border-subtle: #262c3e;
+  --border-muted: #1c202e;
   --border-focus: #58a6ff;
 
   --text-primary: #f0f6fc;
@@ -31,16 +32,18 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', Consolas, monospace;
 
-  --topbar-height: 46px;
-  --toolpanel-width: 48px;
-  --inspector-width: 270px;
-  --timeline-height: 120px;
-  --statusbar-height: 24px;
+  --topbar-height: 48px;
+  --toolpanel-width: 44px;
+  --inspector-width: 280px;
+  --timeline-height: 125px;
+  --statusbar-height: 26px;
 
   --radius-sm: 4px;
   --radius-md: 6px;
+  --radius-lg: 8px;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.75);
 }
 
 /* Resets */
@@ -61,6 +64,7 @@ html, body {
   overflow: hidden;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Master IDE Layout */
@@ -70,6 +74,7 @@ html, body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  position: relative;
 }
 
 /* Top Toolbar */
@@ -80,10 +85,12 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  gap: 10px;
+  padding: 0 10px;
+  gap: 8px;
   flex-shrink: 0;
   z-index: 50;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .brand-section {
@@ -94,6 +101,7 @@ html, body {
   font-size: 14px;
   letter-spacing: 0.5px;
   color: var(--text-primary);
+  white-space: nowrap;
 }
 
 .brand-logo-icon {
@@ -102,10 +110,35 @@ html, body {
   align-items: center;
 }
 
+.project-title-input {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 3px 6px;
+  width: 130px;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.project-title-input:hover {
+  background-color: var(--bg-elevated);
+  border-color: var(--border-subtle);
+}
+
+.project-title-input:focus {
+  background-color: var(--bg-elevated);
+  border-color: var(--border-focus);
+}
+
 .toolbar-group {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .toolbar-divider {
@@ -113,6 +146,7 @@ html, body {
   height: 20px;
   background-color: var(--border-subtle);
   margin: 0 3px;
+  flex-shrink: 0;
 }
 
 /* Main Workspace */
@@ -132,9 +166,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   padding: 6px 0;
-  gap: 4px;
+  gap: 3px;
   flex-shrink: 0;
-  z-index: 10;
+  z-index: 20;
+  overflow-y: auto;
 }
 
 /* Central Viewport & Bottom Timeline */
@@ -154,6 +189,7 @@ html, body {
   overflow: hidden;
   background-color: var(--bg-canvas);
   cursor: crosshair;
+  touch-action: none;
 }
 
 #pixel-canvas {
@@ -161,6 +197,8 @@ html, body {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
+  touch-action: none;
+  outline: none;
 }
 
 /* Bottom Animation Timeline */
@@ -184,7 +222,7 @@ html, body {
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  z-index: 10;
+  z-index: 20;
 }
 
 /* Status Bar */
@@ -200,4 +238,73 @@ html, body {
   font-size: 11px;
   font-family: var(--font-mono);
   flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Accessibility Focus States */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Responsive Breakpoints & Mobile Optimization */
+@media (max-width: 1024px) {
+  :root {
+    --inspector-width: 240px;
+    --timeline-height: 115px;
+  }
+  .tool-props-group #btn-rotate-90,
+  .tool-props-group #btn-open-resize-modal {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --toolpanel-width: 40px;
+    --inspector-width: 210px;
+    --timeline-height: 105px;
+    --topbar-height: 44px;
+  }
+  .brand-title {
+    display: none;
+  }
+  .template-select {
+    width: 120px;
+  }
+  .tool-props-group #btn-flip-h,
+  .tool-props-group #btn-flip-v,
+  .tool-props-group #btn-open-filters-modal {
+    display: none;
+  }
+  .status-hints {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --toolpanel-width: 36px;
+    --inspector-width: 160px;
+    --timeline-height: 95px;
+  }
+  .project-title-input {
+    width: 90px;
+  }
+  .view-export-group #btn-open-tilemap,
+  .view-export-group #btn-import-json,
+  .view-export-group #btn-fit-canvas {
+    display: none;
+  }
 }

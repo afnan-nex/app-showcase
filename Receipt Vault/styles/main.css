@@ -1,23 +1,24 @@
 /**
- * ReceiptVault - Master Layout & Document Filing Cabinet Design Tokens
+ * ReceiptVault - Master Layout & Filing Cabinet Design Tokens
+ * 100% Offline, Zero Cloud Dependencies, Client-Side Digital Filing System.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-app: #0b0f19;
-  --bg-panel: #111827;
-  --bg-elevated: #1f2937;
-  --bg-hover: #374151;
-  --bg-input: #0f172a;
+  --bg-app: #080c14;
+  --bg-panel: #0f172a;
+  --bg-elevated: #1e293b;
+  --bg-hover: #334155;
+  --bg-input: #0b1120;
 
-  --border-subtle: #374151;
-  --border-muted: #1f2937;
+  --border-subtle: #334155;
+  --border-muted: #1e293b;
   --border-focus: #38bdf8;
 
-  --text-primary: #f9fafb;
-  --text-secondary: #e5e7eb;
-  --text-muted: #9ca3af;
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
 
   --accent-primary: #38bdf8;
   --accent-primary-hover: #7dd3fc;
@@ -30,21 +31,21 @@
   --accent-rose: #ef4444;
   --accent-rose-subtle: rgba(239, 68, 68, 0.15);
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', Consolas, monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
 
   --topbar-height: 48px;
-  --sidebar-width: 200px;
-  --inspector-width: 360px;
+  --sidebar-width: 210px;
+  --inspector-width: 380px;
   --statusbar-height: 24px;
 
   --radius-sm: 4px;
   --radius-md: 6px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.7);
 }
 
-/* Resets */
+/* Universal Resets */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -53,18 +54,18 @@
 
 html, body {
   height: 100%;
-  width: 100vw;
+  width: 100%;
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 12.5px;
-  line-height: 1.4;
+  line-height: 1.45;
   overflow: hidden;
-  user-select: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Master Layout */
+/* Master Container */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -73,7 +74,7 @@ html, body {
   overflow: hidden;
 }
 
-/* Top Toolbar */
+/* Top Toolbar Bar */
 .editor-topbar {
   height: var(--topbar-height);
   background-color: var(--bg-panel);
@@ -92,8 +93,8 @@ html, body {
   align-items: center;
   gap: 8px;
   font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.5px;
+  font-size: 14.5px;
+  letter-spacing: 0.3px;
   color: var(--text-primary);
 }
 
@@ -116,7 +117,7 @@ html, body {
   margin: 0 4px;
 }
 
-/* Main Workspace Body */
+/* Main Workspace Body Layout */
 .editor-main-body {
   flex: 1;
   display: flex;
@@ -134,14 +135,14 @@ html, body {
   padding: 10px 8px;
   gap: 4px;
   flex-shrink: 0;
-  z-index: 10;
+  z-index: 20;
 }
 
 .nav-tab-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  justify-content: space-between;
+  padding: 8px 10px;
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
@@ -150,8 +151,15 @@ html, body {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.1s;
+  transition: all 0.12s ease;
   text-align: left;
+  user-select: none;
+}
+
+.nav-tab-btn .tab-left-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav-tab-btn:hover {
@@ -165,6 +173,11 @@ html, body {
   border-color: rgba(56, 189, 248, 0.3);
 }
 
+.nav-tab-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
 /* Center Workspace Area */
 .editor-center-workspace {
   flex: 1;
@@ -173,6 +186,7 @@ html, body {
   overflow: hidden;
   background-color: var(--bg-app);
   position: relative;
+  min-width: 0;
 }
 
 /* Resizable Vertical Splitter */
@@ -182,6 +196,7 @@ html, body {
   cursor: col-resize;
   flex-shrink: 0;
   transition: background-color 0.15s;
+  z-index: 15;
 }
 #library-viewer-splitter:hover {
   background-color: var(--accent-primary);
@@ -196,13 +211,13 @@ html, body {
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  z-index: 10;
+  z-index: 20;
 }
 
 /* Status Bar */
 .editor-statusbar {
   height: var(--statusbar-height);
-  background-color: var(--bg-elevated);
+  background-color: var(--bg-panel);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -212,4 +227,78 @@ html, body {
   font-size: 11px;
   font-family: var(--font-mono);
   flex-shrink: 0;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .editor-sidebar-left {
+    width: 60px;
+    padding: 8px 4px;
+  }
+  .nav-tab-btn span.tab-title,
+  .nav-tab-btn .tab-badge-pill {
+    display: none;
+  }
+  .nav-tab-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  #library-viewer-splitter {
+    display: none !important;
+  }
+
+  .editor-inspector-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    max-width: 480px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.8);
+  }
+}
+
+@media (max-width: 640px) {
+  .editor-topbar {
+    padding: 0 8px;
+    gap: 6px;
+  }
+  .brand-section span:not(.brand-logo-icon) {
+    display: none;
+  }
+  .editor-sidebar-left {
+    display: flex;
+    flex-direction: row;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 48px;
+    border-right: none;
+    border-top: 1px solid var(--border-subtle);
+    padding: 4px;
+    justify-content: space-around;
+    z-index: 100;
+  }
+  .editor-main-body {
+    padding-bottom: 48px;
+  }
+  .editor-statusbar {
+    display: none;
+  }
+  .editor-inspector-right {
+    max-width: 100%;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

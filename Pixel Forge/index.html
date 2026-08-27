@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PixelForge — Pixel Art Creation & Animation Workstation</title>
-  <meta name="description" content="Professional browser-based pixel art creator, sprite animator, and tilemap editor with multi-layer editing, dithering, and sprite sheet export." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PixelForge — Professional Pixel Art Creation & Animation Workstation</title>
+  <meta name="description" content="Professional browser-based pixel art creator, sprite animator, and tilemap editor with multi-layer editing, dithering, Bayer patterns, and sprite sheet export." />
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="styles/main.css" />
@@ -14,141 +14,161 @@
   <div class="app-container">
     
     <!-- Top Menu & Properties Bar -->
-    <header class="editor-topbar">
+    <header class="editor-topbar" role="banner">
       <!-- Brand & Project Template -->
       <div class="toolbar-group">
         <div class="brand-section">
           <span class="brand-logo-icon">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           </span>
-          <span>PixelForge</span>
+          <span class="brand-title">PixelForge</span>
         </div>
 
         <div class="toolbar-divider"></div>
 
-        <button class="btn btn-sm btn-secondary" id="btn-new-project" title="New Canvas">+ New</button>
+        <!-- Project Title Input -->
+        <input type="text" id="project-name-input" class="project-title-input" value="Cyber Knight Run" title="Click to rename project" placeholder="Project Name" aria-label="Project Title" />
 
-        <select id="select-project-template" class="form-control form-control-sm w-44" title="Load Demo Project">
+        <button class="btn btn-sm btn-secondary" id="btn-new-project" title="Create New Canvas">+ New</button>
+
+        <select id="select-project-template" class="form-control form-control-sm template-select" title="Load Curated Project Template" aria-label="Project Templates">
           <option value="knight">Project: Cyber Knight (Animation)</option>
           <option value="dungeon">Project: Dungeon Tileset (Tilemap)</option>
           <option value="city">Project: Cyberpunk Skyline (Art)</option>
+          <option value="potions">Project: RPG Relics & Potions</option>
+          <option value="hero8bit">Project: 8-Bit Hero Walk</option>
         </select>
       </div>
 
-      <!-- Tool Properties (Brush Size, Pixel Perfect, Symmetry) -->
-      <div class="toolbar-group">
+      <!-- Tool Properties (Brush Size, Pixel Perfect, Symmetry, Transforms) -->
+      <div class="toolbar-group tool-props-group">
         <span class="text-xs text-muted">Brush:</span>
-        <select id="select-brush-size" class="form-control form-control-sm w-16" title="Brush Size">
+        <select id="select-brush-size" class="form-control form-control-sm w-16" title="Brush Size" aria-label="Brush Size">
           <option value="1" selected>1 px</option>
           <option value="2">2 px</option>
           <option value="3">3 px</option>
           <option value="4">4 px</option>
         </select>
 
-        <button class="btn btn-sm btn-secondary active" id="btn-toggle-pixel-perfect" title="Pixel-Perfect Stroke (Removes Double Corners)">Pixel-Perfect</button>
+        <button class="btn btn-sm btn-secondary active" id="btn-toggle-pixel-perfect" title="Pixel-Perfect Stroke (Removes Duplicate L-Corner Pixels)">Pixel-Perfect</button>
 
         <span class="text-xs text-muted ml-1">Mirror:</span>
-        <select id="select-symmetry-mode" class="form-control form-control-sm w-28" title="Symmetry Mirror Line">
+        <select id="select-symmetry-mode" class="form-control form-control-sm w-28" title="Symmetry Mirror Line" aria-label="Symmetry Mode">
           <option value="none" selected>No Mirror</option>
           <option value="vertical">Vertical Line</option>
           <option value="horizontal">Horizontal Line</option>
           <option value="both">Quad Mirror</option>
         </select>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Quick Transform Buttons -->
+        <button class="btn btn-sm btn-secondary" id="btn-flip-h" title="Flip Horizontal">Flip H</button>
+        <button class="btn btn-sm btn-secondary" id="btn-flip-v" title="Flip Vertical">Flip V</button>
+        <button class="btn btn-sm btn-secondary" id="btn-rotate-90" title="Rotate 90° Clockwise">Rotate</button>
+        <button class="btn btn-sm btn-secondary" id="btn-open-resize-modal" title="Resize / Rescale Canvas">Resize</button>
+        <button class="btn btn-sm btn-secondary" id="btn-open-filters-modal" title="Adjust Colors & Invert">Filters</button>
       </div>
 
       <!-- Undo, Zoom & Export Actions -->
-      <div class="toolbar-group">
+      <div class="toolbar-group view-export-group">
         <button class="btn btn-sm btn-secondary" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&larr; Undo</button>
         <button class="btn btn-sm btn-secondary" id="btn-redo" title="Redo (Ctrl+Y)" disabled>Redo &rarr;</button>
 
         <div class="toolbar-divider"></div>
 
-        <button class="btn btn-sm btn-secondary" id="btn-zoom-out" title="Zoom Out">&minus;</button>
-        <span class="badge badge-secondary font-mono text-xs" id="zoom-percentage-label">1600%</span>
-        <button class="btn btn-sm btn-secondary" id="btn-zoom-in" title="Zoom In">&plus;</button>
-        <button class="btn btn-sm btn-secondary" id="btn-fit-canvas" title="Center Canvas">Center</button>
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-out" title="Zoom Out" aria-label="Zoom Out">&minus;</button>
+        <span class="badge badge-secondary font-mono text-xs cursor-pointer" id="zoom-percentage-label" title="Click to Reset Zoom (1600%)">1600%</span>
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-in" title="Zoom In" aria-label="Zoom In">&plus;</button>
+        <button class="btn btn-sm btn-secondary" id="btn-fit-canvas" title="Center Canvas Viewport">Center</button>
         <button class="btn btn-sm btn-secondary active" id="btn-toggle-grid" title="Toggle Pixel Grid">Grid</button>
 
         <div class="toolbar-divider"></div>
 
-        <!-- Export -->
-        <button class="btn btn-sm btn-primary" id="btn-export-png" title="Export Upscaled PNG">Export PNG</button>
-        <button class="btn btn-sm btn-secondary" id="btn-export-sheet" title="Export Sprite Sheet">Sprite Sheet</button>
-        <button class="btn btn-sm btn-secondary" id="btn-export-svg" title="Export Infinite Animated SVG">SVG Anim</button>
-        <button class="btn btn-sm btn-secondary" id="btn-export-video" title="Export Video Recording (WebM/MP4)">Video</button>
-        <button class="btn btn-sm btn-secondary" id="btn-export-json" title="Export Project JSON">Save JSON</button>
+        <button class="btn btn-sm btn-secondary" id="btn-open-tilemap" title="Open Tilemap Studio World Builder">Tilemap</button>
+        <button class="btn btn-sm btn-primary" id="btn-open-export-modal" title="Export PNG, Sprite Sheet, SVG, Video, JSON">Export</button>
         <button class="btn btn-sm btn-secondary" id="btn-import-json" title="Import Project JSON">Import</button>
-        <input type="file" id="file-import-project" accept=".json" style="display: none;" />
+        <button class="btn btn-sm btn-secondary" id="btn-open-shortcuts" title="Keyboard Shortcuts Cheat Sheet (?)">?</button>
+        <input type="file" id="file-import-project" accept=".json" style="display: none;" aria-hidden="true" />
       </div>
     </header>
 
     <!-- Main Workspace (Left Tool Palette, Central Canvas, Right Inspector) -->
-    <div class="editor-main-body">
+    <main class="editor-main-body">
       
       <!-- Left Tool Palette -->
-      <aside class="editor-tool-palette">
-        <button class="btn-tool-square btn-pixel-tool active" data-tool="pencil" title="Pencil (B)">
+      <aside class="editor-tool-palette" role="toolbar" aria-label="Drawing Tools">
+        <button class="btn-tool-square btn-pixel-tool active" data-tool="pencil" title="Pencil Tool (B)" aria-label="Pencil Tool">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="eraser" title="Eraser (E)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="eraser" title="Eraser (E)" aria-label="Eraser">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="line" title="Line Tool (L)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"></line></svg>
+        <button class="btn-tool-square btn-pixel-tool" data-tool="line" title="Line Tool (L)" aria-label="Line Tool">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"></line><circle cx="5" cy="19" r="1.5" fill="currentColor"></circle><circle cx="19" cy="5" r="1.5" fill="currentColor"></circle></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="rect" title="Rectangle Outline (U)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="rect" title="Rectangle Outline (U)" aria-label="Rectangle Outline">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="circle" title="Circle Outline (C)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="rectFill" title="Filled Rectangle" aria-label="Filled Rectangle">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
+        </button>
+        <button class="btn-tool-square btn-pixel-tool" data-tool="circle" title="Circle Outline (C)" aria-label="Circle Outline">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="bucket" title="Paint Bucket Fill (G)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="circleFill" title="Filled Circle" aria-label="Filled Circle">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="12" cy="12" r="9"></circle></svg>
+        </button>
+        <button class="btn-tool-square btn-pixel-tool" data-tool="bucket" title="Paint Bucket Fill (G)" aria-label="Paint Bucket Fill">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"></path><path d="m5 2 5 5"></path><path d="M2 13h15"></path></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="picker" title="Eyedropper / Color Picker (I)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 2 4 4L6 18l-4 1 1-4L14 2Z"></path></svg>
+        <button class="btn-tool-square btn-pixel-tool" data-tool="picker" title="Eyedropper / Color Picker (I or Alt+Click)" aria-label="Eyedropper">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 2 4 4L6 18l-4 1 1-4L14 2Z"></path><path d="m11 5 4 4"></path></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="dither" title="Dithering Brush (D)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="dither" title="Bayer Dithering Brush (D)" aria-label="Dithering Brush">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" fill="currentColor"></rect><rect x="15" y="3" width="6" height="6"></rect><rect x="3" y="15" width="6" height="6"></rect><rect x="15" y="15" width="6" height="6" fill="currentColor"></rect></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="select" title="Marquee Selection (S)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="select" title="Marquee Selection (S)" aria-label="Selection Tool">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"><rect x="3" y="3" width="18" height="18" rx="1"></rect></svg>
         </button>
-        <button class="btn-tool-square btn-pixel-tool" data-tool="move" title="Pan / Move Canvas (M / Middle Click)">
+        <button class="btn-tool-square btn-pixel-tool" data-tool="colorReplace" title="Color Replace Tool (R)" aria-label="Color Replace Tool">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path><circle cx="12" cy="12" r="3" fill="currentColor"></circle></svg>
+        </button>
+        <button class="btn-tool-square btn-pixel-tool" data-tool="move" title="Pan / Hand Tool (M / Space+Drag / Middle Click)" aria-label="Pan Tool">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
         </button>
       </aside>
 
       <!-- Center: Pixel Canvas Viewport & Bottom Animation Timeline -->
-      <div class="editor-center-workspace">
+      <section class="editor-center-workspace" aria-label="Canvas Workspace">
         
         <!-- Canvas Viewport -->
         <div class="canvas-workspace-container" id="canvas-workspace-container">
-          <canvas id="pixel-canvas"></canvas>
+          <canvas id="pixel-canvas" aria-label="Pixel Art Drawing Canvas" tabIndex="0"></canvas>
         </div>
 
         <!-- Bottom Animation Timeline Filmstrip -->
-        <div class="editor-panel-timeline" id="timeline-container"></div>
-      </div>
+        <section class="editor-panel-timeline" id="timeline-container" aria-label="Animation Timeline"></section>
+      </section>
 
       <!-- Right Inspector: Color Picker & Layer Stack -->
-      <aside class="editor-inspector-right">
+      <aside class="editor-inspector-right" aria-label="Inspector Panels">
         <!-- Top Half: Color Picker -->
-        <div class="flex-1 flex flex-col border-b overflow-hidden" id="color-picker-container"></div>
+        <section class="flex-1 flex flex-col border-b overflow-hidden" id="color-picker-container" aria-label="Color Palette"></section>
 
         <!-- Bottom Half: Layers Stack -->
-        <div class="flex-1 flex flex-col overflow-hidden" id="layer-stack-container"></div>
+        <section class="flex-1 flex flex-col overflow-hidden" id="layer-stack-container" aria-label="Layers Stack"></section>
       </aside>
 
-    </div>
+    </main>
 
     <!-- Status Bar -->
-    <footer class="editor-statusbar">
-      <div id="project-stats-readout">Size: 24x24 &bull; Frames: 6</div>
+    <footer class="editor-statusbar" role="contentinfo">
+      <div id="project-stats-readout">Canvas: <strong>24×24</strong> &bull; Frames: <strong>6</strong> &bull; Layers: <strong>1</strong></div>
       <div id="pixel-coordinates-readout">X: 0, Y: 0</div>
-      <div class="flex items-center gap-3">
-        <span>Draw: Left Click &bull; Secondary: Right Click &bull; Swap: X &bull; Pan: Space+Drag</span>
-        <span>PixelForge v1.0 &bull; Pixel Engine</span>
+      <div class="flex items-center gap-3 status-hints">
+        <span>Draw: Left Click &bull; Secondary: Right Click &bull; Pick: Alt+Click &bull; Swap: X &bull; Pan: Space+Drag</span>
+        <span class="text-emerald">&bull; IndexedDB Local Sync</span>
       </div>
     </footer>
 

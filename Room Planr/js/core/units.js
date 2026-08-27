@@ -1,12 +1,20 @@
 /**
  * RoomPlanr - Unit Measurement & Spatial Coordinate Engine
- * Real-world unit conversion (m, cm, ft/in), grid snapping, and dimensional formatting.
+ * Real-world unit conversion (m, cm, mm, ft/in), area calculation, grid snapping, and currency formatting.
  */
 
 export const UNITS = {
   METERS: 'm',
   CENTIMETERS: 'cm',
+  MILLIMETERS: 'mm',
   FEET_INCHES: 'ft'
+};
+
+export const CURRENCIES = {
+  USD: { symbol: '$', code: 'USD', name: 'US Dollar ($)' },
+  EUR: { symbol: '€', code: 'EUR', name: 'Euro (€)' },
+  GBP: { symbol: '£', code: 'GBP', name: 'British Pound (£)' },
+  JPY: { symbol: '¥', code: 'JPY', name: 'Japanese Yen (¥)' }
 };
 
 /**
@@ -19,14 +27,35 @@ export function formatDimension(meters, unit = UNITS.METERS) {
     return `${Math.round(meters * 100)} cm`;
   }
 
+  if (unit === UNITS.MILLIMETERS) {
+    return `${Math.round(meters * 1000)} mm`;
+  }
+
   if (unit === UNITS.FEET_INCHES) {
-    const totalInches = meters * 39.3701;
+    const totalInches = meters * 39.3700787;
     const feet = Math.floor(totalInches / 12);
     const inches = Math.round(totalInches % 12);
+    if (inches === 12) {
+      return `${feet + 1}′ 0″`;
+    }
     return `${feet}′ ${inches}″`;
   }
 
-  return `${meters.toFixed(2)} m`;
+  return `${Number(meters).toFixed(2)} m`;
+}
+
+/**
+ * Format floor area into square meters or square feet
+ */
+export function formatArea(squareMeters, unit = UNITS.METERS) {
+  if (squareMeters === null || squareMeters === undefined || isNaN(squareMeters)) return '0.0 m²';
+
+  if (unit === UNITS.FEET_INCHES) {
+    const sqFt = squareMeters * 10.7639;
+    return `${sqFt.toFixed(1)} sq ft`;
+  }
+
+  return `${Number(squareMeters).toFixed(1)} m²`;
 }
 
 /**
@@ -41,8 +70,12 @@ export function parseToMeters(valueStr, unit = UNITS.METERS) {
     return num / 100;
   }
 
+  if (unit === UNITS.MILLIMETERS) {
+    return num / 1000;
+  }
+
   if (unit === UNITS.FEET_INCHES) {
-    // Treat numeric input as feet decimal
+    // Treat plain numeric input as feet
     return num * 0.3048;
   }
 
@@ -59,8 +92,21 @@ export function snapToGrid(value, gridStepMeters = 0.1) {
 }
 
 /**
- * Snap angle to nearest increment (e.g. 45 degrees)
+ * Snap angle to nearest increment (e.g. 15 or 45 degrees)
  */
 export function snapAngle(degrees, step = 45) {
+  if (!step || step <= 0) return degrees;
   return Math.round(degrees / step) * step;
+}
+
+/**
+ * Format price for Bill of Materials takeoff
+ */
+export function formatPrice(amount, currencyCode = 'USD') {
+  const cur = CURRENCIES[currencyCode] || CURRENCIES.USD;
+  const formatted = Number(amount || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+  return `${cur.symbol}${formatted}`;
 }

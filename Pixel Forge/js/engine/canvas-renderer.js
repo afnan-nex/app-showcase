@@ -1,6 +1,7 @@
 /**
- * PixelForge - High-Performance Canvas 2D Pixel Renderer
- * Renders pixel-accurate grid, multi-layer compositing, onion skinning, symmetry lines, and selection marquees.
+ * PixelForge - High-Performance Canvas 2D Pixel Art Renderer
+ * Renders pixel-accurate grid, multi-layer compositing, blend modes, onion skinning,
+ * symmetry lines, selection marquees, and floating paste previews.
  */
 
 export class CanvasRenderer {
@@ -8,12 +9,12 @@ export class CanvasRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.camera = { x: 0, y: 0, zoom: 16 }; // Default 16x pixel zoom
-
-    // Disable image smoothing for ultra-crisp pixel art
     this.ctx.imageSmoothingEnabled = false;
+    this.marqueeOffset = 0;
   }
 
   resize(width, height) {
+    if (!this.canvas) return;
     this.canvas.width = width;
     this.canvas.height = height;
     this.ctx.imageSmoothingEnabled = false;
@@ -25,82 +26,105 @@ export class CanvasRenderer {
     activeLayerId = null,
     showGrid = true,
     showOnionSkin = false,
+    onionSkinOpacity = 0.3,
     symmetryMode = 'none', // none, horizontal, vertical, both
     activePreviewPixels = [],
     selection = null,
+    floatingSelection = null,
     cursorPos = null,
-    brushSize = 1
+    brushSize = 1,
+    backgroundColor = 'transparent'
   }) {
+    if (!this.ctx || !project) return;
+
     const ctx = this.ctx;
     const w = this.canvas.width;
     const h = this.canvas.height;
     const pw = project.width || 32;
     const ph = project.height || 32;
-    const zoom = this.camera.zoom;
+    const zoom = Math.max(1, this.camera.zoom);
 
-    // 1. Clear Viewport
-    ctx.fillStyle = '#0f1117';
+    // 1. Clear Viewport background
+    ctx.fillStyle = '#0a0c10';
     ctx.fillRect(0, 0, w, h);
 
     ctx.save();
     // 2. Camera Transform (Pan & Zoom)
-    ctx.translate(this.camera.x, this.camera.y);
+    ctx.translate(Math.round(this.camera.x), Math.round(this.camera.y));
     ctx.scale(zoom, zoom);
 
     // 3. Canvas Bounds Shadow & Border
-    ctx.fillStyle = '#181b24';
+    ctx.fillStyle = '#141722';
     ctx.fillRect(0, 0, pw, ph);
 
-    // 4. Checkerboard Transparency Pattern
-    this.drawCheckerboard(pw, ph);
+    // 4. Background Fill or Checkerboard Transparency Pattern
+    if (backgroundColor && backgroundColor !== 'transparent') {
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, pw, ph);
+    } else {
+      this.drawCheckerboard(pw, ph);
+    }
 
     // 5. Onion Skinning (Previous Frame in Cyan / Next in Red)
     if (showOnionSkin && project.frames && project.frames.length > 1) {
-      this.drawOnionSkin(project, activeFrameIndex);
+      this.drawOnionSkin(project, activeFrameIndex, onionSkinOpacity);
     }
 
     // 6. Composite Active Frame Layers
     const currentFrame = project.frames ? project.frames[activeFrameIndex] : null;
-    if (currentFrame) {
-      const layers = currentFrame.layers || [];
-      for (const layer of layers) {
+    if (currentFrame && currentFrame.layers) {
+      for (const layer of currentFrame.layers) {
         if (layer.visible === false) continue;
         this.renderLayer(layer, pw, ph);
       }
     }
 
-    // 7. Active Tool Drawing Preview
+    // 7. Floating Selection (Paste / Move preview)
+    if (floatingSelection && floatingSelection.pixels) {
+      this.renderFloatingSelection(floatingSelection, pw, ph);
+    }
+
+    // 8. Active Tool Drawing Preview
     if (activePreviewPixels && activePreviewPixels.length > 0) {
       for (const p of activePreviewPixels) {
         if (p.x >= 0 && p.x < pw && p.y >= 0 && p.y < ph) {
-          ctx.fillStyle = p.color || '#ffffff';
+          ctx.fillStyle = p.color || '#58a6ff';
           ctx.fillRect(p.x, p.y, 1, 1);
         }
       }
     }
 
-    // 8. Selection Marquee
+    // 9. Selection Marquee
     if (selection) {
-      this.drawSelectionMarquee(selection);
+      this.drawSelectionMarquee(selection, zoom);
     }
 
-    // 9. Symmetry Mirror Guidelines
+    // 10. Symmetry Mirror Guidelines
     if (symmetryMode !== 'none') {
       this.drawSymmetryLines(pw, ph, symmetryMode, zoom);
     }
 
-    // 10. Pixel Grid Overlay (when zoom >= 6x)
-    if (showGrid && zoom >= 6) {
+    // 11. Pixel Grid Overlay (when zoom >= 6x)
+    if (showGrid && zoom >= 5) {
       this.drawPixelGrid(pw, ph, zoom);
     }
 
-    // 11. Cursor Hover Indicator
+    // 12. Cursor Hover Indicator (Brush Box)
     if (cursorPos && cursorPos.x >= 0 && cursorPos.x < pw && cursorPos.y >= 0 && cursorPos.y < ph) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
       ctx.lineWidth = 1 / zoom;
       const offset = Math.floor(brushSize / 2);
       ctx.strokeRect(cursorPos.x - offset, cursorPos.y - offset, brushSize, brushSize);
+      ctx.restore();
     }
+
+    // 13. Canvas Outer Border
+    ctx.save();
+    ctx.strokeStyle = 'rgba(88, 166, 255, 0.5)';
+    ctx.lineWidth = 1 / zoom;
+    ctx.strokeRect(0, 0, pw, ph);
+    ctx.restore();
 
     ctx.restore();
   }
@@ -110,7 +134,7 @@ export class CanvasRenderer {
     const ctx = this.ctx;
     for (let y = 0; y < ph; y++) {
       for (let x = 0; x < pw; x++) {
-        ctx.fillStyle = (x + y) % 2 === 0 ? '#1e2330' : '#282e3f';
+        ctx.fillStyle = (x + y) % 2 === 0 ? '#181c28' : '#23293a';
         ctx.fillRect(x, y, 1, 1);
       }
     }
@@ -118,11 +142,15 @@ export class CanvasRenderer {
 
   // --- Single Layer Renderer ---
   renderLayer(layer, pw, ph) {
-    if (!layer.pixels) return;
+    if (!layer || !layer.pixels) return;
     const ctx = this.ctx;
     ctx.save();
+
+    if (layer.blendMode && layer.blendMode !== 'normal') {
+      ctx.globalCompositeOperation = layer.blendMode;
+    }
     if (layer.opacity !== undefined) {
-      ctx.globalAlpha = layer.opacity;
+      ctx.globalAlpha = Math.max(0, Math.min(1, layer.opacity));
     }
 
     const pixels = layer.pixels;
@@ -138,50 +166,75 @@ export class CanvasRenderer {
     ctx.restore();
   }
 
+  // --- Floating Selection Preview ---
+  renderFloatingSelection(sel, pw, ph) {
+    const ctx = this.ctx;
+    ctx.save();
+    const { x, y, width, height, pixels } = sel;
+    for (let py = 0; py < height; py++) {
+      for (let px = 0; px < width; px++) {
+        const targetX = x + px;
+        const targetY = y + py;
+        if (targetX >= 0 && targetX < pw && targetY >= 0 && targetY < ph) {
+          const col = pixels[py * width + px];
+          if (col && col !== 'transparent') {
+            ctx.fillStyle = col;
+            ctx.fillRect(targetX, targetY, 1, 1);
+          }
+        }
+      }
+    }
+    ctx.restore();
+  }
+
   // --- Onion Skinning ---
-  drawOnionSkin(project, activeIndex) {
+  drawOnionSkin(project, activeIndex, opacity = 0.3) {
     const ctx = this.ctx;
     const pw = project.width;
     const ph = project.height;
 
-    // Previous Frame
+    // Previous Frame (Cyan)
     if (activeIndex > 0) {
       const prevFrame = project.frames[activeIndex - 1];
-      ctx.save();
-      ctx.globalAlpha = 0.25;
-      for (const l of prevFrame.layers) {
-        if (l.visible === false) continue;
-        for (let y = 0; y < ph; y++) {
-          for (let x = 0; x < pw; x++) {
-            const col = l.pixels[y * pw + x];
-            if (col && col !== 'transparent') {
-              ctx.fillStyle = '#00e5ff'; // Cyan tint for past frame
-              ctx.fillRect(x, y, 1, 1);
+      if (prevFrame && prevFrame.layers) {
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        for (const l of prevFrame.layers) {
+          if (l.visible === false || !l.pixels) continue;
+          for (let y = 0; y < ph; y++) {
+            for (let x = 0; x < pw; x++) {
+              const col = l.pixels[y * pw + x];
+              if (col && col !== 'transparent') {
+                ctx.fillStyle = '#00e5ff';
+                ctx.fillRect(x, y, 1, 1);
+              }
             }
           }
         }
+        ctx.restore();
       }
-      ctx.restore();
     }
 
-    // Next Frame
+    // Next Frame (Red)
     if (activeIndex < project.frames.length - 1) {
       const nextFrame = project.frames[activeIndex + 1];
-      ctx.save();
-      ctx.globalAlpha = 0.25;
-      for (const l of nextFrame.layers) {
-        if (l.visible === false) continue;
-        for (let y = 0; y < ph; y++) {
-          for (let x = 0; x < pw; x++) {
-            const col = l.pixels[y * pw + x];
-            if (col && col !== 'transparent') {
-              ctx.fillStyle = '#ff1744'; // Red tint for future frame
-              ctx.fillRect(x, y, 1, 1);
+      if (nextFrame && nextFrame.layers) {
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        for (const l of nextFrame.layers) {
+          if (l.visible === false || !l.pixels) continue;
+          for (let y = 0; y < ph; y++) {
+            for (let x = 0; x < pw; x++) {
+              const col = l.pixels[y * pw + x];
+              if (col && col !== 'transparent') {
+                ctx.fillStyle = '#ff1744';
+                ctx.fillRect(x, y, 1, 1);
+              }
             }
           }
         }
+        ctx.restore();
       }
-      ctx.restore();
     }
   }
 
@@ -189,7 +242,7 @@ export class CanvasRenderer {
   drawPixelGrid(pw, ph, zoom) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
     ctx.lineWidth = 1 / zoom;
 
     ctx.beginPath();
@@ -209,7 +262,7 @@ export class CanvasRenderer {
     ctx.save();
     ctx.strokeStyle = '#58a6ff';
     ctx.lineWidth = 1.5 / zoom;
-    ctx.setLineDash([2 / zoom, 2 / zoom]);
+    ctx.setLineDash([3 / zoom, 3 / zoom]);
 
     if (mode === 'vertical' || mode === 'both') {
       const midX = pw / 2;
@@ -227,21 +280,30 @@ export class CanvasRenderer {
   }
 
   // --- Selection Marquee ---
-  drawSelectionMarquee(sel) {
+  drawSelectionMarquee(sel, zoom) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1 / this.camera.zoom;
-    ctx.setLineDash([3 / this.camera.zoom, 3 / this.camera.zoom]);
 
-    const x = Math.min(sel.x0, sel.x1);
-    const y = Math.min(sel.y0, sel.y1);
+    const minX = Math.min(sel.x0, sel.x1);
+    const minY = Math.min(sel.y0, sel.y1);
     const w = Math.abs(sel.x1 - sel.x0) + 1;
     const h = Math.abs(sel.y1 - sel.y0) + 1;
 
-    ctx.fillStyle = 'rgba(88, 166, 255, 0.2)';
-    ctx.fillRect(x, y, w, h);
-    ctx.strokeRect(x, y, w, h);
+    // Fill tinted selection
+    ctx.fillStyle = 'rgba(88, 166, 255, 0.18)';
+    ctx.fillRect(minX, minY, w, h);
+
+    // Dashed border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1 / zoom;
+    ctx.setLineDash([3 / zoom, 3 / zoom]);
+    ctx.strokeRect(minX, minY, w, h);
+
+    // Inner contrasting dash
+    ctx.strokeStyle = '#000000';
+    ctx.lineDashOffset = 3 / zoom;
+    ctx.strokeRect(minX, minY, w, h);
+
     ctx.restore();
   }
 }

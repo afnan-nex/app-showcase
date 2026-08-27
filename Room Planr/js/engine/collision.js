@@ -1,20 +1,20 @@
 /**
  * RoomPlanr - Spatial Collision & Distance Measurement Engine
- * Rotated OBB (Oriented Bounding Box) collision detection and dynamic distance-to-walls calculations.
+ * Rotated OBB (Oriented Bounding Box) collision detection, room boundary checking, and dynamic wall distance calculations.
  */
 
 /**
  * Get the 4 corner points of a rotated rectangle in world coordinates
  */
 export function getRotatedCorners(x, y, width, depth, rotationDegrees = 0) {
-  const rad = (rotationDegrees * Math.PI) / 180;
+  const rad = ((rotationDegrees || 0) * Math.PI) / 180;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
 
-  const hw = width / 2;
-  const hd = depth / 2;
+  const hw = (width || 1) / 2;
+  const hd = (depth || 1) / 2;
 
-  // Local corners relative to center
+  // Local corners relative to center (in clockwise order: NW, NE, SE, SW)
   const localCorners = [
     { x: -hw, y: -hd },
     { x: hw, y: -hd },
@@ -32,6 +32,7 @@ export function getRotatedCorners(x, y, width, depth, rotationDegrees = 0) {
  * Test if a world point (wx, wy) is inside a rotated rectangle item
  */
 export function isPointInsideRotatedItem(wx, wy, item) {
+  if (!item) return false;
   const dx = wx - item.x;
   const dy = wy - item.y;
   const rad = -((item.rotation || 0) * Math.PI) / 180;
@@ -93,6 +94,9 @@ export function checkPolygonsIntersect(polyA, polyB) {
  * Check if furniture item intersects another furniture item
  */
 export function checkFurnitureOverlap(itemA, itemB) {
+  if (!itemA || !itemB || itemA === itemB) return false;
+  if (itemA.id && itemB.id && itemA.id === itemB.id) return false;
+
   // Area rugs should not trigger collisions with other furniture placed on top
   if (itemA.type === 'rug_large' || itemB.type === 'rug_large') {
     return false;
@@ -107,6 +111,7 @@ export function checkFurnitureOverlap(itemA, itemB) {
  * Check if furniture item is outside room perimeter
  */
 export function checkOutsideRoom(item, roomWidth, roomDepth) {
+  if (!item) return false;
   const corners = getRotatedCorners(item.x, item.y, item.width, item.depth, item.rotation || 0);
   for (const pt of corners) {
     if (pt.x < -0.05 || pt.x > roomWidth + 0.05 || pt.y < -0.05 || pt.y > roomDepth + 0.05) {
@@ -117,16 +122,26 @@ export function checkOutsideRoom(item, roomWidth, roomDepth) {
 }
 
 /**
- * Calculate perpendicular distances from item center to nearest 4 walls
+ * Calculate perpendicular distances from item bounds to nearest 4 walls
  */
 export function getDistancesToWalls(item, roomWidth, roomDepth) {
-  const hw = (item.width || 1) / 2;
-  const hd = (item.depth || 1) / 2;
+  if (!item) return { left: 0, right: 0, top: 0, bottom: 0 };
+  const corners = getRotatedCorners(item.x, item.y, item.width, item.depth, item.rotation || 0);
 
-  const left = Math.max(0, item.x - hw);
-  const right = Math.max(0, roomWidth - (item.x + hw));
-  const top = Math.max(0, item.y - hd);
-  const bottom = Math.max(0, roomDepth - (item.y + hd));
+  let minX = Infinity, maxX = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+
+  for (const pt of corners) {
+    minX = Math.min(minX, pt.x);
+    maxX = Math.max(maxX, pt.x);
+    minY = Math.min(minY, pt.y);
+    maxY = Math.max(maxY, pt.y);
+  }
+
+  const left = Math.max(0, minX);
+  const right = Math.max(0, roomWidth - maxX);
+  const top = Math.max(0, minY);
+  const bottom = Math.max(0, roomDepth - maxY);
 
   return {
     left: parseFloat(left.toFixed(2)),

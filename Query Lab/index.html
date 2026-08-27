@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QueryLab — Relational SQL Playground & Database IDE</title>
-  <meta name="description" content="Browser-based SQL playground, relational database simulator, visual ERD schema relationship viewer, and table designer." />
+  <meta name="description" content="Professional browser-based relational SQL playground, query analyzer, visual ERD schema relationship viewer, and table designer." />
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="styles/main.css" />
@@ -14,33 +14,57 @@
   <div class="app-container">
     
     <!-- Top Menu & Action Bar -->
-    <header class="editor-topbar">
-      <!-- Brand & Database Selector -->
+    <header class="editor-topbar" role="banner">
+      <!-- Left: Sidebar Toggle, Brand & Active Database Selector -->
       <div class="toolbar-group">
+        <button class="btn-icon-xs" id="btn-toggle-sidebar" title="Toggle Database Sidebar (Ctrl+B)" aria-label="Toggle Database Sidebar">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+
         <div class="brand-section">
           <span class="brand-logo-icon">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
           </span>
-          <span>QueryLab</span>
+          <span class="brand-title">QueryLab</span>
         </div>
+
+        <div class="toolbar-divider hide-mobile"></div>
+
+        <div class="flex items-center gap-1.5 hide-mobile">
+          <label for="select-active-database" class="text-xs text-muted font-semibold">DB:</label>
+          <select id="select-active-database" class="form-control form-control-sm font-bold font-mono" style="min-width: 170px;" aria-label="Active Database Selector">
+            <option value="shopmart" selected>ShopMart (E-Commerce)</option>
+            <option value="techcorp">TechCorp (Enterprise HR)</option>
+            <option value="cloudpulse">CloudPulse (SaaS Analytics)</option>
+            <option value="grandvista">GrandVista (Hotel & Resorts)</option>
+            <option value="__new__">+ Create New Database...</option>
+          </select>
+        </div>
+
+        <button class="btn btn-xs btn-secondary hide-mobile" id="btn-reset-demo-db" title="Reset Active Database to Clean State">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          <span>Reset</span>
+        </button>
+      </div>
+
+      <!-- Right: Export, Import & Shortcuts Help -->
+      <div class="toolbar-group">
+        <button class="btn btn-xs btn-secondary" id="btn-export-database-json" title="Export Schema & Data as SQL or JSON">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Export</span>
+        </button>
+        <button class="btn btn-xs btn-secondary" id="btn-import-database-json" title="Import Database from SQL or JSON">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <span>Import</span>
+        </button>
+        <input type="file" id="file-import-database" accept=".json,.sql" style="display: none;" aria-hidden="true" />
 
         <div class="toolbar-divider"></div>
 
-        <span class="text-xs text-muted font-semibold">Active Database:</span>
-        <select id="select-active-database" class="form-control form-control-sm w-56 font-bold font-mono">
-          <option value="shopmart" selected>ShopMart (E-Commerce)</option>
-          <option value="techcorp">TechCorp (Enterprise HR)</option>
-          <option value="__new__">+ Create New Database...</option>
-        </select>
-
-        <button class="btn btn-sm btn-secondary" id="btn-reset-demo-db" title="Reset Active Database to Demo State">Reset Demo DB</button>
-      </div>
-
-      <!-- Export, Import & Global Actions -->
-      <div class="toolbar-group">
-        <button class="btn btn-sm btn-secondary" id="btn-export-database-json" title="Export Schema & Data as JSON">Export DB</button>
-        <button class="btn btn-sm btn-secondary" id="btn-import-database-json" title="Import Schema & Data from JSON">Import DB</button>
-        <input type="file" id="file-import-database" accept=".json" style="display: none;" />
+        <button class="btn btn-xs btn-secondary" id="btn-open-shortcuts" title="Keyboard Shortcuts Guide (?)" aria-label="Keyboard Shortcuts">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span class="hide-mobile">Shortcuts</span>
+        </button>
       </div>
     </header>
 
@@ -48,58 +72,67 @@
     <div class="editor-main-body">
       
       <!-- Left Database Explorer Sidebar -->
-      <aside class="editor-sidebar-left" id="schema-browser-container"></aside>
+      <aside class="editor-sidebar-left" id="schema-browser-container" aria-label="Database Schema Explorer"></aside>
 
       <!-- Center Workspace Area -->
-      <main class="editor-center-workspace">
+      <main class="editor-center-workspace" role="main">
         
         <!-- Workspace Tabs Bar -->
-        <nav class="workspace-tabs-bar">
-          <button class="tab-nav-btn active" data-tab="editor">
+        <nav class="workspace-tabs-bar" role="tablist" aria-label="Workspace Views">
+          <button class="tab-nav-btn active" data-tab="editor" role="tab" aria-selected="true" aria-controls="tab-content-editor">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
             <span>Query Editor & Results</span>
           </button>
-          <button class="tab-nav-btn" data-tab="erd">
+          <button class="tab-nav-btn" data-tab="erd" role="tab" aria-selected="false" aria-controls="tab-content-erd">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="7" rx="1"></rect><rect x="14" y="3" width="8" height="7" rx="1"></rect><rect x="8" y="14" width="8" height="7" rx="1"></rect><line x1="6" y1="10" x2="6" y2="12"></line><line x1="18" y1="10" x2="18" y2="12"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="12" y1="12" x2="12" y2="14"></line></svg>
             <span>Schema & ERD Visualizer</span>
           </button>
-          <button class="tab-nav-btn" data-tab="history">
+          <button class="tab-nav-btn" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-content-history">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>Query Execution History</span>
+            <span>Execution History</span>
+          </button>
+          <button class="tab-nav-btn" data-tab="snippets" role="tab" aria-selected="false" aria-controls="tab-content-snippets">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+            <span>Saved Snippets</span>
           </button>
         </nav>
 
         <!-- Tab 1: SQL Editor & Results -->
-        <div class="workspace-tab-pane active" id="tab-content-editor">
+        <section class="workspace-tab-pane active" id="tab-content-editor" role="tabpanel">
           <!-- Top Half: SQL Editor -->
           <div id="sql-editor-container"></div>
 
           <!-- Resizable Splitter -->
-          <div id="editor-results-splitter" title="Drag to Resize Splitter"></div>
+          <div id="editor-results-splitter" title="Drag to Resize Editor/Results Splitter" role="separator" aria-orientation="horizontal"></div>
 
           <!-- Bottom Half: Results Grid -->
           <div id="sql-results-container"></div>
-        </div>
+        </section>
 
         <!-- Tab 2: Schema & ERD Visualizer -->
-        <div class="workspace-tab-pane" id="tab-content-erd" style="background-color: #0f1117;">
-          <canvas id="erd-canvas" style="display: block; width: 100%; height: 100%; cursor: grab;"></canvas>
-        </div>
+        <section class="workspace-tab-pane" id="tab-content-erd" role="tabpanel" style="background-color: #0a0e17;">
+          <canvas id="erd-canvas" style="display: block; width: 100%; height: 100%;" aria-label="Entity Relationship Diagram Canvas"></canvas>
+        </section>
 
         <!-- Tab 3: Query Execution History -->
-        <div class="workspace-tab-pane p-4 overflow-y-auto" id="tab-content-history">
-          <div id="query-history-list" class="flex flex-col gap-2 max-w-4xl mx-auto"></div>
-        </div>
+        <section class="workspace-tab-pane p-4 overflow-y-auto" id="tab-content-history" role="tabpanel">
+          <div id="query-history-list" class="flex flex-col gap-2 max-w-5xl mx-auto w-full"></div>
+        </section>
+
+        <!-- Tab 4: Saved Query Snippets -->
+        <section class="workspace-tab-pane p-4 overflow-y-auto" id="tab-content-snippets" role="tabpanel">
+          <div id="query-snippets-list" class="flex flex-col gap-2 max-w-5xl mx-auto w-full"></div>
+        </section>
 
       </main>
 
     </div>
 
     <!-- Status Bar -->
-    <footer class="editor-statusbar">
-      <div id="status-engine-readout">SQL Engine: <strong>Relational Memory Engine v1.0</strong> (ANSI SQL Subset)</div>
+    <footer class="editor-statusbar" role="contentinfo">
+      <div id="status-engine-readout">Active DB: <strong>ShopMart</strong> &bull; Engine: <strong>Relational Memory Engine v2.0</strong></div>
       <div class="flex items-center gap-3">
-        <span>Execute: <strong>Ctrl+Enter</strong> &bull; Auto-Complete &bull; Format Query</span>
+        <span class="hide-mobile">Run Query: <strong>Ctrl+Enter</strong> &bull; Intellisense: <strong>Ctrl+Space</strong></span>
         <span>QueryLab</span>
       </div>
     </footer>

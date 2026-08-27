@@ -1,6 +1,6 @@
 /**
  * RoomPlanr - 3D Isometric Perspective Preview Renderer
- * Pure Canvas 2D pseudo-3D isometric projection rendering elevated walls, floor textures, and shaded 3D furniture blocks.
+ * Pure Canvas 2D pseudo-3D isometric projection rendering elevated walls, floor textures, ambient shading, and 3D furniture blocks.
  */
 
 import { FLOOR_MATERIALS } from './catalog.js';
@@ -11,11 +11,19 @@ export class Renderer3D {
     this.ctx = canvas.getContext('2d');
     this.camera = { x: 0, y: 0, zoom: 45 };
     this.isoAngle = Math.PI / 6; // 30 degrees
+    this.dpr = window.devicePixelRatio || 1;
+    this.logicalWidth = 800;
+    this.logicalHeight = 600;
   }
 
   resize(width, height) {
-    this.canvas.width = width;
-    this.canvas.height = height;
+    this.dpr = window.devicePixelRatio || 1;
+    this.logicalWidth = width;
+    this.logicalHeight = height;
+    this.canvas.width = Math.round(width * this.dpr);
+    this.canvas.height = Math.round(height * this.dpr);
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
   }
 
   toIso(x, y, z = 0, scale = 1) {
@@ -32,8 +40,11 @@ export class Renderer3D {
     selectedItemId = null
   }) {
     const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const w = this.logicalWidth;
+    const h = this.logicalHeight;
+
+    ctx.save();
+    ctx.scale(this.dpr, this.dpr);
 
     // 1. Clear Viewport
     ctx.fillStyle = '#080c14';
@@ -51,13 +62,19 @@ export class Renderer3D {
     this.drawIsometricWalls(ctx, room, scale);
 
     // 4. Draw Furniture Items Sorted by Isometric Depth (Painter's Algorithm)
-    const sortedItems = [...items].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+    const sortedItems = [...items].sort((a, b) => {
+      // Rugs always at bottom
+      if (a.type === 'rug_large') return -1;
+      if (b.type === 'rug_large') return 1;
+      return (a.x + a.y) - (b.x + b.y);
+    });
 
     for (const item of sortedItems) {
       const isSelected = item.id === selectedItemId;
       this.drawIsometricFurnitureBlock(ctx, item, scale, isSelected);
     }
 
+    ctx.restore();
     ctx.restore();
   }
 
@@ -97,13 +114,23 @@ export class Renderer3D {
       const end = this.toIso(rw, y, 0, scale);
       ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); ctx.stroke();
     }
+
+    // Floor Base Edge Shadow
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(p3.x, p3.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p1.x, p1.y);
+    ctx.stroke();
+
     ctx.restore();
   }
 
   drawIsometricWalls(ctx, room, scale) {
     const rw = room.width;
     const rd = room.depth;
-    const wh = room.height || 2.80; // 2.8m standard ceiling
+    const wh = room.height || 2.85; // Standard architectural ceiling
     const wallColor = room.wallColor || '#1e293b';
 
     ctx.save();
@@ -122,7 +149,8 @@ export class Renderer3D {
     ctx.lineTo(wl0_t.x, wl0_t.y);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // 2. Back-Top Wall (Along X-axis from 0,0 to rw,0)
@@ -131,7 +159,7 @@ export class Renderer3D {
     const wt1_t = this.toIso(rw, 0, wh, scale);
     const wt0_t = this.toIso(0, 0, wh, scale);
 
-    ctx.fillStyle = adjustBrightness(wallColor, 15); // Back-Top wall lit lighter
+    ctx.fillStyle = adjustBrightness(wallColor, 12); // Back-Top wall lit lighter
     ctx.beginPath();
     ctx.moveTo(wt0_b.x, wt0_b.y);
     ctx.lineTo(wt1_b.x, wt1_b.y);
@@ -139,7 +167,16 @@ export class Renderer3D {
     ctx.lineTo(wt0_t.x, wt0_t.y);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Wall Join Corner Line (Ambient Occlusion effect)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(wl0_b.x, wl0_b.y);
+    ctx.lineTo(wl0_t.x, wl0_t.y);
     ctx.stroke();
 
     ctx.restore();
@@ -185,10 +222,37 @@ export class Renderer3D {
 
     ctx.save();
 
+    // Rug flat drawing
+    if (item.type === 'rug_large') {
+      ctx.fillStyle = baseColor;
+      ctx.beginPath();
+      ctx.moveTo(b0.x, b0.y);
+      ctx.lineTo(b1.x, b1.y);
+      ctx.lineTo(b2.x, b2.y);
+      ctx.lineTo(b3.x, b3.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(0, 0, 0, 0.2)';
+      ctx.lineWidth = isSelected ? 2 : 1;
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    // Drop shadow under 3D block
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.beginPath();
+    ctx.moveTo(b0.x + 2, b0.y + 2);
+    ctx.lineTo(b1.x + 2, b1.y + 2);
+    ctx.lineTo(b2.x + 2, b2.y + 2);
+    ctx.lineTo(b3.x + 2, b3.y + 2);
+    ctx.closePath();
+    ctx.fill();
+
     // Draw 4 Side Walls
     for (let i = 0; i < 4; i++) {
       const next = (i + 1) % 4;
-      const shade = i % 2 === 0 ? -30 : -15;
+      const shade = i % 2 === 0 ? -28 : -14;
 
       ctx.fillStyle = adjustBrightness(baseColor, shade);
       ctx.beginPath();
@@ -199,13 +263,13 @@ export class Renderer3D {
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(0, 0, 0, 0.3)';
+      ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(0, 0, 0, 0.35)';
       ctx.lineWidth = isSelected ? 1.5 : 0.8;
       ctx.stroke();
     }
 
     // Top Face (t0 -> t1 -> t2 -> t3)
-    ctx.fillStyle = adjustBrightness(baseColor, 25);
+    ctx.fillStyle = adjustBrightness(baseColor, 22);
     ctx.beginPath();
     ctx.moveTo(t0.x, t0.y);
     ctx.lineTo(t1.x, t1.y);
@@ -214,16 +278,28 @@ export class Renderer3D {
     ctx.closePath();
     ctx.fill();
 
-    ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(0, 0, 0, 0.3)';
+    ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(0, 0, 0, 0.35)';
     ctx.lineWidth = isSelected ? 2 : 1;
     ctx.stroke();
+
+    // Selected 3D highlight marker
+    if (isSelected) {
+      ctx.fillStyle = '#38bdf8';
+      const centerT = {
+        x: (t0.x + t1.x + t2.x + t3.x) / 4,
+        y: (t0.y + t1.y + t2.y + t3.y) / 4
+      };
+      ctx.beginPath();
+      ctx.arc(centerT.x, centerT.y - 12, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.restore();
   }
 }
 
 /**
- * Adjust hex color brightness with fallback for any format
+ * Adjust hex color brightness with fallback
  */
 function adjustBrightness(colorStr, percent) {
   if (!colorStr) return '#475569';

@@ -1,6 +1,7 @@
 /**
  * QueryLab - Visual Table Designer Modal
- * Visual UI to design database tables, columns, data types, and primary key constraints.
+ * Visual UI to design database tables, columns, constraints, foreign keys,
+ * with real-time SQL DDL preview and validation.
  */
 
 import { getIcon, escapeHTML } from '../core/icons.js';
@@ -10,43 +11,90 @@ export class TableDesignerModal {
     this.container = modalContainer;
     this.onSaveTable = onSaveTable;
     this.tableName = 'new_table';
+    this.database = null;
     this.columns = [
       { name: 'id', type: 'INTEGER', isPrimaryKey: true, isNotNull: true, isUnique: false, defaultValue: '' },
-      { name: 'name', type: 'TEXT', isPrimaryKey: false, isNotNull: true, isUnique: false, defaultValue: '' }
+      { name: 'name', type: 'TEXT', isPrimaryKey: false, isNotNull: true, isUnique: false, defaultValue: '' },
+      { name: 'created_at', type: 'DATE', isPrimaryKey: false, isNotNull: false, isUnique: false, defaultValue: '' }
     ];
+    this.foreignKeys = [];
   }
 
-  open() {
-    this.tableName = 'table_' + Math.floor(Math.random() * 1000);
+  setDatabase(database) {
+    this.database = database;
+  }
+
+  open(defaultName = '') {
+    this.tableName = defaultName || 'table_' + Math.floor(100 + Math.random() * 900);
     this.columns = [
       { name: 'id', type: 'INTEGER', isPrimaryKey: true, isNotNull: true, isUnique: false, defaultValue: '' },
-      { name: 'name', type: 'TEXT', isPrimaryKey: false, isNotNull: true, isUnique: false, defaultValue: '' }
+      { name: 'name', type: 'TEXT', isPrimaryKey: false, isNotNull: true, isUnique: false, defaultValue: '' },
+      { name: 'created_at', type: 'DATE', isPrimaryKey: false, isNotNull: false, isUnique: false, defaultValue: '' }
     ];
+    this.foreignKeys = [];
     this.render();
     this.container.classList.add('active');
+
+    setTimeout(() => {
+      const nameInp = this.container.querySelector('#designer-table-name');
+      if (nameInp) nameInp.focus();
+    }, 50);
   }
 
   close() {
     this.container.classList.remove('active');
   }
 
+  generatePreviewSQL() {
+    const name = (this.tableName || 'new_table').trim();
+    const colDefs = this.columns.map(c => {
+      let def = `  ${c.name || 'column_name'} ${c.type || 'TEXT'}`;
+      if (c.isPrimaryKey) def += ' PRIMARY KEY';
+      if (c.isNotNull) def += ' NOT NULL';
+      if (c.isUnique && !c.isPrimaryKey) def += ' UNIQUE';
+      if (c.defaultValue) {
+        const isNum = !isNaN(Number(c.defaultValue)) && typeof c.defaultValue !== 'boolean';
+        def += ` DEFAULT ${isNum ? c.defaultValue : `'${c.defaultValue}'`}`;
+      }
+      return def;
+    });
+
+    if (this.foreignKeys && this.foreignKeys.length > 0) {
+      for (const fk of this.foreignKeys) {
+        if (fk.column && fk.refTable && fk.refColumn) {
+          colDefs.push(`  FOREIGN KEY (${fk.column}) REFERENCES ${fk.refTable}(${fk.refColumn})`);
+        }
+      }
+    }
+
+    return `CREATE TABLE ${name} (\n${colDefs.join(',\n')}\n);`;
+  }
+
   render() {
+    const existingTables = this.database ? Object.values(this.database.tables || {}) : [];
+
     this.container.innerHTML = `
-      <div class="modal-backdrop"></div>
-      <div class="modal-dialog table-designer-dialog">
+      <div class="modal-backdrop" aria-hidden="true"></div>
+      <div class="modal-dialog table-designer-dialog" role="dialog" aria-modal="true" aria-labelledby="designer-modal-title">
         <div class="modal-header flex items-center justify-between p-3 border-b">
           <div class="flex items-center gap-2">
             ${getIcon('table', 'icon-sm text-primary')}
-            <span class="font-bold text-sm">Visual Table Designer</span>
+            <span id="designer-modal-title" class="font-bold text-sm">Visual Table Designer</span>
           </div>
-          <button class="btn-icon-xs btn-modal-close">&times;</button>
+          <button class="btn-icon-xs btn-modal-close" aria-label="Close dialog">&times;</button>
         </div>
 
-        <div class="modal-body p-4 flex flex-col gap-3">
-          <!-- Table Name -->
+        <div class="modal-body p-4 flex flex-col gap-3 overflow-y-auto" style="max-height: 70vh;">
+          <!-- Table Name Input -->
           <div class="form-group">
-            <label class="form-label text-xs font-semibold">Table Name</label>
-            <input type="text" id="designer-table-name" class="form-control form-control-sm font-bold font-mono" value="${escapeHTML(this.tableName)}" />
+            <label for="designer-table-name" class="form-label text-xs font-semibold text-secondary">Table Name</label>
+            <input 
+              type="text" 
+              id="designer-table-name" 
+              class="form-control form-control-sm font-bold font-mono text-primary w-full" 
+              value="${escapeHTML(this.tableName)}" 
+              placeholder="e.g. products, customers"
+            />
           </div>
 
           <!-- Columns Grid -->
@@ -61,23 +109,23 @@ export class TableDesignerModal {
             <table class="data-grid-table font-mono text-xs w-full">
               <thead>
                 <tr>
-                  <th>Column Name</th>
-                  <th>Type</th>
-                  <th>PK</th>
-                  <th>Not Null</th>
-                  <th>Unique</th>
-                  <th>Default</th>
-                  <th></th>
+                  <th style="width: 28%;">Column Name</th>
+                  <th style="width: 22%;">Data Type</th>
+                  <th style="width: 8%; text-align: center;" title="Primary Key">PK</th>
+                  <th style="width: 8%; text-align: center;" title="Not Null">Not Null</th>
+                  <th style="width: 8%; text-align: center;" title="Unique">Unique</th>
+                  <th style="width: 20%;">Default</th>
+                  <th style="width: 6%;"></th>
                 </tr>
               </thead>
               <tbody id="designer-columns-body">
                 ${this.columns.map((col, idx) => `
                   <tr>
                     <td>
-                      <input type="text" class="form-control form-control-sm font-mono col-prop-name" data-idx="${idx}" value="${escapeHTML(col.name)}" />
+                      <input type="text" class="form-control form-control-sm font-mono col-prop-name w-full" data-idx="${idx}" value="${escapeHTML(col.name)}" placeholder="col_name" />
                     </td>
                     <td>
-                      <select class="form-control form-control-sm font-mono col-prop-type" data-idx="${idx}">
+                      <select class="form-control form-control-sm font-mono col-prop-type w-full" data-idx="${idx}">
                         <option value="INTEGER" ${col.type === 'INTEGER' ? 'selected' : ''}>INTEGER</option>
                         <option value="TEXT" ${col.type === 'TEXT' ? 'selected' : ''}>TEXT</option>
                         <option value="REAL" ${col.type === 'REAL' ? 'selected' : ''}>REAL</option>
@@ -95,11 +143,11 @@ export class TableDesignerModal {
                       <input type="checkbox" class="col-prop-uq" data-idx="${idx}" ${col.isUnique ? 'checked' : ''} />
                     </td>
                     <td>
-                      <input type="text" class="form-control form-control-sm font-mono col-prop-def" data-idx="${idx}" value="${escapeHTML(col.defaultValue || '')}" placeholder="NULL" />
+                      <input type="text" class="form-control form-control-sm font-mono col-prop-def w-full" data-idx="${idx}" value="${escapeHTML(col.defaultValue || '')}" placeholder="NULL" />
                     </td>
                     <td class="text-center">
                       ${this.columns.length > 1 ? `
-                        <button class="btn-icon-xs text-rose btn-designer-del-col" data-idx="${idx}">&times;</button>
+                        <button class="btn-icon-xs text-rose btn-designer-del-col" data-idx="${idx}" title="Remove Column">&times;</button>
                       ` : ''}
                     </td>
                   </tr>
@@ -107,11 +155,19 @@ export class TableDesignerModal {
               </tbody>
             </table>
           </div>
+
+          <!-- Real-Time SQL DDL Preview -->
+          <div class="flex flex-col gap-1 mt-1">
+            <span class="text-xs font-bold uppercase text-muted">Generated SQL Statement</span>
+            <pre class="font-mono text-xs text-primary p-2.5 rounded border" style="background-color: var(--bg-input); border-color: var(--border-subtle); margin: 0; line-height: 1.5; max-height: 120px; overflow-y: auto;" id="designer-sql-preview">${escapeHTML(this.generatePreviewSQL())}</pre>
+          </div>
         </div>
 
         <div class="modal-footer p-3 border-t flex justify-end gap-2">
           <button class="btn btn-sm btn-secondary btn-modal-close">Cancel</button>
-          <button class="btn btn-sm btn-primary" id="btn-save-designed-table">Create Table</button>
+          <button class="btn btn-sm btn-primary" id="btn-save-designed-table">
+            ${getIcon('check', 'icon-xs')} Create Table
+          </button>
         </div>
       </div>
     `;
@@ -124,8 +180,14 @@ export class TableDesignerModal {
       b.addEventListener('click', () => this.close());
     });
 
+    const updatePreview = () => {
+      const pre = this.container.querySelector('#designer-sql-preview');
+      if (pre) pre.textContent = this.generatePreviewSQL();
+    };
+
     this.container.querySelector('#designer-table-name')?.addEventListener('input', (e) => {
       this.tableName = e.target.value;
+      updatePreview();
     });
 
     this.container.querySelector('#btn-designer-add-col')?.addEventListener('click', () => {
@@ -144,31 +206,37 @@ export class TableDesignerModal {
     this.container.querySelectorAll('.col-prop-name').forEach(inp => {
       inp.addEventListener('input', (e) => {
         this.columns[parseInt(e.target.dataset.idx, 10)].name = e.target.value;
+        updatePreview();
       });
     });
     this.container.querySelectorAll('.col-prop-type').forEach(sel => {
       sel.addEventListener('change', (e) => {
         this.columns[parseInt(e.target.dataset.idx, 10)].type = e.target.value;
+        updatePreview();
       });
     });
     this.container.querySelectorAll('.col-prop-pk').forEach(chk => {
       chk.addEventListener('change', (e) => {
         this.columns[parseInt(e.target.dataset.idx, 10)].isPrimaryKey = e.target.checked;
+        updatePreview();
       });
     });
     this.container.querySelectorAll('.col-prop-nn').forEach(chk => {
       chk.addEventListener('change', (e) => {
         this.columns[parseInt(e.target.dataset.idx, 10)].isNotNull = e.target.checked;
+        updatePreview();
       });
     });
     this.container.querySelectorAll('.col-prop-uq').forEach(chk => {
       chk.addEventListener('change', (e) => {
         this.columns[parseInt(e.target.dataset.idx, 10)].isUnique = e.target.checked;
+        updatePreview();
       });
     });
     this.container.querySelectorAll('.col-prop-def').forEach(inp => {
       inp.addEventListener('input', (e) => {
         this.columns[parseInt(e.target.dataset.idx, 10)].defaultValue = e.target.value;
+        updatePreview();
       });
     });
 
@@ -182,8 +250,11 @@ export class TableDesignerModal {
 
     // Create Table Commit
     this.container.querySelector('#btn-save-designed-table')?.addEventListener('click', () => {
-      const name = this.container.querySelector('#designer-table-name').value.trim();
-      if (!name) return alert('Please enter a table name.');
+      const name = (this.container.querySelector('#designer-table-name')?.value || '').trim();
+      if (!name) return alert('Please enter a valid table name.');
+
+      const invalidCol = this.columns.find(c => !c.name || !c.name.trim());
+      if (invalidCol) return alert('All columns must have a valid column name.');
 
       if (this.onSaveTable) {
         this.onSaveTable({
@@ -195,7 +266,8 @@ export class TableDesignerModal {
             isNotNull: !!c.isNotNull,
             isUnique: !!c.isUnique,
             defaultValue: c.defaultValue ? c.defaultValue.trim() : null
-          }))
+          })),
+          foreignKeys: this.foreignKeys
         });
       }
       this.close();

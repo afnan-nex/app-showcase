@@ -1,5 +1,6 @@
 /**
- * RoomPlanr - Master Layout & CAD Design Tokens
+ * RoomPlanr - Master Layout & CAD Design System
+ * Clean, technical, high-precision architectural styling. Zero AI-clichés.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
@@ -9,37 +10,35 @@
   --bg-panel: #0f172a;
   --bg-elevated: #1e293b;
   --bg-hover: #334155;
-  --bg-canvas: #090d16;
+  --bg-canvas: #080c14;
 
-  --border-subtle: #334155;
+  --border-subtle: #243247;
   --border-muted: #1e293b;
   --border-focus: #38bdf8;
 
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
+  --text-muted: #8493a8;
 
   --accent-primary: #38bdf8;
   --accent-primary-hover: #7dd3fc;
-  --accent-primary-subtle: rgba(56, 189, 248, 0.15);
+  --accent-primary-subtle: rgba(56, 189, 248, 0.12);
 
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
-  --accent-amber-subtle: rgba(245, 158, 11, 0.15);
   --accent-rose: #ef4444;
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', Consolas, monospace;
 
   --topbar-height: 48px;
-  --catalog-width: 260px;
-  --inspector-width: 280px;
+  --catalog-width: 270px;
+  --inspector-width: 290px;
   --statusbar-height: 24px;
 
+  --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
 }
 
 /* Resets */
@@ -62,6 +61,12 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Focus styles for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
 /* Master Layout */
 .app-container {
   display: flex;
@@ -69,6 +74,7 @@ html, body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  position: relative;
 }
 
 /* Top Toolbar */
@@ -79,8 +85,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  gap: 8px;
+  padding: 0 10px;
+  gap: 6px;
   flex-shrink: 0;
   z-index: 50;
 }
@@ -88,10 +94,10 @@ html, body {
 .brand-section {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 700;
-  font-size: 14.5px;
-  letter-spacing: 0.5px;
+  font-size: 14px;
+  letter-spacing: 0.3px;
   color: var(--text-primary);
 }
 
@@ -104,7 +110,7 @@ html, body {
 .toolbar-group {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .toolbar-divider {
@@ -112,6 +118,10 @@ html, body {
   height: 20px;
   background-color: var(--border-subtle);
   margin: 0 4px;
+}
+
+.select-project-dropdown {
+  width: 190px;
 }
 
 /* Main Workspace Body */
@@ -131,7 +141,8 @@ html, body {
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  z-index: 10;
+  z-index: 20;
+  transition: transform 0.2s ease, width 0.2s ease;
 }
 
 /* Center Design Viewport */
@@ -156,6 +167,7 @@ html, body {
   display: block;
   width: 100%;
   height: 100%;
+  touch-action: none;
 }
 
 /* Scenarios Tab Bar (Above Status Bar) */
@@ -168,6 +180,7 @@ html, body {
   justify-content: space-between;
   padding: 0 10px;
   flex-shrink: 0;
+  z-index: 10;
 }
 
 /* Right Property Inspector */
@@ -179,7 +192,8 @@ html, body {
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  z-index: 10;
+  z-index: 20;
+  transition: transform 0.2s ease, width 0.2s ease;
 }
 
 /* Status Bar */
@@ -190,9 +204,97 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 10px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 10.5px;
   font-family: var(--font-mono);
   flex-shrink: 0;
+  z-index: 30;
+}
+
+/* Responsive Drawer Behavior */
+.mobile-drawer-btn {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .editor-catalog-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.7);
+    transform: translateX(-100%);
+  }
+  .editor-catalog-left.drawer-open {
+    transform: translateX(0);
+  }
+
+  .editor-inspector-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.7);
+    transform: translateX(100%);
+  }
+  .editor-inspector-right.drawer-open {
+    transform: translateX(0);
+  }
+
+  .mobile-drawer-btn {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  .select-project-dropdown {
+    width: 140px;
+  }
+  .editor-catalog-left, .editor-inspector-right {
+    width: 85vw;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-title {
+    display: none;
+  }
+  .select-project-dropdown {
+    width: 120px;
+  }
+}
+
+/* Print Stylesheet */
+@media print {
+  body, html, .app-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .editor-topbar, .editor-catalog-left, .editor-inspector-right, .scenarios-toolbar-bar, .editor-statusbar, .modal-overlay, .toast-container {
+    display: none !important;
+  }
+  .editor-center-workspace, .canvas-workspace-wrap {
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #ffffff !important;
+  }
+  #planr-canvas {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

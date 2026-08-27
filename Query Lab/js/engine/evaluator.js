@@ -1,6 +1,6 @@
 /**
  * QueryLab - Relational SQL Evaluator Engine
- * Processes SELECT (Joins, Aggregations, Grouping, Having), DML (Insert, Update, Delete), and DDL operations.
+ * Processes SELECT (Joins, Aggregations, Grouping, Having, Scalar Functions), DML, DDL, and Meta Operations.
  */
 
 export function executeQuery(statement, database) {
@@ -29,6 +29,18 @@ export function executeQuery(statement, database) {
     case 'ALTER_TABLE':
       result = executeAlterTable(statement, database);
       break;
+    case 'TRUNCATE_TABLE':
+      result = executeTruncateTable(statement, database);
+      break;
+    case 'SHOW_TABLES':
+      result = executeShowTables(statement, database);
+      break;
+    case 'DESCRIBE_TABLE':
+      result = executeDescribeTable(statement, database);
+      break;
+    case 'EXPLAIN':
+      result = executeExplain(statement, database);
+      break;
     default:
       throw new Error(`Execution for statement '${statement.type}' not implemented.`);
   }
@@ -54,18 +66,18 @@ function executeSelect(stmt, db) {
       const rowMap = {};
       for (const [k, v] of Object.entries(r)) {
         rowMap[`${tAlias}.${k}`] = v;
-        rowMap[k] = v; // Allow un-prefixed access if unique
+        rowMap[k] = v; // Allow un-prefixed access
       }
       return rowMap;
     });
 
     availableColumns = table.columns.map(c => ({ name: c.name, table: tAlias, type: c.type }));
   } else {
-    // Single row dummy query (e.g. SELECT 1 + 1)
+    // Single row dummy query (e.g. SELECT 1 + 1 AS calc, UPPER('querylab') AS name;)
     workingRows = [{}];
   }
 
-  // 2. JOIN clauses (INNER JOIN, LEFT JOIN)
+  // 2. JOIN clauses (INNER, LEFT, RIGHT, CROSS)
   if (stmt.joins && stmt.joins.length > 0) {
     for (const join of stmt.joins) {
       const joinTable = db.getTable(join.table);
@@ -76,30 +88,43 @@ function executeSelect(stmt, db) {
       const jAlias = join.alias || join.table;
       const newRows = [];
 
-      for (const leftRow of workingRows) {
-        let matchFound = false;
-
-        for (const rightRow of joinTable.rows) {
-          const combined = { ...leftRow };
-          for (const [k, v] of Object.entries(rightRow)) {
-            combined[`${jAlias}.${k}`] = v;
-            if (combined[k] === undefined) combined[k] = v;
-          }
-
-          if (evaluateExpression(join.on, combined)) {
+      if (join.type === 'CROSS') {
+        for (const leftRow of workingRows) {
+          for (const rightRow of joinTable.rows) {
+            const combined = { ...leftRow };
+            for (const [k, v] of Object.entries(rightRow)) {
+              combined[`${jAlias}.${k}`] = v;
+              if (combined[k] === undefined) combined[k] = v;
+            }
             newRows.push(combined);
-            matchFound = true;
           }
         }
+      } else {
+        for (const leftRow of workingRows) {
+          let matchFound = false;
 
-        // LEFT JOIN unmatched row with nulls
-        if (!matchFound && join.type === 'LEFT') {
-          const combined = { ...leftRow };
-          for (const c of joinTable.columns) {
-            combined[`${jAlias}.${c.name}`] = null;
-            if (combined[c.name] === undefined) combined[c.name] = null;
+          for (const rightRow of joinTable.rows) {
+            const combined = { ...leftRow };
+            for (const [k, v] of Object.entries(rightRow)) {
+              combined[`${jAlias}.${k}`] = v;
+              if (combined[k] === undefined) combined[k] = v;
+            }
+
+            if (evaluateExpression(join.on, combined)) {
+              newRows.push(combined);
+              matchFound = true;
+            }
           }
-          newRows.push(combined);
+
+          // LEFT JOIN unmatched row with nulls
+          if (!matchFound && join.type === 'LEFT') {
+            const combined = { ...leftRow };
+            for (const c of joinTable.columns) {
+              combined[`${jAlias}.${c.name}`] = null;
+              if (combined[c.name] === undefined) combined[c.name] = null;
+            }
+            newRows.push(combined);
+          }
         }
       }
 
@@ -193,6 +218,9 @@ function executeSelect(stmt, db) {
         const valA = evaluateExpression(ord.expr, a);
         const valB = evaluateExpression(ord.expr, b);
 
+        if (valA === null || valA === undefined) return 1;
+        if (valB === null || valB === undefined) return -1;
+
         if (valA !== valB) {
           const comp = valA < valB ? -1 : 1;
           return ord.dir === 'DESC' ? -comp : comp;
@@ -239,7 +267,7 @@ function executeInsert(stmt, db) {
       });
     } else {
       table.columns.forEach((col, idx) => {
-        rowObj[col.name] = valRow[idx] ? evaluateExpression(valRow[idx], {}) : null;
+        rowObj[col.name] = valRow[idx] !== undefined ? evaluateExpression(valRow[idx], {}) : null;
       });
     }
     table.insertRow(rowObj);
@@ -258,7 +286,10 @@ function executeUpdate(stmt, db) {
   for (const row of table.rows) {
     if (!stmt.where || evaluateExpression(stmt.where, row)) {
       for (const assign of stmt.assignments) {
-        row[assign.column] = evaluateExpression(assign.expr, row);
+        const colDef = table.getColumn(assign.column);
+        let val = evaluateExpression(assign.expr, row);
+        if (colDef) val = table.castValue(val, colDef.type);
+        row[assign.column] = val;
       }
       updatedCount++;
     }
@@ -283,7 +314,7 @@ function executeDelete(stmt, db) {
   return { type: 'DELETE', affectedRows: deletedCount, message: `Deleted ${deletedCount} row(s)` };
 }
 
-// --- 5. DDL (Create, Drop, Alter) ---
+// --- 5. DDL (Create, Drop, Alter, Truncate) ---
 function executeCreateTable(stmt, db) {
   if (stmt.ifNotExists && db.getTable(stmt.table)) {
     return { type: 'CREATE_TABLE', affectedRows: 0, message: `Table '${stmt.table}' already exists.` };
@@ -318,6 +349,101 @@ function executeAlterTable(stmt, db) {
   return { type: 'ALTER_TABLE', affectedRows: 0, message: `Altered table '${stmt.table}'` };
 }
 
+function executeTruncateTable(stmt, db) {
+  const count = db.truncateTable(stmt.table);
+  return { type: 'TRUNCATE_TABLE', affectedRows: count, message: `Truncated table '${stmt.table}' (${count} rows removed)` };
+}
+
+// --- 6. Meta Inspection (SHOW TABLES, DESCRIBE, EXPLAIN) ---
+function executeShowTables(stmt, db) {
+  const tables = Object.values(db.tables || {});
+  const rows = tables.map(t => ({
+    table_name: t.name,
+    column_count: t.columns.length,
+    row_count: t.rows.length
+  }));
+
+  return {
+    type: 'SELECT',
+    columns: [{ name: 'table_name' }, { name: 'column_count' }, { name: 'row_count' }],
+    rows,
+    rowCount: rows.length
+  };
+}
+
+function executeDescribeTable(stmt, db) {
+  const table = db.getTable(stmt.table);
+  if (!table) throw new Error(`Table '${stmt.table}' does not exist.`);
+
+  const rows = table.columns.map(c => {
+    const isFK = (table.foreignKeys || []).find(fk => fk.column === c.name);
+    return {
+      column_name: c.name,
+      data_type: c.type || 'TEXT',
+      primary_key: !!c.isPrimaryKey,
+      not_null: !!c.isNotNull,
+      unique: !!c.isUnique,
+      default_value: c.defaultValue !== undefined ? c.defaultValue : null,
+      foreign_key: isFK ? `${isFK.refTable}.${isFK.refColumn}` : null
+    };
+  });
+
+  return {
+    type: 'SELECT',
+    columns: [
+      { name: 'column_name' },
+      { name: 'data_type' },
+      { name: 'primary_key' },
+      { name: 'not_null' },
+      { name: 'unique' },
+      { name: 'default_value' },
+      { name: 'foreign_key' }
+    ],
+    rows,
+    rowCount: rows.length
+  };
+}
+
+function executeExplain(stmt, db) {
+  const inner = stmt.innerStatement;
+  const planRows = [];
+
+  planRows.push({ step: 1, operation: `Parsed statement type: ${inner.type}`, details: 'Root Plan Node' });
+
+  if (inner.type === 'SELECT') {
+    if (inner.from) {
+      planRows.push({ step: 2, operation: `SCAN TABLE ${inner.from.table}`, details: `Alias: ${inner.from.alias || 'none'}` });
+    }
+    if (inner.joins && inner.joins.length > 0) {
+      inner.joins.forEach((j, i) => {
+        planRows.push({ step: 3 + i, operation: `${j.type} JOIN ${j.table}`, details: `ON condition evaluation` });
+      });
+    }
+    if (inner.where) {
+      planRows.push({ step: 4, operation: 'FILTER (WHERE clause)', details: 'Evaluates row predicate' });
+    }
+    if (inner.groupBy) {
+      planRows.push({ step: 5, operation: 'HASH AGGREGATE / GROUP BY', details: `Grouping on ${inner.groupBy.length} keys` });
+    }
+    if (inner.having) {
+      planRows.push({ step: 6, operation: 'FILTER (HAVING clause)', details: 'Filter group aggregates' });
+    }
+    if (inner.orderBy) {
+      planRows.push({ step: 7, operation: 'SORT / ORDER BY', details: `Sort keys: ${inner.orderBy.length}` });
+    }
+    if (inner.limit !== null && inner.limit !== undefined) {
+      planRows.push({ step: 8, operation: `LIMIT ${inner.limit} OFFSET ${inner.offset || 0}`, details: 'Slice final rows' });
+    }
+  }
+
+  return {
+    type: 'SELECT',
+    columns: [{ name: 'step' }, { name: 'operation' }, { name: 'details' }],
+    rows: planRows,
+    rowCount: planRows.length
+  };
+}
+
 // --- Expression Evaluator ---
 function evaluateExpression(expr, row) {
   if (!expr) return true;
@@ -332,6 +458,13 @@ function evaluateExpression(expr, row) {
         if (row[full] !== undefined) return row[full];
       }
       return row[expr.column];
+    }
+
+    case 'UNARY_OP': {
+      if (expr.op === 'NOT') {
+        return !evaluateExpression(expr.expr, row);
+      }
+      return false;
     }
 
     case 'BINARY_OP': {
@@ -350,14 +483,23 @@ function evaluateExpression(expr, row) {
         case '*': return Number(left) * Number(right);
         case '/': return Number(right) === 0 ? 0 : Number(left) / Number(right);
         case '%': return Number(left) % Number(right);
+        case '||': return String(left ?? '') + String(right ?? '');
         case 'AND': return Boolean(left && right);
         case 'OR': return Boolean(left || right);
         case 'LIKE': {
           const regex = new RegExp('^' + String(right).replace(/%/g, '.*').replace(/_/g, '.') + '$', 'i');
-          return regex.test(String(left));
+          return regex.test(String(left ?? ''));
         }
       }
       return false;
+    }
+
+    case 'BETWEEN': {
+      const val = Number(evaluateExpression(expr.expr, row));
+      const low = Number(evaluateExpression(expr.low, row));
+      const high = Number(evaluateExpression(expr.high, row));
+      const inRange = val >= low && val <= high;
+      return expr.not ? !inRange : inRange;
     }
 
     case 'IS_NULL': {
@@ -369,7 +511,61 @@ function evaluateExpression(expr, row) {
     case 'IN': {
       const val = evaluateExpression(expr.expr, row);
       const listVals = expr.list.map(e => evaluateExpression(e, row));
-      return listVals.includes(val);
+      const found = listVals.includes(val);
+      return expr.not ? !found : found;
+    }
+
+    case 'CASE_EXPR': {
+      for (const item of expr.cases) {
+        if (evaluateExpression(item.when, row)) {
+          return evaluateExpression(item.then, row);
+        }
+      }
+      return expr.elseExpr ? evaluateExpression(expr.elseExpr, row) : null;
+    }
+
+    case 'FUNCTION_CALL': {
+      const func = expr.func.toUpperCase();
+      const args = (expr.args || []).map(a => evaluateExpression(a, row));
+
+      switch (func) {
+        case 'UPPER':
+          return args[0] !== null && args[0] !== undefined ? String(args[0]).toUpperCase() : null;
+        case 'LOWER':
+          return args[0] !== null && args[0] !== undefined ? String(args[0]).toLowerCase() : null;
+        case 'LENGTH':
+        case 'LEN':
+          return args[0] !== null && args[0] !== undefined ? String(args[0]).length : 0;
+        case 'TRIM':
+          return args[0] !== null && args[0] !== undefined ? String(args[0]).trim() : null;
+        case 'ABS':
+          return args[0] !== null && args[0] !== undefined ? Math.abs(Number(args[0])) : null;
+        case 'ROUND': {
+          const num = Number(args[0]);
+          const decimals = args[1] !== undefined ? Number(args[1]) : 0;
+          return isNaN(num) ? null : parseFloat(num.toFixed(decimals));
+        }
+        case 'COALESCE':
+          for (const arg of args) {
+            if (arg !== null && arg !== undefined) return arg;
+          }
+          return null;
+        case 'CONCAT':
+          return args.map(a => (a === null || a === undefined ? '' : String(a))).join('');
+        case 'SUBSTR':
+        case 'SUBSTRING': {
+          const str = String(args[0] ?? '');
+          const start = Math.max(0, Number(args[1] ?? 1) - 1);
+          const len = args[2] !== undefined ? Number(args[2]) : undefined;
+          return str.substr(start, len);
+        }
+        case 'NOW':
+          return new Date().toISOString();
+        case 'CAST':
+          return args[0];
+        default:
+          return args[0] ?? null;
+      }
     }
 
     default:
@@ -408,10 +604,44 @@ function evaluateAggregateExpression(expr, rows, aliasMap = {}) {
       case '*': return Number(left) * Number(right);
       case '/': return Number(right) === 0 ? 0 : Number(left) / Number(right);
       case '%': return Number(left) % Number(right);
+      case '||': return String(left ?? '') + String(right ?? '');
       case 'AND': return Boolean(left && right);
       case 'OR': return Boolean(left || right);
     }
     return false;
+  }
+
+  if (expr.type === 'FUNCTION_CALL') {
+    const func = expr.func.toUpperCase();
+    const args = (expr.args || []).map(a => evaluateAggregateExpression(a, rows, aliasMap));
+
+    switch (func) {
+      case 'UPPER':
+        return args[0] !== null && args[0] !== undefined ? String(args[0]).toUpperCase() : null;
+      case 'LOWER':
+        return args[0] !== null && args[0] !== undefined ? String(args[0]).toLowerCase() : null;
+      case 'LENGTH':
+      case 'LEN':
+        return args[0] !== null && args[0] !== undefined ? String(args[0]).length : 0;
+      case 'TRIM':
+        return args[0] !== null && args[0] !== undefined ? String(args[0]).trim() : null;
+      case 'ABS':
+        return args[0] !== null && args[0] !== undefined ? Math.abs(Number(args[0])) : null;
+      case 'ROUND': {
+        const num = Number(args[0]);
+        const decimals = args[1] !== undefined ? Number(args[1]) : 0;
+        return isNaN(num) ? null : parseFloat(num.toFixed(decimals));
+      }
+      case 'COALESCE':
+        for (const arg of args) {
+          if (arg !== null && arg !== undefined) return arg;
+        }
+        return null;
+      case 'CONCAT':
+        return args.map(a => (a === null || a === undefined ? '' : String(a))).join('');
+      default:
+        return args[0] ?? null;
+    }
   }
 
   if (expr.type === 'AGGREGATE') {
@@ -426,19 +656,20 @@ function evaluateAggregateExpression(expr, rows, aliasMap = {}) {
     const numbers = rows.map(r => Number(evaluateExpression(expr.arg, r))).filter(n => !isNaN(n));
     if (numbers.length === 0) return null;
 
-    if (func === 'SUM') return numbers.reduce((a, b) => a + b, 0);
+    if (func === 'SUM') return parseFloat(numbers.reduce((a, b) => a + b, 0).toFixed(2));
     if (func === 'AVG') return parseFloat((numbers.reduce((a, b) => a + b, 0) / numbers.length).toFixed(2));
     if (func === 'MIN') return Math.min(...numbers);
     if (func === 'MAX') return Math.max(...numbers);
   }
 
-  // Fallback to first row evaluation for normal expressions
+  // Fallback to single expression evaluation
   return evaluateExpression(expr, rows[0] || {});
 }
 
 function hasAggregateFunc(expr) {
   if (!expr) return false;
   if (expr.type === 'AGGREGATE') return true;
+  if (expr.type === 'FUNCTION_CALL' && expr.args && expr.args.some(hasAggregateFunc)) return true;
   if (expr.left && hasAggregateFunc(expr.left)) return true;
   if (expr.right && hasAggregateFunc(expr.right)) return true;
   return false;
@@ -447,6 +678,7 @@ function hasAggregateFunc(expr) {
 function getColumnExpressionName(expr, index) {
   if (expr.type === 'COLUMN') return expr.column;
   if (expr.type === 'AGGREGATE') return `${expr.func.toLowerCase()}_${index + 1}`;
+  if (expr.type === 'FUNCTION_CALL') return `${expr.func.toLowerCase()}_${index + 1}`;
   if (expr.type === 'WILDCARD') return '*';
   return `col_${index + 1}`;
 }

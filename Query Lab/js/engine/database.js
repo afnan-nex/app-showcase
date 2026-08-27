@@ -12,7 +12,8 @@ export class Table {
   }
 
   getColumn(colName) {
-    return this.columns.find(c => c.name.toLowerCase() === colName.toLowerCase());
+    if (!colName) return null;
+    return this.columns.find(c => c.name.toLowerCase() === colName.toLowerCase()) || null;
   }
 
   insertRow(rowObj) {
@@ -21,11 +22,14 @@ export class Table {
     for (const col of this.columns) {
       let val = rowObj[col.name] !== undefined ? rowObj[col.name] : col.defaultValue;
 
-      if (val === undefined || val === null) {
-        if (col.isNotNull && !col.isPrimaryKey) {
+      if (val === undefined || val === null || val === '') {
+        if (col.defaultValue !== undefined && col.defaultValue !== null && col.defaultValue !== '') {
+          val = this.castValue(col.defaultValue, col.type);
+        } else if (col.isNotNull && !col.isPrimaryKey) {
           throw new Error(`Column '${col.name}' cannot be NULL in table '${this.name}'`);
+        } else {
+          val = null;
         }
-        val = null;
       } else {
         val = this.castValue(val, col.type);
       }
@@ -49,19 +53,64 @@ export class Table {
     if (val === null || val === undefined) return null;
     const upperType = (type || 'TEXT').toUpperCase();
 
-    if (upperType === 'INTEGER') {
+    if (upperType === 'INTEGER' || upperType === 'INT') {
       const num = parseInt(val, 10);
       return isNaN(num) ? 0 : num;
     }
-    if (upperType === 'REAL' || upperType === 'FLOAT' || upperType === 'DOUBLE') {
+    if (upperType === 'REAL' || upperType === 'FLOAT' || upperType === 'DOUBLE' || upperType === 'NUMERIC' || upperType === 'DECIMAL') {
       const num = parseFloat(val);
       return isNaN(num) ? 0.0 : num;
     }
-    if (upperType === 'BOOLEAN') {
+    if (upperType === 'BOOLEAN' || upperType === 'BOOL') {
       if (typeof val === 'boolean') return val;
-      return String(val).toLowerCase() === 'true' || val === 1;
+      const s = String(val).trim().toLowerCase();
+      return s === 'true' || s === '1' || s === 't';
     }
     return String(val);
+  }
+
+  truncate() {
+    const count = this.rows.length;
+    this.rows = [];
+    return count;
+  }
+
+  toSQLDDL() {
+    const colDefs = this.columns.map(c => {
+      let def = `  ${c.name} ${c.type || 'TEXT'}`;
+      if (c.isPrimaryKey) def += ' PRIMARY KEY';
+      if (c.isNotNull) def += ' NOT NULL';
+      if (c.isUnique && !c.isPrimaryKey) def += ' UNIQUE';
+      if (c.defaultValue !== undefined && c.defaultValue !== null && c.defaultValue !== '') {
+        const isNum = !isNaN(Number(c.defaultValue)) && typeof c.defaultValue !== 'boolean';
+        def += ` DEFAULT ${isNum ? c.defaultValue : `'${c.defaultValue}'`}`;
+      }
+      return def;
+    });
+
+    if (this.foreignKeys && this.foreignKeys.length > 0) {
+      for (const fk of this.foreignKeys) {
+        colDefs.push(`  FOREIGN KEY (${fk.column}) REFERENCES ${fk.refTable}(${fk.refColumn})`);
+      }
+    }
+
+    return `CREATE TABLE ${this.name} (\n${colDefs.join(',\n')}\n);`;
+  }
+
+  toSQLDML() {
+    if (!this.rows || this.rows.length === 0) return '';
+    const colNames = this.columns.map(c => c.name);
+    const inserts = this.rows.map(r => {
+      const vals = colNames.map(col => {
+        const v = r[col];
+        if (v === null || v === undefined) return 'NULL';
+        if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+        if (typeof v === 'number') return v;
+        return `'${String(v).replace(/'/g, "''")}'`;
+      });
+      return `INSERT INTO ${this.name} (${colNames.join(', ')}) VALUES (${vals.join(', ')});`;
+    });
+    return inserts.join('\n');
   }
 }
 
@@ -97,6 +146,31 @@ export class Database {
       throw new Error(`Table '${name}' does not exist in database '${this.name}'`);
     }
     delete this.tables[key];
+  }
+
+  truncateTable(name) {
+    const key = name.toLowerCase();
+    const table = this.tables[key];
+    if (!table) {
+      throw new Error(`Table '${name}' does not exist in database '${this.name}'`);
+    }
+    return table.truncate();
+  }
+
+  dumpSQL() {
+    const header = `-- ========================================================\n-- QueryLab Database Export Dump\n-- Database: ${this.name}\n-- Generated: ${new Date().toISOString()}\n-- ========================================================\n\n`;
+    const ddlParts = [];
+    const dmlParts = [];
+
+    for (const table of Object.values(this.tables)) {
+      ddlParts.push(`-- Table structure for '${table.name}'\nDROP TABLE IF EXISTS ${table.name};\n${table.toSQLDDL()}\n`);
+      const dml = table.toSQLDML();
+      if (dml) {
+        dmlParts.push(`-- Data for '${table.name}'\n${dml}\n`);
+      }
+    }
+
+    return header + ddlParts.join('\n') + '\n' + dmlParts.join('\n');
   }
 
   toJSON() {

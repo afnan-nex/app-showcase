@@ -1,19 +1,19 @@
 /**
  * QueryLab - Master IDE Layout & Developer Theme Tokens
- * Inspired by DBeaver, DataGrip, and VS Code SQL Editor.
+ * Professional dark engineering theme inspired by DataGrip, VS Code, and TablePlus.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
   --bg-app: #090d16;
-  --bg-panel: #0f141f;
-  --bg-elevated: #182030;
-  --bg-hover: #222c42;
-  --bg-input: #0d121c;
+  --bg-panel: #0f1420;
+  --bg-elevated: #161e30;
+  --bg-hover: #202b42;
+  --bg-input: #0b101a;
 
-  --border-subtle: #242f47;
-  --border-muted: #1a2233;
+  --border-subtle: #222d42;
+  --border-muted: #182233;
   --border-focus: #58a6ff;
 
   --text-primary: #f0f6fc;
@@ -22,7 +22,7 @@
 
   --accent-primary: #58a6ff;
   --accent-primary-hover: #79b8ff;
-  --accent-primary-subtle: rgba(88, 166, 255, 0.15);
+  --accent-primary-subtle: rgba(88, 166, 255, 0.12);
 
   --accent-emerald: #3fb950;
   --accent-emerald-subtle: rgba(63, 185, 80, 0.15);
@@ -30,20 +30,20 @@
   --accent-rose-subtle: rgba(248, 81, 73, 0.15);
   --accent-amber: #d29922;
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
 
-  --topbar-height: 44px;
-  --sidebar-width: 250px;
+  --topbar-height: 42px;
+  --sidebar-width: 270px;
   --statusbar-height: 24px;
 
   --radius-sm: 4px;
   --radius-md: 6px;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
-/* Resets */
+/* Resets & Base */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -59,8 +59,14 @@ html, body {
   font-size: 12px;
   line-height: 1.4;
   overflow: hidden;
-  user-select: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus States for Accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
 }
 
 /* Master IDE Layout */
@@ -80,8 +86,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  gap: 10px;
+  padding: 0 10px;
+  gap: 8px;
   flex-shrink: 0;
   z-index: 50;
 }
@@ -91,9 +97,10 @@ html, body {
   align-items: center;
   gap: 6px;
   font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.5px;
+  font-size: 13.5px;
+  letter-spacing: 0.3px;
   color: var(--text-primary);
+  user-select: none;
 }
 
 .brand-logo-icon {
@@ -132,7 +139,14 @@ html, body {
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-  z-index: 10;
+  z-index: 20;
+  transition: width 0.2s ease, transform 0.2s ease;
+}
+
+.editor-sidebar-left.collapsed {
+  width: 0;
+  border-right: none;
+  overflow: hidden;
 }
 
 /* Center Workspace Area */
@@ -143,41 +157,50 @@ html, body {
   overflow: hidden;
   background-color: var(--bg-app);
   position: relative;
+  min-width: 0;
 }
 
 /* Workspace Tabs Bar */
 .workspace-tabs-bar {
-  height: 34px;
+  height: 32px;
   background-color: var(--bg-panel);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  padding: 0 8px;
-  gap: 4px;
+  padding: 0 6px;
+  gap: 2px;
   flex-shrink: 0;
+  overflow-x: auto;
 }
 
 .tab-nav-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 5px 10px;
   font-family: var(--font-sans);
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.1s;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+  user-select: none;
 }
 
-.tab-nav-btn:hover { color: var(--text-primary); }
+.tab-nav-btn:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
 .tab-nav-btn.active {
   color: var(--accent-primary);
   border-bottom-color: var(--accent-primary);
   background-color: var(--accent-primary-subtle);
+  font-weight: 600;
 }
 
 /* Tab Panes */
@@ -187,17 +210,21 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  min-height: 0;
 }
-.workspace-tab-pane.active { display: flex; }
+.workspace-tab-pane.active {
+  display: flex;
+}
 
 /* Split Pane: Editor & Results */
 #sql-editor-container {
-  height: 240px;
-  min-height: 120px;
+  height: 230px;
+  min-height: 100px;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-input);
   overflow: hidden;
+  position: relative;
 }
 
 #editor-results-splitter {
@@ -206,8 +233,11 @@ html, body {
   cursor: row-resize;
   flex-shrink: 0;
   transition: background-color 0.15s;
+  position: relative;
+  z-index: 10;
 }
-#editor-results-splitter:hover {
+#editor-results-splitter:hover,
+#editor-results-splitter:active {
   background-color: var(--accent-primary);
 }
 
@@ -217,6 +247,7 @@ html, body {
   flex-direction: column;
   background-color: var(--bg-panel);
   overflow: hidden;
+  min-height: 100px;
 }
 
 /* Status Bar */
@@ -227,9 +258,56 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 10px;
   color: var(--text-muted);
   font-size: 11px;
   font-family: var(--font-mono);
   flex-shrink: 0;
+  user-select: none;
+}
+
+/* ERD Floating Toolbar */
+.erd-floating-toolbar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(22, 30, 48, 0.85);
+  backdrop-filter: blur(6px);
+  padding: 5px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  z-index: 15;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .editor-sidebar-left {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    box-shadow: var(--shadow-md);
+  }
+
+  .editor-sidebar-left.collapsed {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

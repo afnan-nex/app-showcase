@@ -1,16 +1,20 @@
 /**
  * TimeGrid - Schedule Simulation & Scenario Comparison Component
- * Side-by-side comparison matrix for simulated daily schedules (Focus vs Meetings vs Free Time vs Conflicts).
+ * Side-by-side comparison matrix for simulated daily schedules (Focus vs Meetings vs Free Time vs Conflicts)
+ * with mini timeline visualizers and 1-click application.
  */
 
 import { getIcon, escapeHTML } from '../core/icons.js';
-import { formatDuration } from '../core/time.js';
+import { formatDuration, minutesToTimeString } from '../core/time.js';
 import { calculateScheduleMetrics } from '../engine/conflicts.js';
 
 export class ScenarioComparisonModal {
   constructor(container, onApplyScenario) {
     this.container = container;
     this.onApplyScenario = onApplyScenario;
+    this.scenarios = [];
+    this.currentDateStr = '';
+    this.keyListener = null;
   }
 
   open(scenarios = [], currentDateStr = '') {
@@ -18,40 +22,49 @@ export class ScenarioComparisonModal {
     this.currentDateStr = currentDateStr;
     this.render();
     this.container.classList.add('active');
+
+    this.keyListener = (e) => {
+      if (e.key === 'Escape') this.close();
+    };
+    window.addEventListener('keydown', this.keyListener);
   }
 
   close() {
     this.container.classList.remove('active');
+    if (this.keyListener) {
+      window.removeEventListener('keydown', this.keyListener);
+      this.keyListener = null;
+    }
   }
 
   render() {
     this.container.innerHTML = `
       <div class="modal-backdrop"></div>
       <div class="modal-dialog scenario-modal-dialog">
-        <div class="modal-header flex items-center justify-between p-3 border-b">
+        <div class="modal-header flex items-center justify-between p-3 border-b bg-panel select-none">
           <div class="flex items-center gap-2">
             ${getIcon('layers', 'icon-sm text-primary')}
-            <span class="font-bold text-sm">Schedule Scenario Simulation & Comparison</span>
+            <span class="font-bold text-sm">Schedule Simulation & Scenario Comparison</span>
           </div>
-          <button class="btn-icon-xs btn-modal-close">&times;</button>
+          <button class="btn-icon-xs text-muted btn-modal-close" title="Close (Esc)">&times;</button>
         </div>
 
-        <div class="modal-body p-4 flex flex-col gap-4 overflow-y-auto" style="max-height: 70vh;">
+        <div class="modal-body p-4 flex flex-col gap-4 overflow-y-auto bg-panel" style="max-height: 75vh;">
           <p class="text-xs text-muted font-sans">
-            Compare alternative arrangements for <strong>${this.currentDateStr}</strong> to balance deep focus, meeting fatigue, and buffer time.
+            Simulate and benchmark alternative schedule distributions for <strong>${this.currentDateStr}</strong> to eliminate cognitive fragmentation and optimize Maker vs Manager time.
           </p>
 
           <!-- Comparison Table Grid -->
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto rounded border border-subtle">
             <table class="data-grid-table font-sans text-xs w-full">
               <thead>
                 <tr>
-                  <th>Scenario Name</th>
-                  <th class="text-center">Total Focus</th>
+                  <th>Scenario & Timeline Preview</th>
+                  <th class="text-center">Deep Focus</th>
                   <th class="text-center">Meetings</th>
-                  <th class="text-center">Free Buffer</th>
+                  <th class="text-center">Buffer</th>
+                  <th class="text-center">Maker %</th>
                   <th class="text-center">Conflicts</th>
-                  <th class="text-center">Efficiency</th>
                   <th class="text-right">Action</th>
                 </tr>
               </thead>
@@ -62,20 +75,33 @@ export class ScenarioComparisonModal {
 
                   return `
                     <tr>
-                      <td>
-                        <div class="flex flex-col">
-                          <strong class="text-primary">${escapeHTML(sc.name)}</strong>
-                          <span class="text-xs text-muted">${dayBlocks.length} scheduled blocks</span>
+                      <td style="max-width: 260px;">
+                        <div class="flex flex-col gap-1.5 py-1">
+                          <strong class="text-primary text-xs">${escapeHTML(sc.name)}</strong>
+                          <!-- Mini timeline visualizer -->
+                          <div class="w-full bg-elevated h-2 rounded overflow-hidden relative flex">
+                            ${dayBlocks.map(b => {
+                              const leftPct = (b.startMinute / 1440) * 100;
+                              const widthPct = Math.max(1, ((b.endMinute - b.startMinute) / 1440) * 100);
+                              return `
+                                <div class="absolute h-full rounded-xs"
+                                     style="left: ${leftPct}%; width: ${widthPct}%; background-color: ${b.color || '#0284c7'};"
+                                     title="${escapeHTML(b.title)} (${minutesToTimeString(b.startMinute)} - ${minutesToTimeString(b.endMinute)})">
+                                </div>
+                              `;
+                            }).join('')}
+                          </div>
+                          <span class="text-xs text-muted font-mono" style="font-size: 9.5px;">${dayBlocks.length} blocks &bull; ${formatDuration(m.totalScheduled)} total</span>
                         </div>
                       </td>
                       <td class="text-center font-mono font-bold text-primary">${formatDuration(m.focusTime)}</td>
                       <td class="text-center font-mono text-secondary">${formatDuration(m.meetingTime)}</td>
                       <td class="text-center font-mono text-emerald">${formatDuration(m.freeWorkdayTime)}</td>
+                      <td class="text-center font-mono font-bold text-primary">${m.makerRatio}%</td>
                       <td class="text-center font-mono ${m.totalConflicts > 0 ? 'text-amber font-bold' : 'text-muted'}">${m.totalConflicts}</td>
-                      <td class="text-center font-mono font-bold text-primary">${m.efficiency}%</td>
                       <td class="text-right">
                         <button class="btn btn-xs btn-primary btn-apply-scenario-row" data-id="${sc.id}">
-                          Apply Plan
+                          Apply Schedule
                         </button>
                       </td>
                     </tr>
@@ -87,7 +113,8 @@ export class ScenarioComparisonModal {
 
         </div>
 
-        <div class="modal-footer p-3 border-t flex justify-end gap-2">
+        <div class="modal-footer p-3 border-t bg-panel flex justify-between items-center">
+          <span class="text-xs text-muted font-mono" style="font-size: 10px;">Applying a scenario automatically saves an undo snapshot</span>
           <button class="btn btn-sm btn-secondary btn-modal-close">Close</button>
         </div>
       </div>
