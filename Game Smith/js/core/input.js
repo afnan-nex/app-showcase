@@ -14,6 +14,13 @@ class InputManager {
     this.isMouseDown = false;
     this.mouseClicked = false;
 
+    // Virtual Touch Joystick / Button state for Mobile Play
+    this.virtualAxisX = 0;
+    this.virtualAxisY = 0;
+    this.virtualJump = false;
+    this.virtualAction = false;
+    this.virtualDash = false;
+
     this.initListeners();
   }
 
@@ -21,7 +28,6 @@ class InputManager {
     if (typeof window === 'undefined') return;
 
     window.addEventListener('keydown', (e) => {
-      // Don't capture inputs when typing in input fields or textareas
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
 
       const code = e.code;
@@ -58,6 +64,20 @@ class InputManager {
     this.isMouseDown = isDown;
   }
 
+  setVirtualInput({ axisX = 0, axisY = 0, jump = false, action = false, dash = false } = {}) {
+    this.virtualAxisX = axisX;
+    this.virtualAxisY = axisY;
+    if (jump && !this.virtualJump) {
+      this.keysDown['Space'] = true;
+    }
+    if (action && !this.virtualAction) {
+      this.keysDown['KeyJ'] = true;
+    }
+    this.virtualJump = jump;
+    this.virtualAction = action;
+    this.virtualDash = dash;
+  }
+
   endFrame() {
     this.keysDown = {};
     this.keysUp = {};
@@ -77,25 +97,29 @@ class InputManager {
   }
 
   getHorizontalAxis() {
-    let axis = 0;
+    let axis = this.virtualAxisX;
     if (this.keys['ArrowLeft'] || this.keys['KeyA']) axis -= 1;
     if (this.keys['ArrowRight'] || this.keys['KeyD']) axis += 1;
-    return axis;
+    return Math.max(-1, Math.min(1, axis));
   }
 
   getVerticalAxis() {
-    let axis = 0;
+    let axis = this.virtualAxisY;
     if (this.keys['ArrowUp'] || this.keys['KeyW']) axis -= 1;
     if (this.keys['ArrowDown'] || this.keys['KeyS']) axis += 1;
-    return axis;
+    return Math.max(-1, Math.min(1, axis));
   }
 
   isJumpPressed() {
-    return this.isKeyDown('Space') || this.isKeyDown('ArrowUp') || this.isKeyDown('KeyW');
+    return this.virtualJump || this.isKeyDown('Space') || this.isKeyDown('ArrowUp') || this.isKeyDown('KeyW');
   }
 
   isShootPressed() {
-    return this.isKeyDown('KeyJ') || this.isKeyDown('KeyZ') || this.isKeyDown('KeyX') || this.mouseClicked;
+    return this.virtualAction || this.isKeyDown('KeyJ') || this.isKeyDown('KeyZ') || this.isKeyDown('KeyX') || this.mouseClicked;
+  }
+
+  isDashPressed() {
+    return this.virtualDash || this.isKeyDown('ShiftLeft') || this.isKeyDown('KeyK') || this.isKeyDown('KeyC');
   }
 
   reset() {
@@ -104,6 +128,11 @@ class InputManager {
     this.keysUp = {};
     this.isMouseDown = false;
     this.mouseClicked = false;
+    this.virtualAxisX = 0;
+    this.virtualAxisY = 0;
+    this.virtualJump = false;
+    this.virtualAction = false;
+    this.virtualDash = false;
   }
 }
 

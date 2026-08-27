@@ -1,6 +1,6 @@
 /**
  * DevBench - Storage & State Management Module
- * Manages favorites, recent tools, theme, input history, and saved snippets using localStorage.
+ * Manages favorites, recent tools, theme, input history, and saved snippets using localStorage with safe in-memory fallback.
  */
 
 const STORAGE_KEYS = {
@@ -14,137 +14,171 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_FAVORITES = ['json-formatter', 'jwt-decoder', 'base64', 'regex-tester', 'text-diff'];
+const DEFAULT_RECENTS = ['json-formatter', 'jwt-decoder', 'uuid-gen', 'hash-gen'];
+
+// In-memory fallback if localStorage is disabled or restricted
+const inMemoryStore = new Map();
+
+function safeGetItem(key) {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const val = localStorage.getItem(key);
+      if (val !== null) return val;
+    }
+  } catch (e) {
+    // Fallback to memory
+  }
+  return inMemoryStore.has(key) ? inMemoryStore.get(key) : null;
+}
+
+function safeSetItem(key, value) {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
+  } catch (e) {
+    // Storage quota exceeded or disabled
+  }
+  inMemoryStore.set(key, value);
+}
 
 export function getTheme() {
-  try {
-    return localStorage.getItem(STORAGE_KEYS.THEME) || 'dark';
-  } catch (e) {
-    return 'dark';
-  }
+  const val = safeGetItem(STORAGE_KEYS.THEME);
+  return (val === 'light' || val === 'dark') ? val : 'dark';
 }
 
 export function setTheme(theme) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.THEME, theme);
-  } catch (e) {}
+  safeSetItem(STORAGE_KEYS.THEME, theme === 'light' ? 'light' : 'dark');
 }
 
 export function getFavorites() {
+  const raw = safeGetItem(STORAGE_KEYS.FAVORITES);
+  if (!raw) return DEFAULT_FAVORITES;
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-    return raw ? JSON.parse(raw) : DEFAULT_FAVORITES;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : DEFAULT_FAVORITES;
   } catch (e) {
     return DEFAULT_FAVORITES;
   }
 }
 
 export function toggleFavorite(toolId) {
-  const favs = getFavorites();
+  if (!toolId) return getFavorites();
+  const favs = [...getFavorites()];
   const idx = favs.indexOf(toolId);
   if (idx !== -1) {
     favs.splice(idx, 1);
   } else {
     favs.push(toolId);
   }
-  try {
-    localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favs));
-  } catch (e) {}
+  safeSetItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favs));
   return favs;
 }
 
 export function getRecentTools() {
+  const raw = safeGetItem(STORAGE_KEYS.RECENT);
+  if (!raw) return DEFAULT_RECENTS;
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.RECENT);
-    return raw ? JSON.parse(raw) : ['json-formatter', 'jwt-decoder', 'uuid-gen', 'hash-gen'];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : DEFAULT_RECENTS;
   } catch (e) {
-    return [];
+    return DEFAULT_RECENTS;
   }
 }
 
 export function recordRecentTool(toolId) {
+  if (!toolId) return;
   let recents = getRecentTools().filter(id => id !== toolId);
   recents.unshift(toolId);
   if (recents.length > 8) recents = recents.slice(0, 8);
-  try {
-    localStorage.setItem(STORAGE_KEYS.RECENT, JSON.stringify(recents));
-  } catch (e) {}
+  safeSetItem(STORAGE_KEYS.RECENT, JSON.stringify(recents));
 }
 
 export function getOpenTabs() {
+  const raw = safeGetItem(STORAGE_KEYS.OPEN_TABS);
+  if (!raw) return ['json-formatter'];
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.OPEN_TABS);
-    return raw ? JSON.parse(raw) : ['json-formatter'];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : ['json-formatter'];
   } catch (e) {
     return ['json-formatter'];
   }
 }
 
 export function saveOpenTabs(tabs) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.OPEN_TABS, JSON.stringify(tabs));
-  } catch (e) {}
-}
-
-export function getActiveTab() {
-  try {
-    return localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || 'json-formatter';
-  } catch (e) {
-    return 'json-formatter';
+  if (Array.isArray(tabs) && tabs.length > 0) {
+    safeSetItem(STORAGE_KEYS.OPEN_TABS, JSON.stringify(tabs));
   }
 }
 
+export function getActiveTab() {
+  return safeGetItem(STORAGE_KEYS.ACTIVE_TAB) || 'json-formatter';
+}
+
 export function saveActiveTab(tabId) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, tabId);
-  } catch (e) {}
+  if (tabId) {
+    safeSetItem(STORAGE_KEYS.ACTIVE_TAB, tabId);
+  }
 }
 
 /**
  * Tool Input History Stack
  */
 export function getToolHistory(toolId) {
+  const raw = safeGetItem(STORAGE_KEYS.HISTORY);
+  if (!raw) return [];
   try {
-    const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '{}');
-    return all[toolId] || [];
+    const all = JSON.parse(raw);
+    return Array.isArray(all[toolId]) ? all[toolId] : [];
   } catch (e) {
     return [];
   }
 }
 
 export function addToolHistory(toolId, inputVal) {
-  if (!inputVal || !inputVal.trim()) return;
+  if (!toolId || !inputVal || !inputVal.trim()) return;
+  // Ignore huge payloads > 500KB in history
+  if (inputVal.length > 500000) return;
   try {
-    const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '{}');
-    let list = all[toolId] || [];
+    const raw = safeGetItem(STORAGE_KEYS.HISTORY);
+    const all = raw ? JSON.parse(raw) : {};
+    let list = Array.isArray(all[toolId]) ? all[toolId] : [];
     // Remove duplicate of same value
     list = list.filter(item => item.value !== inputVal);
     list.unshift({
-      id: 'h_' + Date.now(),
+      id: 'h_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       value: inputVal,
       timestamp: Date.now(),
       snippet: inputVal.slice(0, 80).replace(/\n/g, ' ')
     });
-    if (list.length > 15) list = list.slice(0, 15);
+    if (list.length > 20) list = list.slice(0, 20);
     all[toolId] = list;
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(all));
+    safeSetItem(STORAGE_KEYS.HISTORY, JSON.stringify(all));
   } catch (e) {}
 }
 
 export function clearToolHistory(toolId) {
   try {
-    const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '{}');
+    const raw = safeGetItem(STORAGE_KEYS.HISTORY);
+    const all = raw ? JSON.parse(raw) : {};
     delete all[toolId];
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(all));
+    safeSetItem(STORAGE_KEYS.HISTORY, JSON.stringify(all));
   } catch (e) {}
+}
+
+export function clearAllHistory() {
+  safeSetItem(STORAGE_KEYS.HISTORY, JSON.stringify({}));
 }
 
 /**
  * Saved Snippets
  */
 export function getSavedSnippets(toolId = null) {
+  const raw = safeGetItem(STORAGE_KEYS.SNIPPETS);
+  if (!raw) return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.SNIPPETS);
-    const list = raw ? JSON.parse(raw) : [];
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
     if (toolId) return list.filter(s => s.toolId === toolId);
     return list;
   } catch (e) {
@@ -153,17 +187,17 @@ export function getSavedSnippets(toolId = null) {
 }
 
 export function saveSnippet(toolId, title, content) {
-  if (!content || !title) return;
+  if (!toolId || !content || !title) return;
   try {
     const list = getSavedSnippets();
     list.unshift({
-      id: 'snip_' + Date.now(),
+      id: 'snip_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       toolId,
       title: title.trim(),
       content,
       createdAt: new Date().toISOString()
     });
-    localStorage.setItem(STORAGE_KEYS.SNIPPETS, JSON.stringify(list));
+    safeSetItem(STORAGE_KEYS.SNIPPETS, JSON.stringify(list));
   } catch (e) {}
 }
 
@@ -171,6 +205,6 @@ export function deleteSnippet(snippetId) {
   try {
     let list = getSavedSnippets();
     list = list.filter(s => s.id !== snippetId);
-    localStorage.setItem(STORAGE_KEYS.SNIPPETS, JSON.stringify(list));
+    safeSetItem(STORAGE_KEYS.SNIPPETS, JSON.stringify(list));
   } catch (e) {}
 }

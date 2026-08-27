@@ -1,6 +1,6 @@
 /**
  * DevBench - Main Workstation Orchestrator
- * Tab management, sidebar navigation, history & snippet drawers, shortcuts, theme engine.
+ * Tab management, sidebar navigation, history & snippet drawers, shortcuts, toast engine, and theme engine.
  */
 
 import { TOOLS, TOOL_CATEGORIES, getToolById } from './tool-registry.js';
@@ -34,6 +34,7 @@ class DevBenchApp {
     this.sidebarFilter = document.getElementById('sidebar-search-input');
     this.drawer = document.getElementById('side-drawer');
     this.modal = document.getElementById('devbench-modal-container');
+    this.toastContainer = document.getElementById('devbench-toast-container');
 
     this.openTabs = getOpenTabs();
     this.activeTabId = getActiveTab();
@@ -41,7 +42,10 @@ class DevBenchApp {
       this.openTabs.unshift(this.activeTabId);
     }
 
-    this.commandPalette = new CommandPalette((toolId) => this.openTool(toolId));
+    this.commandPalette = new CommandPalette(
+      (toolId) => this.openTool(toolId),
+      (action) => this.handleGlobalAction(action)
+    );
   }
 
   init() {
@@ -50,7 +54,7 @@ class DevBenchApp {
     document.documentElement.setAttribute('data-theme', theme);
     this.updateThemeButton(theme);
 
-    // 2. Render Sidebar Navigation & Tabs
+    // 2. Render Sidebar Navigation, Tabs & Active Tool
     this.renderSidebar();
     this.renderTabs();
     this.renderActiveTool();
@@ -68,6 +72,7 @@ class DevBenchApp {
       document.documentElement.setAttribute('data-theme', next);
       setTheme(next);
       this.updateThemeButton(next);
+      this.showToast(`Switched to ${next === 'dark' ? 'Dark' : 'Light'} Mode`, 'info');
     });
 
     window.addEventListener('SET_THEME', (e) => {
@@ -75,6 +80,13 @@ class DevBenchApp {
       document.documentElement.setAttribute('data-theme', t);
       setTheme(t);
       this.updateThemeButton(t);
+      this.showToast(`Switched to ${t === 'dark' ? 'Dark' : 'Light'} Mode`, 'info');
+    });
+
+    // Toast event listener
+    window.addEventListener('SHOW_TOAST', (e) => {
+      const { message, type } = e.detail || {};
+      if (message) this.showToast(message, type);
     });
 
     // Sidebar search input
@@ -91,9 +103,11 @@ class DevBenchApp {
     window.addEventListener('TOGGLE_FAVORITE', (e) => {
       const toolId = e.detail?.toolId;
       if (toolId) {
-        toggleFavorite(toolId);
+        const favs = toggleFavorite(toolId);
+        const isNowFav = favs.includes(toolId);
         this.renderSidebar(this.sidebarFilter?.value.trim().toLowerCase());
-        this.renderActiveTool(); // refresh star
+        this.renderActiveTool(); // refresh star in tool header
+        this.showToast(isNowFav ? 'Pinned to favorites' : 'Unpinned from favorites', 'info');
       }
     });
 
@@ -109,9 +123,21 @@ class DevBenchApp {
       this.openSaveSnippetModal(toolId);
     });
 
-    // Mobile sidebar toggle
+    // Mobile sidebar toggle & backdrop
+    const sidebarEl = document.getElementById('app-sidebar');
     document.getElementById('btn-mobile-sidebar-toggle')?.addEventListener('click', () => {
-      document.getElementById('app-sidebar')?.classList.toggle('open');
+      sidebarEl?.classList.toggle('open');
+    });
+
+    // Close mobile sidebar on backdrop click or outside click
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && sidebarEl?.classList.contains('open')) {
+        const isToggle = e.target.closest('#btn-mobile-sidebar-toggle');
+        const isSidebar = e.target.closest('#app-sidebar');
+        if (!isToggle && !isSidebar) {
+          sidebarEl.classList.remove('open');
+        }
+      }
     });
   }
 
@@ -124,7 +150,33 @@ class DevBenchApp {
           this.closeTab(this.activeTabId);
         }
       }
+
+      // Ctrl+\ or Ctrl+B: toggle sidebar
+      if ((e.ctrlKey || e.metaKey) && (e.key === '\\' || e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        const sidebar = document.getElementById('app-sidebar');
+        sidebar?.classList.toggle('collapsed');
+      }
+
+      // Escape: Close open modals, drawers, command palette
+      if (e.key === 'Escape') {
+        if (this.drawer?.classList.contains('active')) {
+          this.drawer.classList.remove('active');
+        }
+        if (this.modal?.classList.contains('active')) {
+          this.modal.classList.remove('active');
+        }
+      }
     });
+  }
+
+  handleGlobalAction(action) {
+    if (action === 'close-other-tabs') {
+      this.openTabs = [this.activeTabId];
+      saveOpenTabs(this.openTabs);
+      this.renderTabs();
+      this.showToast('Closed other tabs', 'info');
+    }
   }
 
   updateThemeButton(theme) {
@@ -132,7 +184,38 @@ class DevBenchApp {
     if (btn) {
       btn.innerHTML = theme === 'dark' ? getIcon('sun', 'icon-sm') : getIcon('moon', 'icon-sm');
       btn.setAttribute('title', `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`);
+      btn.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`);
     }
+  }
+
+  showToast(message, type = 'info') {
+    if (!this.toastContainer) {
+      let tc = document.getElementById('devbench-toast-container');
+      if (!tc) {
+        tc = document.createElement('div');
+        tc.id = 'devbench-toast-container';
+        tc.className = 'toast-container';
+        document.body.appendChild(tc);
+      }
+      this.toastContainer = tc;
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `devbench-toast toast-${type}`;
+    const iconName = type === 'success' ? 'check' : (type === 'warning' ? 'alert' : 'info');
+    toast.innerHTML = `
+      <span class="toast-icon">${getIcon(iconName, 'icon-xs')}</span>
+      <span class="toast-message">${escapeHTML(message)}</span>
+    `;
+
+    this.toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('toast-fade-out');
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 300);
+    }, 2400);
   }
 
   // --- Sidebar Rendering ---
@@ -144,7 +227,7 @@ class DevBenchApp {
     const favTools = TOOLS.filter(t => favorites.includes(t.id));
     if (this.favoritesList) {
       if (favTools.length === 0) {
-        this.favoritesList.innerHTML = `<span class="text-xs text-muted px-3">No pinned tools</span>`;
+        this.favoritesList.innerHTML = `<span class="text-xs text-muted px-3 block py-1">No pinned utilities</span>`;
       } else {
         this.favoritesList.innerHTML = favTools.map(t => this.renderSidebarItem(t)).join('');
       }
@@ -153,7 +236,11 @@ class DevBenchApp {
     // 2. Recents List
     const recentTools = recents.map(id => getToolById(id)).filter(Boolean);
     if (this.recentsList) {
-      this.recentsList.innerHTML = recentTools.slice(0, 5).map(t => this.renderSidebarItem(t)).join('');
+      if (recentTools.length === 0) {
+        this.recentsList.innerHTML = `<span class="text-xs text-muted px-3 block py-1">No recent utilities</span>`;
+      } else {
+        this.recentsList.innerHTML = recentTools.slice(0, 5).map(t => this.renderSidebarItem(t)).join('');
+      }
     }
 
     // 3. Category Groups
@@ -178,7 +265,7 @@ class DevBenchApp {
     });
 
     if (this.sidebarNav) {
-      this.sidebarNav.innerHTML = html || `<div class="p-3 text-xs text-muted text-center">No tools matched "${escapeHTML(filterQuery)}"</div>`;
+      this.sidebarNav.innerHTML = html || `<div class="p-3 text-xs text-muted text-center">No utilities matched "${escapeHTML(filterQuery)}"</div>`;
     }
 
     // Bind sidebar clicks
@@ -195,9 +282,9 @@ class DevBenchApp {
   renderSidebarItem(tool) {
     const isActive = tool.id === this.activeTabId;
     return `
-      <a href="#${tool.id}" class="sidebar-tool-item ${isActive ? 'active' : ''}" data-tool-id="${tool.id}">
+      <a href="#${tool.id}" class="sidebar-tool-item ${isActive ? 'active' : ''}" data-tool-id="${tool.id}" title="${escapeHTML(tool.desc)}">
         <span class="tool-item-icon">${getIcon(tool.icon, 'icon-sm')}</span>
-        <span class="tool-item-label">${tool.title}</span>
+        <span class="tool-item-label">${escapeHTML(tool.title)}</span>
       </a>
     `;
   }
@@ -218,7 +305,10 @@ class DevBenchApp {
   }
 
   closeTab(toolId) {
-    if (this.openTabs.length <= 1) return; // Keep at least one tab open
+    if (this.openTabs.length <= 1) {
+      this.showToast('At least one tab must remain open', 'warning');
+      return;
+    }
     const idx = this.openTabs.indexOf(toolId);
     if (idx !== -1) {
       this.openTabs.splice(idx, 1);
@@ -240,11 +330,11 @@ class DevBenchApp {
       const tool = getToolById(toolId);
       const isActive = toolId === this.activeTabId;
       return `
-        <div class="editor-tab ${isActive ? 'active' : ''}" data-tool-id="${tool.id}">
+        <div class="editor-tab ${isActive ? 'active' : ''}" data-tool-id="${tool.id}" role="tab" aria-selected="${isActive}">
           <span class="tab-icon">${getIcon(tool.icon, 'icon-xs')}</span>
-          <span class="tab-title text-xs font-medium">${tool.title}</span>
+          <span class="tab-title text-xs font-medium">${escapeHTML(tool.title)}</span>
           ${this.openTabs.length > 1 ? `
-            <button class="tab-close-btn" data-close-id="${tool.id}" title="Close Tab (Ctrl+W)">&times;</button>
+            <button class="tab-close-btn" data-close-id="${tool.id}" title="Close Tab (Ctrl+W)" aria-label="Close Tab">&times;</button>
           ` : ''}
         </div>
       `;
@@ -263,6 +353,10 @@ class DevBenchApp {
         this.openTool(toolId);
       });
     });
+
+    // Scroll active tab into view
+    const activeTabEl = this.tabBar.querySelector('.editor-tab.active');
+    activeTabEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
   }
 
   renderActiveTool() {
@@ -290,13 +384,13 @@ class DevBenchApp {
       <div class="drawer-header">
         <div class="flex items-center gap-2">
           ${getIcon('history', 'icon-sm')}
-          <span class="font-bold text-sm">${tool.title} &mdash; Input History</span>
+          <span class="font-bold text-sm">${escapeHTML(tool.title)} &mdash; Input History</span>
         </div>
-        <button class="btn-icon-xs btn-drawer-close">&times;</button>
+        <button class="btn-icon-xs btn-drawer-close" aria-label="Close Drawer">&times;</button>
       </div>
       <div class="drawer-body p-4 overflow-y-auto flex-1">
         ${history.length === 0 ? `
-          <div class="text-muted text-xs text-center p-6">No saved history for this tool yet. Recent inputs will automatically appear here.</div>
+          <div class="text-muted text-xs text-center p-6">No saved history for this utility yet. Recent inputs will automatically appear here.</div>
         ` : `
           <div class="history-list flex flex-col gap-3">
             ${history.map(item => `
@@ -311,7 +405,7 @@ class DevBenchApp {
           </div>
         `}
       </div>
-      <div class="drawer-footer p-3 border-t flex justify-between">
+      <div class="drawer-footer p-3 border-t flex justify-between items-center">
         <button class="btn btn-sm btn-ghost text-rose btn-clear-history">${getIcon('trash', 'icon-xs')} Clear History</button>
         <button class="btn btn-sm btn-secondary btn-drawer-close">Close</button>
       </div>
@@ -326,11 +420,11 @@ class DevBenchApp {
     this.drawer.querySelectorAll('.history-card').forEach(card => {
       card.addEventListener('click', () => {
         const val = card.dataset.val;
-        // Inject into current active tool editor
         const primaryInput = this.workspace.querySelector('textarea, input[type="text"]');
         if (primaryInput) {
           primaryInput.value = val;
           primaryInput.dispatchEvent(new Event('input'));
+          this.showToast('Restored input from history', 'info');
         }
         this.drawer.classList.remove('active');
       });
@@ -339,6 +433,7 @@ class DevBenchApp {
     this.drawer.querySelector('.btn-clear-history')?.addEventListener('click', () => {
       clearToolHistory(toolId);
       this.openHistoryDrawer(toolId);
+      this.showToast(`Cleared history for ${tool.title}`, 'info');
     });
   }
 
@@ -355,17 +450,17 @@ class DevBenchApp {
         <div class="modal-header">
           <div class="flex items-center gap-2">
             ${getIcon('bookmark', 'icon-sm')}
-            <span class="font-bold text-sm">Save Snippet for ${tool.title}</span>
+            <span class="font-bold text-sm">Save Snippet &mdash; ${escapeHTML(tool.title)}</span>
           </div>
-          <button class="btn-icon-xs btn-modal-close">&times;</button>
+          <button class="btn-icon-xs btn-modal-close" aria-label="Close Modal">&times;</button>
         </div>
         <div class="modal-body p-4">
           <div class="form-group mb-3">
-            <label class="form-label text-xs font-semibold">Snippet Title / Label *</label>
-            <input type="text" id="snippet-title-input" class="form-control" placeholder="e.g. Standard Auth Payload, Sample JWT" required />
+            <label class="form-label text-xs font-semibold" for="snippet-title-input">Snippet Name / Label *</label>
+            <input type="text" id="snippet-title-input" class="form-control" placeholder="e.g. Production Config, Test Webhook" required />
           </div>
           <div class="form-group mb-4">
-            <label class="form-label text-xs font-semibold">Content</label>
+            <label class="form-label text-xs font-semibold" for="snippet-content-input">Content</label>
             <textarea id="snippet-content-input" class="code-editor font-mono text-xs" rows="4">${escapeHTML(content)}</textarea>
           </div>
 
@@ -375,8 +470,8 @@ class DevBenchApp {
               <div class="flex flex-col gap-2 max-h-40 overflow-y-auto">
                 ${existingSnippets.map(s => `
                   <div class="card p-2 flex justify-between items-center text-xs">
-                    <span class="font-medium cursor-pointer text-primary btn-load-snip" data-content="${escapeHTML(s.content)}">${escapeHTML(s.title)}</span>
-                    <button class="btn-icon-xs text-rose btn-del-snip" data-id="${s.id}">&times;</button>
+                    <span class="font-medium cursor-pointer text-primary btn-load-snip" data-content="${escapeHTML(s.content)}" title="Load into editor">${escapeHTML(s.title)}</span>
+                    <button class="btn-icon-xs text-rose btn-del-snip" data-id="${s.id}" title="Delete snippet">&times;</button>
                   </div>
                 `).join('')}
               </div>
@@ -402,6 +497,9 @@ class DevBenchApp {
       if (title.trim() && text) {
         saveSnippet(toolId, title, text);
         this.modal.classList.remove('active');
+        this.showToast(`Saved snippet "${title.trim()}"`, 'success');
+      } else {
+        this.showToast('Snippet title and content are required', 'warning');
       }
     });
 
@@ -410,6 +508,7 @@ class DevBenchApp {
         if (primaryInput) {
           primaryInput.value = b.dataset.content;
           primaryInput.dispatchEvent(new Event('input'));
+          this.showToast('Snippet loaded into editor', 'info');
         }
         this.modal.classList.remove('active');
       });
@@ -420,14 +519,13 @@ class DevBenchApp {
         e.stopPropagation();
         deleteSnippet(b.dataset.id);
         this.openSaveSnippetModal(toolId);
+        this.showToast('Snippet deleted', 'info');
       });
     });
   }
 }
 
-
-
-// Bootstrap
+// Bootstrap Application
 function startDevBench() {
   const app = new DevBenchApp();
   app.init();

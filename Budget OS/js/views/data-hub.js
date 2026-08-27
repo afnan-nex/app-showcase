@@ -340,28 +340,68 @@ export function renderDataHubView(container) {
   container.querySelector('#btn-wizard-step2-next')?.addEventListener('click', () => {
     // Parse rows based on mappings
     const rows = [];
-    const { date: dIdx, description: descIdx, amount: amtIdx } = csvWizardState.mappings;
+    const { date: dIdx, description: descIdx, amount: amtIdx, category: catIdx } = csvWizardState.mappings;
     
+    // Category lookup map
+    const catLowerMap = {};
+    categories.forEach(c => {
+      catLowerMap[c.name.toLowerCase()] = c.id;
+      catLowerMap[c.id.toLowerCase()] = c.id;
+    });
+
     for (let i = 1; i < csvWizardState.rawLines.length; i++) {
       const line = csvWizardState.rawLines[i];
-      if (line.length <= 1) continue;
+      if (!line || line.length <= 1) continue;
 
-      let dateVal = line[dIdx] || new Date().toISOString().split('T')[0];
-      // Clean date
-      if (dateVal.includes('/')) {
-        const parts = dateVal.split('/');
-        if (parts.length === 3) {
-          dateVal = `${parts[2].length === 2 ? '20' + parts[2] : parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      let rawDate = (line[dIdx] || '').trim();
+      let dateVal = new Date().toISOString().split('T')[0];
+
+      if (rawDate) {
+        if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(rawDate)) {
+          const parts = rawDate.split(/[-/]/);
+          dateVal = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+        } else if (/^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/.test(rawDate)) {
+          const parts = rawDate.split(/[-/]/);
+          let y = parts[2];
+          if (y.length === 2) y = '20' + y;
+          // default assume MM/DD/YYYY unless month > 12
+          let m = parseInt(parts[0], 10);
+          let d = parseInt(parts[1], 10);
+          if (m > 12 && d <= 12) {
+            // Swap if DD/MM/YYYY
+            const temp = m;
+            m = d;
+            d = temp;
+          }
+          dateVal = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         }
       }
 
-      const descVal = line[descIdx] || 'Imported Transaction';
-      let rawAmt = (line[amtIdx] || '0').replace(/[^0-9.-]/g, '');
-      let amtNum = parseFloat(rawAmt) || 0;
+      const descVal = (line[descIdx] || 'Imported Transaction').trim();
+      let rawAmt = (line[amtIdx] || '0').trim();
+
+      // Check accounting parentheses for negative e.g. (45.00)
+      const isParenthesesNegative = rawAmt.startsWith('(') && rawAmt.endsWith(')');
+      let cleanAmtStr = rawAmt.replace(/[^0-9.-]/g, '');
+      let amtNum = parseFloat(cleanAmtStr) || 0;
+      if (isParenthesesNegative) amtNum = -Math.abs(amtNum);
 
       const isNegative = amtNum < 0 || rawAmt.startsWith('-');
       const absAmount = Math.abs(amtNum);
       const type = isNegative ? 'expense' : 'income';
+
+      // Auto assign category if column was mapped
+      let resolvedCatId = type === 'income' ? 'cat_salary' : 'cat_misc';
+      if (catIdx >= 0 && line[catIdx]) {
+        const rawCat = line[catIdx].trim().toLowerCase();
+        if (catLowerMap[rawCat]) {
+          resolvedCatId = catLowerMap[rawCat];
+        } else {
+          // Fuzzy match against category names
+          const found = categories.find(c => rawCat.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(rawCat));
+          if (found) resolvedCatId = found.id;
+        }
+      }
 
       rows.push({
         id: 'tx_imp_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -371,7 +411,7 @@ export function renderDataHubView(container) {
         amount: absAmount,
         type,
         accountId: csvWizardState.targetAccountId || accounts[0]?.id || 'acc_checking',
-        categoryId: type === 'income' ? 'cat_salary' : 'cat_misc',
+        categoryId: resolvedCatId,
         isCleared: true,
         notes: 'Imported via CSV Wizard'
       });
@@ -391,7 +431,6 @@ export function renderDataHubView(container) {
     for (const tx of csvWizardState.parsedRows) {
       await state.addTransaction(tx);
     }
-    alert(`Successfully imported ${csvWizardState.parsedRows.length} transactions!`);
     csvWizardState = {
       step: 1,
       rawLines: [],

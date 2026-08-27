@@ -1,7 +1,7 @@
 /**
  * MapCraft - Standalone Bundle Builder
  * Compiles all modular JavaScript files into a single standalone bundle.js
- * allowing MapCraft to run seamlessly offline and via direct file:/// double-click.
+ * allowing MapCraft to run seamlessly offline, on GitHub Pages, and via direct file:/// double-click.
  */
 
 import fs from 'fs';
@@ -25,7 +25,7 @@ const filesToBundle = [
 
 let bundleContent = `/**
  * MapCraft - Standalone Cartography & Map Workstation Bundle
- * Multi-layer interactive map creation with routes, regions, markers, scale measurement, and themes.
+ * Multi-layer interactive map creation with routes, regions, vector glyph markers, measurement, and themes.
  * 100% Client-Side, Zero Backend, Works on HTTP & file:///
  */
 

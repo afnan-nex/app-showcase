@@ -8,7 +8,7 @@ import state from '../state.js';
 import { getIcon } from '../icons.js';
 import { formatCurrency, formatDate } from '../formatters.js';
 import { generateCashFlowForecast } from '../calculations/forecast.js';
-import { renderForecastChart } from '../charts/svg-charts.js';
+import { renderForecastChart, attachForecastChartInteractivity } from '../charts/svg-charts.js';
 
 let forecastHorizon = 90;
 let safeBufferSetting = 500;
@@ -172,6 +172,9 @@ export function renderForecastView(container) {
       </div>
     </div>
   `;
+
+  // Attach interactive SVG forecast chart tooltips
+  attachForecastChartInteractivity(container);
 
   // Attach Handlers
   container.querySelectorAll('#forecast-horizon-tabs .segment-btn').forEach(btn => {

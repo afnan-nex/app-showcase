@@ -17,21 +17,78 @@ export class StorageManager {
      */
     static async getDB() {
         return new Promise((resolve, reject) => {
-            if (!window.indexedDB) {
-                reject(new Error('IndexedDB not supported'));
-                return;
-            }
-            const request = indexedDB.open(StorageManager.DB_NAME, StorageManager.DB_VERSION);
-            request.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(StorageManager.STORE_PROJECTS)) {
-                    const store = db.createObjectStore(StorageManager.STORE_PROJECTS, { keyPath: 'id' });
-                    store.createIndex('updatedAt', 'updatedAt', { unique: false });
+            let done = false;
+            const timer = setTimeout(() => {
+                if (!done) {
+                    done = true;
+                    reject(new Error('IndexedDB timeout'));
                 }
-            };
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
+            }, 200);
+
+            try {
+                if (typeof window === 'undefined' || !window.indexedDB) {
+                    done = true;
+                    clearTimeout(timer);
+                    reject(new Error('IndexedDB not supported'));
+                    return;
+                }
+                const request = indexedDB.open(StorageManager.DB_NAME, StorageManager.DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(StorageManager.STORE_PROJECTS)) {
+                        const store = db.createObjectStore(StorageManager.STORE_PROJECTS, { keyPath: 'id' });
+                        store.createIndex('updatedAt', 'updatedAt', { unique: false });
+                    }
+                };
+                request.onsuccess = () => {
+                    if (!done) {
+                        done = true;
+                        clearTimeout(timer);
+                        resolve(request.result);
+                    }
+                };
+                request.onerror = () => {
+                    if (!done) {
+                        done = true;
+                        clearTimeout(timer);
+                        reject(request.error);
+                    }
+                };
+            } catch (err) {
+                if (!done) {
+                    done = true;
+                    clearTimeout(timer);
+                    reject(err);
+                }
+            }
         });
+    }
+
+    /**
+     * Helper to list projects from localStorage
+     * @returns {Array<{id: string, name: string, bpm: number, updatedAt: number}>}
+     */
+    static listLocalStorageProjects() {
+        const list = [];
+        try {
+            if (typeof localStorage === 'undefined') return list;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('audiodeck_proj_')) {
+                    const raw = localStorage.getItem(key);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        list.push({
+                            id: parsed.id || key.replace('audiodeck_proj_', ''),
+                            name: parsed.name || 'Untitled Project',
+                            bpm: parsed.bpm || 120,
+                            updatedAt: parsed.updatedAt || Date.now()
+                        });
+                    }
+                }
+            }
+        } catch (e) {}
+        return list;
     }
 
     /**
@@ -68,7 +125,7 @@ export class StorageManager {
     }
 
     /**
-     * Lists all saved projects in IndexedDB
+     * Lists all saved projects in IndexedDB or localStorage
      * @returns {Promise<Array<{id: string, name: string, bpm: number, updatedAt: number}>>}
      */
     static async listProjects() {
@@ -85,13 +142,18 @@ export class StorageManager {
                         bpm: r.bpm,
                         updatedAt: r.updatedAt
                     }));
-                    list.sort((a, b) => b.updatedAt - a.updatedAt);
-                    resolve(list);
+                    if (list.length === 0) {
+                        const localList = StorageManager.listLocalStorageProjects();
+                        resolve(localList);
+                    } else {
+                        list.sort((a, b) => b.updatedAt - a.updatedAt);
+                        resolve(list);
+                    }
                 };
-                req.onerror = () => resolve([]);
+                req.onerror = () => resolve(StorageManager.listLocalStorageProjects());
             });
         } catch (e) {
-            return [];
+            return StorageManager.listLocalStorageProjects();
         }
     }
 
@@ -540,6 +602,10 @@ export class StorageManager {
         }
 
         proj.tracks.push(fxTrack);
+        if (proj.tracks.length > 0) {
+            proj.activeTrackId = proj.tracks[0].id;
+            proj.activeClipId = proj.tracks[0].clips[0]?.id || null;
+        }
         return proj;
     }
 
@@ -605,7 +671,10 @@ export class StorageManager {
         ];
         bassTrack.addClip(new MidiClip({ name: 'Deep Bassline', startBeat: 0, durationBeats: 16, notes: houseBassNotes }));
         proj.tracks.push(bassTrack);
-
+        if (proj.tracks.length > 0) {
+            proj.activeTrackId = proj.tracks[0].id;
+            proj.activeClipId = proj.tracks[0].clips[0]?.id || null;
+        }
         return proj;
     }
 
@@ -643,6 +712,10 @@ export class StorageManager {
             }
         }));
         proj.tracks.push(drums);
+        if (proj.tracks.length > 0) {
+            proj.activeTrackId = proj.tracks[0].id;
+            proj.activeClipId = proj.tracks[0].clips[0]?.id || null;
+        }
 
         return proj;
     }
@@ -661,6 +734,10 @@ export class StorageManager {
         proj.addTrack('drum', 'Drums');
         proj.addTrack('synth', 'Synth Lead');
         proj.addTrack('audio', 'Audio Track');
+        if (proj.tracks.length > 0) {
+            proj.activeTrackId = proj.tracks[0].id;
+            proj.activeClipId = proj.tracks[0].clips[0]?.id || null;
+        }
         return proj;
     }
 }

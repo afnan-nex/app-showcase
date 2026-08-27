@@ -1,6 +1,6 @@
 /**
  * DevBench - Network & API Tools Engine
- * URL Parser & Query Inspector, and HTTP Request Builder / Simulator.
+ * URL Parser & Live Query Inspector, and HTTP Request Builder / Simulator with code generators.
  */
 
 // --- 1. URL Parser & Query Inspector ---
@@ -37,17 +37,18 @@ export function parseURL(urlStr) {
       searchParams
     };
   } catch (err) {
-    return { isValid: false, error: 'Invalid URL: ' + err.message };
+    return { isValid: false, error: 'Invalid URL format: ' + err.message };
   }
 }
 
 export function rebuildURL(parsedData, queryParams = []) {
   try {
-    let base = `${parsedData.protocol}//${parsedData.hostname}${parsedData.port && !['80', '443'].includes(parsedData.port) ? ':' + parsedData.port : ''}${parsedData.pathname || '/'}`;
+    const portPart = parsedData.port && !['80', '443', ''].includes(String(parsedData.port)) ? ':' + parsedData.port : '';
+    let base = `${parsedData.protocol}//${parsedData.hostname}${portPart}${parsedData.pathname || '/'}`;
     if (queryParams.length > 0) {
       const sp = new URLSearchParams();
       queryParams.forEach(p => {
-        if (p.key.trim()) sp.append(p.key.trim(), p.value);
+        if (p && p.key && p.key.trim()) sp.append(p.key.trim(), p.value || '');
       });
       const qs = sp.toString();
       if (qs) base += '?' + qs;
@@ -69,9 +70,9 @@ export async function executeHTTPRequest({
   body = '',
   isSimulated = false,
   mockStatus = 200,
-  mockLatency = 150
+  mockLatency = 120
 }) {
-  if (!url) {
+  if (!url || !url.trim()) {
     return { success: false, error: 'Request URL cannot be empty' };
   }
 
@@ -79,14 +80,83 @@ export async function executeHTTPRequest({
 
   // Simulated Offline Mode
   if (isSimulated) {
-    await new Promise(r => setTimeout(r, mockLatency));
+    await new Promise(r => setTimeout(r, Math.max(30, mockLatency)));
     const duration = Math.round(performance.now() - startTime);
+
     const mockResponses = {
-      200: { status: 200, statusText: 'OK', body: JSON.stringify({ message: 'Simulated 200 OK Response', method, url, timestamp: new Date().toISOString() }, null, 2) },
-      201: { status: 201, statusText: 'Created', body: JSON.stringify({ message: 'Simulated 201 Resource Created', id: 'res_' + Math.random().toString(36).substr(2, 6) }, null, 2) },
-      400: { status: 400, statusText: 'Bad Request', body: JSON.stringify({ error: 'Bad Request', detail: 'Invalid parameters in simulated request' }, null, 2) },
-      404: { status: 404, statusText: 'Not Found', body: JSON.stringify({ error: 'Not Found', detail: `Endpoint ${url} was not found` }, null, 2) },
-      500: { status: 500, statusText: 'Internal Server Error', body: JSON.stringify({ error: 'Internal Server Error', detail: 'Simulated server fault' }, null, 2) }
+      200: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'content-type': 'application/json; charset=utf-8', 'x-simulated-by': 'DevBench Workstation', 'x-ratelimit-remaining': '4980' },
+        body: JSON.stringify({
+          status: 'success',
+          statusCode: 200,
+          method: method.toUpperCase(),
+          endpoint: url,
+          timestamp: new Date().toISOString(),
+          data: {
+            serviceId: 'srv_auth_prod_01',
+            healthy: true,
+            cluster: 'us-west-2a',
+            metrics: { activeConnections: 1420, p99LatencyMs: 14.8 }
+          }
+        }, null, 2)
+      },
+      201: {
+        status: 201,
+        statusText: 'Created',
+        headers: { 'content-type': 'application/json; charset=utf-8', 'location': `${url}/res_${Date.now()}` },
+        body: JSON.stringify({
+          status: 'created',
+          id: 'res_' + Math.random().toString(36).substr(2, 9),
+          acknowledged: true,
+          createdAt: new Date().toISOString()
+        }, null, 2)
+      },
+      204: {
+        status: 204,
+        statusText: 'No Content',
+        headers: { 'x-action': 'deleted' },
+        body: ''
+      },
+      400: {
+        status: 400,
+        statusText: 'Bad Request',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: JSON.stringify({
+          error: 'BAD_REQUEST',
+          message: 'The server could not understand the request due to invalid syntax or missing required fields.',
+          timestamp: new Date().toISOString()
+        }, null, 2)
+      },
+      401: {
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: { 'www-authenticate': 'Bearer realm="api.enterprise.dev"' },
+        body: JSON.stringify({
+          error: 'UNAUTHORIZED',
+          message: 'Missing or expired Bearer token authorization header.'
+        }, null, 2)
+      },
+      404: {
+        status: 404,
+        statusText: 'Not Found',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: JSON.stringify({
+          error: 'NOT_FOUND',
+          message: `Resource endpoint '${url}' was not found on this server.`
+        }, null, 2)
+      },
+      500: {
+        status: 500,
+        statusText: 'Internal Server Error',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: JSON.stringify({
+          error: 'INTERNAL_SERVER_FAULT',
+          message: 'An unexpected fault occurred during request handling.',
+          traceId: 'trc_' + Math.random().toString(36).substr(2, 10)
+        }, null, 2)
+      }
     };
 
     const resp = mockResponses[mockStatus] || mockResponses[200];
@@ -94,7 +164,7 @@ export async function executeHTTPRequest({
       success: true,
       status: resp.status,
       statusText: resp.statusText,
-      headers: { 'content-type': 'application/json; charset=utf-8', 'x-simulated-by': 'DevBench' },
+      headers: resp.headers,
       body: resp.body,
       duration,
       isSimulated: true
@@ -108,7 +178,7 @@ export async function executeHTTPRequest({
       headers: new Headers(headers)
     };
 
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase()) && body) {
+    if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && body) {
       fetchOptions.body = body;
     }
 
@@ -139,7 +209,7 @@ export async function executeHTTPRequest({
     const duration = Math.round(performance.now() - startTime);
     return {
       success: false,
-      error: `Network Error: ${err.message}. If this is a cross-origin request, the endpoint must support CORS (Access-Control-Allow-Origin). You can switch to "Simulated Mode" to test payloads offline.`,
+      error: `Network Error: ${err.message}. If this request is calling an external domain, the remote endpoint must include the header 'Access-Control-Allow-Origin: *'. You can check 'Offline Simulated Mock Mode' above to test simulated responses.`,
       duration,
       isCorsError: true
     };
@@ -156,4 +226,22 @@ export function generateCurlCommand({ method = 'GET', url = '', headers = {}, bo
     curl += ` \\\n  -d "${escaped}"`;
   }
   return curl;
+}
+
+export function generateFetchSnippet({ method = 'GET', url = '', headers = {}, body = '' }) {
+  const options = {
+    method: method.toUpperCase(),
+    headers: headers
+  };
+  if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && body) {
+    try {
+      options.body = JSON.parse(body);
+    } catch (e) {
+      options.body = body;
+    }
+  }
+
+  return `const response = await fetch("${url}", ${JSON.stringify(options, null, 2)});
+const data = await response.json();
+console.log(data);`;
 }

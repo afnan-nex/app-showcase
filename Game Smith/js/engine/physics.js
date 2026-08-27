@@ -1,9 +1,9 @@
 /**
  * GameSmith - 2D Physics & Collision Engine
- * Provides Euler physics integration, AABB/Circle collision resolution, and behavior controllers.
+ * Provides Euler physics integration, AABB/Circle collision resolution, one-way platforms, and bounciness.
  */
 
-export function updatePhysics(objects, gravityY = 980, dt = 1/60, worldBounds = { width: 1280, height: 720 }) {
+export function updatePhysics(objects, gravityY = 980, dt = 1/60, worldBounds = { width: 1600, height: 800 }) {
   const activeObjs = objects.filter(o => o.visible !== false);
 
   // 1. Apply Forces & Integrate Velocity -> Position
@@ -21,19 +21,30 @@ export function updatePhysics(objects, gravityY = 980, dt = 1/60, worldBounds = 
     }
 
     // Apply friction
-    const friction = obj.friction !== undefined ? obj.friction : 0.9;
+    const friction = obj.friction !== undefined ? obj.friction : 0.88;
     obj.vx = (obj.vx || 0) * Math.pow(friction, dt * 60);
 
     // Limit max velocity
-    const maxV = obj.maxSpeed || 800;
+    const maxV = obj.maxSpeed || 900;
     obj.vx = Math.max(-maxV, Math.min(maxV, obj.vx));
-    obj.vy = Math.max(-1200, Math.min(1200, obj.vy));
+    obj.vy = Math.max(-1400, Math.min(1400, obj.vy));
 
     // Update X position
-    obj.x += obj.vx * dt;
+    obj.x += (obj.vx || 0) * dt;
 
     // Update Y position
-    obj.y += obj.vy * dt;
+    obj.y += (obj.vy || 0) * dt;
+
+    // World bounds floor containment (if enabled)
+    if (obj.clampBounds && worldBounds) {
+      if (obj.x < 0) { obj.x = 0; obj.vx = 0; }
+      if (obj.x + obj.width > worldBounds.width) { obj.x = worldBounds.width - obj.width; obj.vx = 0; }
+      if (obj.y + obj.height > worldBounds.height) {
+        obj.y = worldBounds.height - obj.height;
+        obj.vy = 0;
+        obj.isGrounded = true;
+      }
+    }
   }
 
   // 2. Collision Detection & Solid Resolution
@@ -185,16 +196,26 @@ function resolveOneWayOverlap(dynamicObj, staticObj, normal, overlap) {
   dynamicObj.x -= normal.x * overlap;
   dynamicObj.y -= normal.y * overlap;
 
+  const bounciness = dynamicObj.bounciness || staticObj.bounciness || 0;
+
   // If hitting from top (falling onto ground)
   if (normal.y > 0) {
-    dynamicObj.vy = 0;
-    dynamicObj.isGrounded = true;
+    if (bounciness > 0.1 && Math.abs(dynamicObj.vy) > 100) {
+      dynamicObj.vy = -dynamicObj.vy * bounciness;
+    } else {
+      dynamicObj.vy = 0;
+      dynamicObj.isGrounded = true;
+    }
   } else if (normal.y < 0) {
     // Hitting ceiling
     dynamicObj.vy = Math.max(0, dynamicObj.vy);
   }
 
   if (normal.x !== 0) {
-    dynamicObj.vx = 0;
+    if (bounciness > 0.1) {
+      dynamicObj.vx = -dynamicObj.vx * bounciness;
+    } else {
+      dynamicObj.vx = 0;
+    }
   }
 }

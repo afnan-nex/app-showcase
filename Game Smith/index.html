@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GameSmith — 2D Game Creator & Runtime Engine</title>
-  <meta name="description" content="Professional browser-based 2D game creator featuring visual event rules, scene editor, pixel art sprite painter, 2D physics engine, and instant play mode." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GameSmith — Professional 2D Game Creator & Runtime Engine</title>
+  <meta name="description" content="Professional browser-based 2D game development workstation featuring visual event rules, scene hierarchy editor, pixel art sprite studio, 2D physics engine, and instant 60 FPS play mode." />
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="styles/main.css" />
@@ -14,32 +14,32 @@
   <div class="app-container">
     
     <!-- Top Editor Toolbar -->
-    <header class="editor-topbar">
+    <header class="editor-topbar" role="toolbar" aria-label="GameSmith Main Toolbar">
       <!-- Brand & Project Template -->
       <div class="toolbar-group">
-        <div class="brand-section">
+        <div class="brand-section" title="GameSmith 2D Game Workstation">
           <span class="brand-logo-icon">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
           </span>
-          <span>GameSmith</span>
+          <span class="brand-title">GameSmith</span>
         </div>
 
         <div class="toolbar-divider"></div>
 
-        <select id="select-template" class="form-control form-control-sm w-44" title="Load Game Template">
-          <option value="platformer">Template: Neon Knight (Platformer)</option>
-          <option value="shooter">Template: Space Defender (Shooter)</option>
-          <option value="adventure">Template: Dungeon Quest (Adventure)</option>
+        <select id="select-template" class="form-control form-control-sm w-48" title="Load Game Template">
+          <option value="platformer">Template: CyberRunner (Platformer)</option>
+          <option value="shooter">Template: Void Striker (Shooter)</option>
+          <option value="adventure">Template: Shadow Crypt (Adventure)</option>
         </select>
       </div>
 
-      <!-- Play Mode Controls (Prominent) -->
-      <div class="toolbar-group">
-        <button class="btn btn-sm btn-primary" id="btn-play-game" title="Run Game (Ctrl+P)">
+      <!-- Play Mode Controls (Prominent Center) -->
+      <div class="toolbar-group play-controls-group">
+        <button class="btn btn-sm btn-primary" id="btn-play-game" title="Run Game Mode (Ctrl+P)">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Play Mode
+          <span>Play Mode</span>
         </button>
-        <button class="btn btn-sm btn-ghost" id="btn-pause-game" title="Pause Game">
+        <button class="btn btn-sm btn-ghost" id="btn-pause-game" title="Pause / Resume Game">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
         </button>
         <button class="btn btn-sm btn-ghost" id="btn-stop-game" title="Stop & Restore Editor (ESC)">
@@ -52,21 +52,21 @@
       <!-- Scene, Grid, Zoom & Project Actions -->
       <div class="toolbar-group">
         <!-- Scene Selector -->
-        <select id="select-active-scene" class="form-control form-control-sm w-36" title="Switch Active Scene"></select>
-        <button class="btn btn-sm btn-secondary" id="btn-new-scene" title="New Scene">
+        <select id="select-active-scene" class="form-control form-control-sm w-40" title="Switch Active Scene"></select>
+        <button class="btn btn-sm btn-secondary" id="btn-new-scene" title="Create New Scene">
           + Scene
         </button>
 
         <div class="toolbar-divider"></div>
 
         <!-- Grid & Colliders -->
-        <button class="btn btn-sm btn-secondary active" id="btn-toggle-grid" title="Toggle Grid Snapping">Grid</button>
-        <select id="select-grid-size" class="form-control form-control-sm w-16" title="Grid Size">
+        <button class="btn btn-sm btn-secondary active" id="btn-toggle-grid" title="Toggle Grid Snapping (G)">Grid</button>
+        <select id="select-grid-size" class="form-control form-control-sm w-16" title="Grid Snapping Size">
           <option value="16">16px</option>
           <option value="32" selected>32px</option>
           <option value="64">64px</option>
         </select>
-        <button class="btn btn-sm btn-secondary active" id="btn-toggle-colliders" title="Toggle Collider Wireframes">Colliders</button>
+        <button class="btn btn-sm btn-secondary active" id="btn-toggle-colliders" title="Toggle Collider Wireframes (C)">Colliders</button>
 
         <div class="toolbar-divider"></div>
 
@@ -77,35 +77,72 @@
 
         <div class="toolbar-divider"></div>
 
+        <!-- Settings & Shortcuts -->
+        <button class="btn btn-sm btn-secondary" id="btn-project-settings" title="Project Settings">Settings</button>
+        <button class="btn btn-sm btn-secondary" id="btn-help-shortcuts" title="Keyboard Shortcuts & Help">?</button>
+
+        <div class="toolbar-divider"></div>
+
         <!-- Export / Import -->
+        <button class="btn btn-sm btn-secondary" id="btn-export-html" title="Export Standalone Playable HTML Game File">Export HTML</button>
         <button class="btn btn-sm btn-secondary" id="btn-export-project" title="Export Game Project as JSON">Export JSON</button>
         <button class="btn btn-sm btn-secondary" id="btn-import-project" title="Import Game Project JSON">Import</button>
         <input type="file" id="file-import-project" accept=".json" style="display: none;" />
       </div>
     </header>
 
+    <!-- Mobile View Switcher (Visible on small screens) -->
+    <nav class="mobile-nav-switcher" aria-label="Mobile Panel Switcher">
+      <button class="mobile-nav-btn" data-view="hierarchy">Hierarchy</button>
+      <button class="mobile-nav-btn active" data-view="canvas">Canvas</button>
+      <button class="mobile-nav-btn" data-view="events">Event Sheet</button>
+      <button class="mobile-nav-btn" data-view="inspector">Inspector</button>
+    </nav>
+
     <!-- Main Workspace (Left Panels, Central Canvas, Right Inspector) -->
-    <div class="editor-main-body">
+    <main class="editor-main-body">
       
       <!-- Left Panel: Scene Hierarchy Tree & Assets -->
-      <aside class="editor-panel-left" id="scene-tree-container"></aside>
+      <aside class="editor-panel-left" id="scene-tree-container" aria-label="Hierarchy & Assets"></aside>
 
       <!-- Center: Canvas Viewport & Bottom Event Sheet -->
-      <div class="editor-center-workspace">
+      <section class="editor-center-workspace" aria-label="Canvas and Visual Events">
         
         <!-- Canvas Viewport -->
         <div class="canvas-viewport-container" id="canvas-viewport-container">
           <canvas id="game-canvas"></canvas>
+
+          <!-- On-Screen Virtual Touch Gamepad (Active during mobile play mode) -->
+          <div class="mobile-touch-gamepad" id="mobile-touch-gamepad">
+            <div class="touch-dpad-container">
+              <div class="touch-dpad-row">
+                <button class="touch-btn touch-dpad-btn" id="touch-btn-up" aria-label="Up">&uarr;</button>
+              </div>
+              <div class="touch-dpad-row touch-dpad-middle">
+                <button class="touch-btn touch-dpad-btn" id="touch-btn-left" aria-label="Left">&larr;</button>
+                <div class="touch-dpad-center"></div>
+                <button class="touch-btn touch-dpad-btn" id="touch-btn-right" aria-label="Right">&rarr;</button>
+              </div>
+              <div class="touch-dpad-row">
+                <button class="touch-btn touch-dpad-btn" id="touch-btn-down" aria-label="Down">&darr;</button>
+              </div>
+            </div>
+
+            <div class="touch-action-buttons">
+              <button class="touch-btn touch-action-btn action-b" id="touch-btn-b" aria-label="Shoot / Action">B</button>
+              <button class="touch-btn touch-action-btn action-a" id="touch-btn-a" aria-label="Jump">A</button>
+            </div>
+          </div>
         </div>
 
         <!-- Bottom Panel: Visual Event Sheet -->
-        <div class="editor-panel-bottom" id="bottom-sheet-container"></div>
-      </div>
+        <div class="editor-panel-bottom" id="bottom-sheet-container" aria-label="Visual Rules Event Sheet"></div>
+      </section>
 
       <!-- Right Panel: Object & Scene Inspector -->
-      <aside class="editor-panel-right" id="inspector-panel-container"></aside>
+      <aside class="editor-panel-right" id="inspector-panel-container" aria-label="Property Inspector"></aside>
 
-    </div>
+    </main>
 
     <!-- Status Bar -->
     <footer class="editor-status-bar">
@@ -116,7 +153,7 @@
       </div>
     </footer>
 
-    <!-- Modals (Sprite Painter, etc.) -->
+    <!-- Modals (Sprite Painter, Project Settings, Shortcuts) -->
     <div class="modal-container-wrapper" id="gamesmith-modal-container"></div>
 
   </div>

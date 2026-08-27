@@ -1,15 +1,16 @@
 /**
- * DevBench - Command Palette Module (Ctrl+K / Cmd+K)
+ * DevBench - Command Palette Module (Ctrl+K / Cmd+K / Ctrl+P)
  * Fast keyboard-driven command palette for instant tool switching, search, and actions.
  */
 
 import { TOOLS } from './tool-registry.js';
-import { getIcon } from './icons.js';
-import { getRecentTools, getFavorites } from './storage.js';
+import { getIcon, escapeHTML } from './icons.js';
+import { getRecentTools, getFavorites, clearAllHistory } from './storage.js';
 
 export class CommandPalette {
-  constructor(onSelectTool) {
+  constructor(onSelectTool, onAction) {
     this.onSelectTool = onSelectTool;
+    this.onAction = onAction;
     this.dialog = document.getElementById('command-palette-dialog');
     this.input = document.getElementById('palette-search-input');
     this.resultsList = document.getElementById('palette-results-list');
@@ -20,13 +21,14 @@ export class CommandPalette {
   }
 
   initListeners() {
-    // Keyboard shortcut Ctrl+K or Cmd+K
+    // Keyboard shortcut Ctrl+K or Cmd+K or Ctrl+P
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K' || e.key === 'p' || e.key === 'P')) {
         e.preventDefault();
         this.open();
       }
       if (e.key === 'Escape' && this.isOpen()) {
+        e.preventDefault();
         this.close();
       }
     });
@@ -59,9 +61,11 @@ export class CommandPalette {
   open() {
     if (!this.dialog) return;
     this.dialog.classList.add('active');
-    this.input.value = '';
-    this.filterResults('');
-    setTimeout(() => this.input.focus(), 50);
+    if (this.input) {
+      this.input.value = '';
+      this.filterResults('');
+      setTimeout(() => this.input.focus(), 40);
+    }
   }
 
   close() {
@@ -88,7 +92,6 @@ export class CommandPalette {
       const catLower = tool.category.toLowerCase();
 
       if (!q) {
-        // Default ranking: Favorites first, then recents, then standard
         if (favorites.includes(tool.id)) score = 100;
         else if (recents.includes(tool.id)) score = 50;
         else score = 10;
@@ -116,12 +119,14 @@ export class CommandPalette {
 
     // Actions
     const actions = [
-      { type: 'action', id: 'theme-dark', title: 'Theme: Switch to Dark Mode', icon: 'moon', category: 'Preferences' },
-      { type: 'action', id: 'theme-light', title: 'Theme: Switch to Light Mode', icon: 'sun', category: 'Preferences' }
+      { type: 'action', id: 'theme-dark', title: 'Theme: Switch to Dark Mode', desc: 'High-contrast charcoal IDE palette', icon: 'moon', category: 'Preferences' },
+      { type: 'action', id: 'theme-light', title: 'Theme: Switch to Light Mode', desc: 'Crisp developer light palette', icon: 'sun', category: 'Preferences' },
+      { type: 'action', id: 'clear-all-history', title: 'History: Clear All Tool Inputs', desc: 'Remove stored input history across all tools', icon: 'trash', category: 'Workspace' },
+      { type: 'action', id: 'close-all-tabs', title: 'Tabs: Close Other Tabs', desc: 'Keep only the currently active tool tab open', icon: 'close', category: 'Workspace' }
     ];
 
     actions.forEach(act => {
-      if (!q || act.title.toLowerCase().includes(q)) {
+      if (!q || act.title.toLowerCase().includes(q) || act.desc.toLowerCase().includes(q)) {
         items.push({ ...act, score: q ? 150 : 5 });
       }
     });
@@ -142,13 +147,13 @@ export class CommandPalette {
     this.resultsList.innerHTML = this.currentItems.map((item, idx) => {
       const isSelected = idx === this.selectedIndex;
       return `
-        <div class="palette-item ${isSelected ? 'selected' : ''}" data-idx="${idx}">
+        <div class="palette-item ${isSelected ? 'selected' : ''}" data-idx="${idx}" role="option" aria-selected="${isSelected}">
           <div class="palette-item-icon">${getIcon(item.icon, 'icon-sm')}</div>
           <div class="palette-item-text">
-            <span class="palette-item-title font-medium">${item.title}</span>
-            ${item.desc ? `<span class="palette-item-desc text-xs text-muted">${item.desc}</span>` : ''}
+            <span class="palette-item-title font-medium">${escapeHTML(item.title)}</span>
+            ${item.desc ? `<span class="palette-item-desc text-xs text-muted">${escapeHTML(item.desc)}</span>` : ''}
           </div>
-          <span class="palette-category-badge badge badge-secondary font-mono text-xs">${item.category}</span>
+          <span class="palette-category-badge badge badge-secondary font-mono text-xs">${escapeHTML(item.category)}</span>
         </div>
       `;
     }).join('');
@@ -165,7 +170,6 @@ export class CommandPalette {
     if (this.currentItems.length === 0) return;
     this.selectedIndex = (this.selectedIndex + dir + this.currentItems.length) % this.currentItems.length;
     this.renderResults();
-    // Scroll item into view
     const selectedEl = this.resultsList.querySelector(`.palette-item[data-idx="${this.selectedIndex}"]`);
     selectedEl?.scrollIntoView({ block: 'nearest' });
   }
@@ -182,6 +186,11 @@ export class CommandPalette {
       window.dispatchEvent(new CustomEvent('SET_THEME', { detail: { theme: 'dark' } }));
     } else if (item.id === 'theme-light') {
       window.dispatchEvent(new CustomEvent('SET_THEME', { detail: { theme: 'light' } }));
+    } else if (item.id === 'clear-all-history') {
+      clearAllHistory();
+      window.dispatchEvent(new CustomEvent('SHOW_TOAST', { detail: { message: 'Cleared all tool input history', type: 'info' } }));
+    } else if (item.id === 'close-all-tabs') {
+      if (this.onAction) this.onAction('close-other-tabs');
     }
   }
 }

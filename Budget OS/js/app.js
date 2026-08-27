@@ -26,6 +26,7 @@ class BudgetOSApp {
     this.modalContainer = document.getElementById('modal-container');
     this.toastContainer = document.getElementById('toast-container');
     this.sidebar = document.getElementById('app-sidebar');
+    this.backdrop = document.getElementById('sidebar-backdrop');
   }
 
   async init() {
@@ -83,7 +84,16 @@ class BudgetOSApp {
     // Mobile Sidebar Toggle
     const sidebarToggleBtn = document.getElementById('btn-mobile-sidebar-toggle');
     sidebarToggleBtn?.addEventListener('click', () => {
-      this.sidebar.classList.toggle('open');
+      const isOpen = this.sidebar.classList.toggle('open');
+      this.backdrop?.classList.toggle('active', isOpen);
+      sidebarToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Mobile Backdrop click to dismiss
+    this.backdrop?.addEventListener('click', () => {
+      this.sidebar?.classList.remove('open');
+      this.backdrop?.classList.remove('active');
+      sidebarToggleBtn?.setAttribute('aria-expanded', 'false');
     });
 
     // Topbar quick transaction button
@@ -112,6 +122,8 @@ class BudgetOSApp {
 
     // Close mobile sidebar if open
     this.sidebar?.classList.remove('open');
+    this.backdrop?.classList.remove('active');
+    document.getElementById('btn-mobile-sidebar-toggle')?.setAttribute('aria-expanded', 'false');
 
     // Scroll to top
     this.viewContainer.scrollTop = 0;
@@ -169,6 +181,20 @@ class BudgetOSApp {
 
   setupShortcuts() {
     window.addEventListener('keydown', (e) => {
+      // ESC key closes active modal or mobile menu anywhere
+      if (e.key === 'Escape') {
+        if (this.modalContainer.classList.contains('active')) {
+          this.closeModal();
+          return;
+        }
+        if (this.sidebar.classList.contains('open')) {
+          this.sidebar.classList.remove('open');
+          this.backdrop?.classList.remove('active');
+          document.getElementById('btn-mobile-sidebar-toggle')?.setAttribute('aria-expanded', 'false');
+          return;
+        }
+      }
+
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
 
       if (e.key === 'n' || e.key === 'N') {
@@ -185,9 +211,29 @@ class BudgetOSApp {
         state.activeView = 'dashboard';
         this.renderCurrentView();
       }
+      if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        state.activeView = 'accounts';
+        this.renderCurrentView();
+      }
+      if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        state.activeView = 'budgets';
+        this.renderCurrentView();
+      }
+      if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        state.activeView = 'goals';
+        this.renderCurrentView();
+      }
       if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         state.activeView = 'forecast';
+        this.renderCurrentView();
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        state.activeView = 'reports';
         this.renderCurrentView();
       }
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {

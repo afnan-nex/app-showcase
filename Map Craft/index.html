@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MapCraft — Interactive Cartography & Map-Making Workstation</title>
-  <meta name="description" content="Professional cartography web workstation for creating custom maps, travel plans, fantasy RPG worlds, routes, regions, measurements, and legends." />
+  <title>MapCraft — Interactive Cartography & Map Workstation</title>
+  <meta name="description" content="Professional interactive cartography web workstation for fantasy RPG campaigns, travel guides, architectural blueprints, nautical charts, measurement, and multi-layer vector mapping." />
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="styles/main.css" />
@@ -13,91 +13,109 @@
 <body>
   <div class="app-container">
     
-    <!-- Top Cartography Toolbar -->
-    <header class="map-topbar">
-      <!-- Brand & Template Switcher -->
+    <!-- Top Cartography Workstation Toolbar -->
+    <header class="map-topbar" role="toolbar" aria-label="Map Studio Toolbar">
+      <!-- Left: Brand, Project & Theme Selection -->
       <div class="toolbar-group">
+        <button class="btn btn-icon-xs text-muted" id="btn-toggle-left-sidebar" title="Toggle Layers & Legend Panel">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+
         <div class="brand-section">
           <span class="brand-logo-icon">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
           </span>
           <span>MapCraft</span>
         </div>
 
         <div class="toolbar-divider"></div>
 
-        <select id="select-map-template" class="form-control form-control-sm w-44" title="Load Map Template">
+        <select id="select-map-template" class="form-control form-control-sm w-44 font-semibold" title="Switch Map Template Project" aria-label="Map Template">
           <option value="fantasy">Map: Realm of Eldoria (Fantasy)</option>
-          <option value="travel">Map: Tokyo Planner (Travel)</option>
-          <option value="blueprint">Map: Lunar Colony Beta (Sci-Fi)</option>
+          <option value="travel">Map: Tokyo Explorer (Travel)</option>
+          <option value="blueprint">Map: Artemis IV Lunar Base (Sci-Fi)</option>
+          <option value="nautical">Map: Galleon Archipelago (Nautical)</option>
         </select>
 
-        <select id="select-map-theme" class="form-control form-control-sm w-36" title="Change Cartographic Theme">
+        <select id="select-map-theme" class="form-control form-control-sm w-36 font-semibold" title="Cartographic Color Theme" aria-label="Cartographic Theme">
           <option value="parchment">Theme: Vintage Parchment</option>
-          <option value="dark">Theme: Dark Slate</option>
-          <option value="blueprint">Theme: Blueprint</option>
-          <option value="clean">Theme: Clean Modern</option>
-          <option value="terrain">Theme: Topographic Terrain</option>
+          <option value="dark">Theme: Dark Slate Tactical</option>
+          <option value="blueprint">Theme: Architectural Blueprint</option>
+          <option value="clean">Theme: Clean Modern Editorial</option>
+          <option value="terrain">Theme: Topographic Wilderness</option>
+          <option value="nautical">Theme: Nautical Sea Chart</option>
+          <option value="cyberpunk">Theme: Cyberpunk Neon</option>
         </select>
       </div>
 
-      <!-- Center Tool Buttons -->
-      <div class="toolbar-group">
-        <button class="btn btn-sm btn-secondary btn-map-tool active" data-tool="select" title="Select & Move (V)">Select</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="hand" title="Pan Map (H / Middle Click)">Pan</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="marker" title="Drop Marker Pin (M)">+ Marker</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="route" title="Plot Connected Route (R)">+ Route</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="region" title="Draw Polygon Region (P)">+ Region</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="circle" title="Draw Circular Zone (C)">+ Circle</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="label" title="Place Text Label (T)">+ Label</button>
-        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="measure" title="Measure Distance & Area">Measure</button>
+      <!-- Center: Cartography Drawing Tools Segmented Control -->
+      <div class="toolbar-group" role="group" aria-label="Drawing Tools">
+        <button class="btn btn-sm btn-secondary btn-map-tool active" data-tool="select" title="Select & Reshape (V)">Select</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="hand" title="Pan Map (H / Space+Drag)">Pan</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="marker" title="Place Marker Pin (M)">+ Marker</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="route" title="Plot Route Waypoints (R)">+ Route</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="region" title="Draw Polygon Territory (P)">+ Region</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="circle" title="Draw Zone Radius (C)">+ Circle</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="label" title="Place Typography Label (T)">+ Label</button>
+        <button class="btn btn-sm btn-secondary btn-map-tool" data-tool="measure" title="Measure Distances & Area (X)">Measure</button>
       </div>
 
-      <!-- History, Zoom & Export Actions -->
+      <!-- Right: History, Viewport Zoom, Grid & Export Actions -->
       <div class="toolbar-group">
         <!-- Undo / Redo -->
-        <button class="btn btn-sm btn-secondary" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&larr; Undo</button>
-        <button class="btn btn-sm btn-secondary" id="btn-redo" title="Redo (Ctrl+Y)" disabled>Redo &rarr;</button>
+        <button class="btn btn-sm btn-secondary" id="btn-undo" title="Undo (Ctrl+Z)" disabled aria-label="Undo">&larr; Undo</button>
+        <button class="btn btn-sm btn-secondary" id="btn-redo" title="Redo (Ctrl+Y)" disabled aria-label="Redo">Redo &rarr;</button>
 
         <div class="toolbar-divider"></div>
 
-        <!-- Zoom -->
-        <button class="btn btn-sm btn-secondary" id="btn-zoom-out" title="Zoom Out">&minus;</button>
-        <span class="badge badge-secondary font-mono text-xs" id="zoom-percentage-label">100%</span>
-        <button class="btn btn-sm btn-secondary" id="btn-zoom-in" title="Zoom In">&plus;</button>
-        <button class="btn btn-sm btn-secondary" id="btn-fit-content" title="Fit to Map Elements">Fit</button>
-        <button class="btn btn-sm btn-secondary active" id="btn-toggle-grid" title="Toggle Grid">Grid</button>
+        <!-- Grid & Snapping -->
+        <button class="btn btn-sm btn-secondary active" id="btn-toggle-grid" title="Toggle Cartographic Grid (G)">Grid</button>
+        <button class="btn btn-sm btn-secondary" id="btn-toggle-snap" title="Toggle Snap to Grid (S)">Snap</button>
 
         <div class="toolbar-divider"></div>
 
-        <!-- Export / Import -->
-        <button class="btn btn-sm btn-primary" id="btn-export-png" title="Export High-Res PNG Image">Export PNG</button>
-        <button class="btn btn-sm btn-secondary" id="btn-export-json" title="Save Project JSON">Export JSON</button>
-        <button class="btn btn-sm btn-secondary" id="btn-import-json" title="Import Map JSON">Import</button>
-        <button class="btn btn-sm btn-secondary" id="btn-print-map" title="Printable Map View">Print</button>
-        <input type="file" id="file-import-map" accept=".json" style="display: none;" />
+        <!-- Zoom Controls -->
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-out" title="Zoom Out" aria-label="Zoom Out">&minus;</button>
+        <span class="badge badge-secondary font-mono text-xs cursor-pointer" id="zoom-percentage-label" title="Reset Zoom to 100%">100%</span>
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-in" title="Zoom In" aria-label="Zoom In">&plus;</button>
+        <button class="btn btn-sm btn-secondary" id="btn-fit-content" title="Fit to Map Content">Fit</button>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Export & Project Actions -->
+        <button class="btn btn-sm btn-primary" id="btn-open-export-modal" title="Export Map (PNG, SVG, GeoJSON, Print)">Export</button>
+        <button class="btn btn-sm btn-secondary" id="btn-import-json" onclick="document.getElementById('file-import-map').click()" title="Import Project JSON">Import</button>
+        <button class="btn btn-sm btn-secondary" id="btn-open-help-modal" title="Shortcuts & Instructions (?)">Help</button>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="btn btn-icon-xs text-muted" id="btn-toggle-right-inspector" title="Toggle Inspector Panel">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+        </button>
+
+        <input type="file" id="file-import-map" accept=".json,.geojson" style="display: none;" />
       </div>
     </header>
 
-    <!-- Main Workspace (Left Sidebar, Central Canvas, Right Inspector) -->
+    <!-- Main Workspace Studio Body -->
     <div class="map-main-body">
       
-      <!-- Left Sidebar: Layers & Legend -->
-      <aside class="map-sidebar-left">
-        <div class="sidebar-subtabs">
-          <button class="subtab-btn active" id="tab-btn-layers">Layers</button>
-          <button class="subtab-btn" id="tab-btn-legend">Legend & Search</button>
+      <!-- Left Sidebar: Layer Hierarchy & Legend Search -->
+      <aside class="map-sidebar-left" aria-label="Layers and Legend">
+        <div class="sidebar-subtabs" role="tablist">
+          <button class="subtab-btn active" id="tab-btn-layers" role="tab" aria-selected="true">Layers</button>
+          <button class="subtab-btn" id="tab-btn-legend" role="tab" aria-selected="false">Legend & Index</button>
         </div>
         <div class="flex-1 flex flex-col overflow-hidden" id="sidebar-panel-container"></div>
       </aside>
 
-      <!-- Center: Map Viewport Canvas -->
-      <div class="map-viewport-container" id="map-viewport-container">
+      <!-- Center: High-DPI Interactive Viewport Canvas -->
+      <main class="map-viewport-container" id="map-viewport-container" role="region" aria-label="Map Canvas Viewport">
         <canvas id="map-canvas"></canvas>
-      </div>
+      </main>
 
-      <!-- Right Panel: Properties Inspector -->
-      <aside class="map-inspector-right" id="inspector-panel-container"></aside>
+      <!-- Right: Contextual Properties Inspector Panel -->
+      <aside class="map-inspector-right" id="inspector-panel-container" aria-label="Properties Inspector"></aside>
 
     </div>
 
@@ -106,14 +124,95 @@
       <div id="map-stats-readout">Elements: 0 &bull; Layers: 0</div>
       <div id="map-coordinates-readout">X: 0, Y: 0</div>
       <div class="flex items-center gap-3">
-        <span>Draw: Double-click to complete &bull; Pan: Space+Drag / Middle Click</span>
-        <span>MapCraft Cartography Engine</span>
+        <span>Plot: Double-click or Enter to complete &bull; Pan: Space+Drag / Middle Click</span>
+        <span class="font-bold text-secondary">MapCraft v2.4 Studio</span>
       </div>
     </footer>
 
   </div>
 
-  <!-- Standalone Application Script Bundle (Works on both http:// and direct file:/// double-click) -->
+  <!-- Modal 1: Export Map Dialog -->
+  <div class="modal-overlay" id="modal-export" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="font-bold text-sm text-primary" id="modal-export-title">Export Cartographic Artwork & Data</h3>
+        <button class="btn-icon-xs btn-close-modal" title="Close Dialog">&times;</button>
+      </div>
+      <div class="modal-body flex flex-col gap-3">
+        <div class="card p-3 flex flex-col gap-2">
+          <span class="font-bold text-xs uppercase text-primary">Raster Image Exports</span>
+          <p class="text-xs text-muted">Generate high-resolution PNG image files suitable for digital sharing or tabletop printing.</p>
+          <div class="flex gap-2">
+            <button class="btn btn-sm btn-primary flex-1" id="btn-do-export-png-1x">Standard PNG (1x Screen)</button>
+            <button class="btn btn-sm btn-primary flex-1" id="btn-do-export-png-2x">High-Res PNG (2x Retina)</button>
+          </div>
+        </div>
+
+        <div class="card p-3 flex flex-col gap-2">
+          <span class="font-bold text-xs uppercase text-primary">Vector & GIS Data Formats</span>
+          <p class="text-xs text-muted">Export clean vector graphics or standard GIS geospatial datasets for CAD and Illustrator.</p>
+          <div class="flex gap-2">
+            <button class="btn btn-sm btn-secondary flex-1" id="btn-do-export-svg">Vector SVG File</button>
+            <button class="btn btn-sm btn-secondary flex-1" id="btn-do-export-geojson">GeoJSON Dataset</button>
+            <button class="btn btn-sm btn-secondary flex-1" id="btn-do-export-json">MapCraft JSON Project</button>
+          </div>
+        </div>
+
+        <div class="card p-3 flex flex-col gap-2">
+          <span class="font-bold text-xs uppercase text-primary">Print Document</span>
+          <p class="text-xs text-muted">Open formatted browser print view optimized for poster and sheet paper printing.</p>
+          <button class="btn btn-sm btn-secondary" id="btn-do-print">Open Print Dialog</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-secondary btn-close-modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Shortcuts & Cartography Help Guide -->
+  <div class="modal-overlay" id="modal-help" role="dialog" aria-modal="true" aria-labelledby="modal-help-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="font-bold text-sm text-primary" id="modal-help-title">Keyboard Shortcuts & Workstation Guide</h3>
+        <button class="btn-icon-xs btn-close-modal" title="Close Dialog">&times;</button>
+      </div>
+      <div class="modal-body flex flex-col gap-3">
+        <div class="card p-3">
+          <span class="font-bold text-xs uppercase text-muted block mb-2">Cartography Tool Shortcuts</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Select & Reshape</span><kbd class="badge badge-secondary font-mono">V</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Pan Canvas</span><kbd class="badge badge-secondary font-mono">H / Space</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Place Marker</span><kbd class="badge badge-secondary font-mono">M</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Plot Route</span><kbd class="badge badge-secondary font-mono">R</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Draw Region</span><kbd class="badge badge-secondary font-mono">P</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Draw Circle Zone</span><kbd class="badge badge-secondary font-mono">C</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Text Label</span><kbd class="badge badge-secondary font-mono">T</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Measure Tool</span><kbd class="badge badge-secondary font-mono">X</kbd></div>
+          </div>
+        </div>
+
+        <div class="card p-3">
+          <span class="font-bold text-xs uppercase text-muted block mb-2">Editing & History Gestures</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Undo / Redo</span><kbd class="badge badge-secondary font-mono">Ctrl+Z / Ctrl+Y</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Duplicate Element</span><kbd class="badge badge-secondary font-mono">Ctrl+D</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Delete Element</span><kbd class="badge badge-secondary font-mono">Del / Backspace</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Micro-Nudge Position</span><kbd class="badge badge-secondary font-mono">Arrow Keys</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Complete Route / Region</span><kbd class="badge badge-secondary font-mono">Enter / DblClick</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Cancel Active Drawing</span><kbd class="badge badge-secondary font-mono">Escape</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Toggle Grid / Snap</span><kbd class="badge badge-secondary font-mono">G / S</kbd></div>
+            <div class="flex items-center justify-between py-1 border-b"><span class="text-secondary">Help & Reference</span><kbd class="badge badge-secondary font-mono">?</kbd></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-primary btn-close-modal">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Script Bundle (Works on both HTTP server and direct file:/// double-click) -->
   <script src="bundle.js"></script>
   <script>
     // Tab switching for left sidebar

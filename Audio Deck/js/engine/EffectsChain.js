@@ -129,6 +129,7 @@ export class EffectsChain {
         this.analyserNode = ctx.createAnalyser();
         this.analyserNode.fftSize = 256;
         this.analyserNode.smoothingTimeConstant = 0.8;
+        this._meterData = new Uint8Array(this.analyserNode.frequencyBinCount || 128);
 
         // 11. Output Node
         this.outputNode = ctx.createGain();
@@ -353,7 +354,16 @@ export class EffectsChain {
      * @returns {{peak: number, rms: number, clipping: boolean}}
      */
     getLevels() {
-        this.analyserNode.getByteTimeDomainData(this._meterData);
+        if (!this.analyserNode) return { peak: 0, rms: 0, clipping: false };
+        if (!this._meterData) {
+            this._meterData = new Uint8Array(this.analyserNode.frequencyBinCount || 128);
+        }
+        try {
+            this.analyserNode.getByteTimeDomainData(this._meterData);
+        } catch (e) {
+            return { peak: 0, rms: 0, clipping: false };
+        }
+
         let sumSquares = 0;
         let peak = 0;
 
@@ -364,7 +374,7 @@ export class EffectsChain {
             sumSquares += normalized * normalized;
         }
 
-        const rms = Math.sqrt(sumSquares / this._meterData.length);
+        const rms = Math.sqrt(sumSquares / (this._meterData.length || 1));
         return {
             peak: Math.min(1.0, peak * 1.15),
             rms: Math.min(1.0, rms * 1.4),

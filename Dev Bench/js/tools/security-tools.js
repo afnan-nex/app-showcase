@@ -1,20 +1,34 @@
 /**
  * DevBench - Security & Cryptographic Tools Engine
- * JWT Decoder, Hash Generator (Web Crypto + MD5/CRC32), and UUID/ID Generator.
+ * JWT Decoder (Claims & Algorithm inspector), Hash Generator (Web Crypto + HMAC + MD5/CRC32), and Multi-Standard ID Generator.
  */
 
 import { decodeBase64 } from './encoding-tools.js';
 
 // --- 1. JWT Decoder ---
+const JWT_ALG_DESCRIPTIONS = {
+  HS256: 'HMAC using SHA-256 hash algorithm (Symmetric)',
+  HS384: 'HMAC using SHA-384 hash algorithm (Symmetric)',
+  HS512: 'HMAC using SHA-512 hash algorithm (Symmetric)',
+  RS256: 'RSASSA-PKCS1-v1_5 using SHA-256 (Asymmetric)',
+  RS384: 'RSASSA-PKCS1-v1_5 using SHA-384 (Asymmetric)',
+  RS512: 'RSASSA-PKCS1-v1_5 using SHA-512 (Asymmetric)',
+  ES256: 'ECDSA using P-256 curve and SHA-256 (Asymmetric)',
+  ES384: 'ECDSA using P-384 curve and SHA-384 (Asymmetric)',
+  ES512: 'ECDSA using P-521 curve and SHA-512 (Asymmetric)',
+  EdDSA: 'Edwards-curve Digital Signature (Ed25519)',
+  none: 'Unsecured JWT (No cryptographic signature)'
+};
+
 export function decodeJWT(token) {
   if (!token || !token.trim()) {
-    return { success: false, error: 'Please enter a JWT token' };
+    return { success: false, error: 'Please enter a JWT token string' };
   }
 
   try {
     const parts = token.trim().split('.');
     if (parts.length < 2 || parts.length > 3) {
-      return { success: false, error: 'Invalid JWT structure: Token must contain 2 or 3 dot-separated segments' };
+      return { success: false, error: 'Invalid JWT structure: Token must contain 2 or 3 dot-separated Base64URL segments' };
     }
 
     const headerJSON = decodeBase64(parts[0]);
@@ -29,10 +43,17 @@ export function decodeJWT(token) {
     if (payload.exp) {
       const expDate = new Date(payload.exp * 1000);
       const isExpired = expDate.getTime() < Date.now();
+      const diffSec = Math.abs(Math.round((expDate.getTime() - Date.now()) / 1000));
+      let durationStr = '';
+      if (diffSec < 3600) durationStr = `${Math.floor(diffSec / 60)}m`;
+      else if (diffSec < 86400) durationStr = `${Math.floor(diffSec / 3600)}h ${Math.floor((diffSec % 3600) / 60)}m`;
+      else durationStr = `${Math.floor(diffSec / 86400)}d`;
+
       expirationStatus = {
         date: expDate.toISOString(),
         isExpired,
-        human: isExpired ? `Expired on ${expDate.toLocaleString()}` : `Valid until ${expDate.toLocaleString()}`
+        human: isExpired ? `Expired (${durationStr} ago)` : `Active (Expires in ${durationStr})`,
+        fullDate: expDate.toLocaleString()
       };
     }
 
@@ -42,13 +63,26 @@ export function decodeJWT(token) {
       issuedAtStatus = iatDate.toLocaleString();
     }
 
+    let notBeforeStatus = null;
+    if (payload.nbf) {
+      const nbfDate = new Date(payload.nbf * 1000);
+      notBeforeStatus = nbfDate.toLocaleString();
+    }
+
+    const algDesc = JWT_ALG_DESCRIPTIONS[header.alg] || 'Standard cryptographic algorithm';
+
     return {
       success: true,
       header,
       payload,
       signature,
+      algDesc,
       expirationStatus,
       issuedAtStatus,
+      notBeforeStatus,
+      issuer: payload.iss || null,
+      subject: payload.sub || null,
+      audience: payload.aud || null,
       rawHeader: JSON.stringify(header, null, 2),
       rawPayload: JSON.stringify(payload, null, 2)
     };
@@ -58,15 +92,15 @@ export function decodeJWT(token) {
 }
 
 // --- 2. Hash & Checksum Generator ---
-export async function generateHashes(input, hmacKey = '') {
+export async function generateHashes(input, hmacKey = '', outputFormat = 'hex') {
   if (!input) {
-    return { sha256: '', sha384: '', sha512: '', sha1: '', md5: '', crc32: '' };
+    return { sha256: '', sha384: '', sha512: '', sha1: '', md5: '', crc32: '', byteLength: 0 };
   }
 
   const encoder = new TextEncoder();
   const data = encoder.encode(input);
+  const byteLength = data.length;
 
-  // Web Crypto standard algorithms
   let sha256 = '';
   let sha384 = '';
   let sha512 = '';
@@ -77,36 +111,60 @@ export async function generateHashes(input, hmacKey = '') {
       const keyData = encoder.encode(hmacKey);
       const key256 = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
       const sig256 = await crypto.subtle.sign('HMAC', key256, data);
-      sha256 = bufToHex(sig256);
+      sha256 = formatBuffer(sig256, outputFormat);
+
+      const key384 = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-384' }, false, ['sign']);
+      const sig384 = await crypto.subtle.sign('HMAC', key384, data);
+      sha384 = formatBuffer(sig384, outputFormat);
 
       const key512 = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign']);
       const sig512 = await crypto.subtle.sign('HMAC', key512, data);
-      sha512 = bufToHex(sig512);
+      sha512 = formatBuffer(sig512, outputFormat);
+
+      const key1 = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+      const sig1 = await crypto.subtle.sign('HMAC', key1, data);
+      sha1 = formatBuffer(sig1, outputFormat);
     } else {
       const buf256 = await crypto.subtle.digest('SHA-256', data);
-      sha256 = bufToHex(buf256);
+      sha256 = formatBuffer(buf256, outputFormat);
 
       const buf384 = await crypto.subtle.digest('SHA-384', data);
-      sha384 = bufToHex(buf384);
+      sha384 = formatBuffer(buf384, outputFormat);
 
       const buf512 = await crypto.subtle.digest('SHA-512', data);
-      sha512 = bufToHex(buf512);
+      sha512 = formatBuffer(buf512, outputFormat);
 
       const buf1 = await crypto.subtle.digest('SHA-1', data);
-      sha1 = bufToHex(buf1);
+      sha1 = formatBuffer(buf1, outputFormat);
     }
   }
 
-  const md5 = computeMD5(input);
-  const crc32 = computeCRC32(input);
+  let md5 = computeMD5(input);
+  let crc32 = computeCRC32(input);
 
-  return { sha256, sha384, sha512, sha1, md5, crc32 };
+  if (outputFormat === 'base64') {
+    md5 = hexToBase64(md5);
+  }
+
+  return { sha256, sha384, sha512, sha1, md5, crc32, byteLength };
 }
 
-function bufToHex(buffer) {
-  return Array.from(new Uint8Array(buffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+function formatBuffer(buffer, format = 'hex') {
+  const bytes = new Uint8Array(buffer);
+  if (format === 'base64') {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function hexToBase64(hexStr) {
+  let binary = '';
+  for (let i = 0; i < hexStr.length; i += 2) {
+    binary += String.fromCharCode(parseInt(hexStr.substr(i, 2), 16));
+  }
+  return btoa(binary);
 }
 
 // Pure JS CRC32
@@ -237,20 +295,20 @@ function computeMD5(string) {
 }
 
 // --- 3. UUID / ID Generator ---
-export function generateUUID(version = 'v4') {
+export function generateUUID(version = 'v4', prefix = '') {
+  let id = '';
+
   if (version === 'v4') {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID();
+      id = crypto.randomUUID();
+    } else {
+      id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
     }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
-
-  if (version === 'ulid') {
-    // ULID: 10 chars timestamp + 16 chars random (Crockford Base32)
+  } else if (version === 'ulid') {
     const ENCODING = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
     const now = Date.now();
     let timeStr = '';
@@ -263,27 +321,29 @@ export function generateUUID(version = 'v4') {
     for (let i = 0; i < 16; i++) {
       randStr += ENCODING[Math.floor(Math.random() * 32)];
     }
-    return timeStr + randStr;
-  }
-
-  if (version === 'v7') {
-    // Unix epoch millis (48 bit) + 12 bit rand + 62 bit rand
+    id = timeStr + randStr;
+  } else if (version === 'v7') {
     const now = Date.now().toString(16).padStart(12, '0');
     const rand = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    return `${now.slice(0, 8)}-${now.slice(8, 12)}-7${rand.slice(0, 3)}-8${rand.slice(3, 6)}-${rand.slice(6, 18)}`;
+    id = `${now.slice(0, 8)}-${now.slice(8, 12)}-7${rand.slice(0, 3)}-8${rand.slice(3, 6)}-${rand.slice(6, 18)}`;
+  } else if (version === 'nanoid') {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+    id = Array.from({ length: 21 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  } else {
+    id = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
   }
 
-  return crypto.randomUUID();
+  return prefix ? `${prefix}${id}` : id;
 }
 
 export function generateBulkUUIDs(count = 10, options = {}) {
-  const { version = 'v4', uppercase = false, hyphens = true, format = 'list' } = options;
+  const { version = 'v4', uppercase = false, hyphens = true, format = 'list', prefix = '' } = options;
   const list = [];
   for (let i = 0; i < count; i++) {
-    let id = generateUUID(version);
-    if (!hyphens) id = id.replace(/-/g, '');
+    let id = generateUUID(version, prefix);
+    if (!hyphens && version !== 'nanoid' && version !== 'ulid') id = id.replace(/-/g, '');
     if (uppercase) id = id.toUpperCase();
-    else id = id.toLowerCase();
+    else if (!prefix && version !== 'ulid') id = id.toLowerCase();
     list.push(id);
   }
 
@@ -292,6 +352,9 @@ export function generateBulkUUIDs(count = 10, options = {}) {
   }
   if (format === 'csv') {
     return list.join(', ');
+  }
+  if (format === 'sql') {
+    return `IN ('${list.join("', '")}')`;
   }
   return list.join('\n');
 }

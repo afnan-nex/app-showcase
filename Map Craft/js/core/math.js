@@ -1,9 +1,10 @@
 /**
- * GameSmith / MapCraft - Cartographic & Geometry Math Engine
- * Distance calculation, Shoelace polygon area, point-in-polygon, and scale conversions.
+ * MapCraft - Cartographic & Geometry Math Engine
+ * Distance calculation, Shoelace polygon area, point-in-polygon, snap-to-grid, and scale conversions.
  */
 
 export function calculateDistance(p1, p2) {
+  if (!p1 || !p2) return 0;
   return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
 
@@ -71,6 +72,41 @@ export function pointNearPolyline(p, points, threshold = 8) {
   return false;
 }
 
+// Heading angle from p1 to p2 in degrees (0° = North, 90° = East, etc.)
+export function calculateBearing(p1, p2) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  let angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
+  if (angle < 0) angle += 360;
+  return Math.round(angle);
+}
+
+// Snap world coordinate to square grid or hex grid
+export function snapToGrid(x, y, gridSize = 50, gridType = 'square') {
+  if (!gridSize || gridSize <= 0) return { x, y };
+
+  if (gridType === 'square' || gridType === 'dot') {
+    return {
+      x: Math.round(x / gridSize) * gridSize,
+      y: Math.round(y / gridSize) * gridSize
+    };
+  }
+
+  if (gridType === 'hex') {
+    // Flat-topped hex grid snapping
+    const h = gridSize * Math.sqrt(3);
+    const col = Math.round(x / (gridSize * 1.5));
+    const rowOffset = (col % 2 !== 0) ? h / 2 : 0;
+    const row = Math.round((y - rowOffset) / h);
+    return {
+      x: col * gridSize * 1.5,
+      y: row * h + rowOffset
+    };
+  }
+
+  return { x, y };
+}
+
 /**
  * Scaled Units Formatter
  * scaleRatio: How many real-world units per 100 pixels (e.g. 100px = 10 km)
@@ -89,6 +125,21 @@ export function formatScaledDistance(pixels, scaleRatio = 10, unit = 'km') {
     }
     return `${realUnits.toFixed(1)} mi`;
   }
+  if (unit === 'm') {
+    return `${Math.round(realUnits)} m`;
+  }
+  if (unit === 'ft') {
+    return `${Math.round(realUnits)} ft`;
+  }
+  if (unit === 'nm' || unit === 'nmi') {
+    return `${realUnits.toFixed(1)} nm`;
+  }
+  if (unit === 'leagues') {
+    return `${realUnits.toFixed(1)} leagues`;
+  }
+  if (unit === 'hexes') {
+    return `${(realUnits).toFixed(1)} hex`;
+  }
   return `${Math.round(realUnits)} ${unit}`;
 }
 
@@ -103,6 +154,18 @@ export function formatScaledArea(pixelArea, scaleRatio = 10, unit = 'km') {
   }
   if (unit === 'mi') {
     return `${realUnitsSq.toFixed(1)} sq mi`;
+  }
+  if (unit === 'm') {
+    return `${Math.round(realUnitsSq)} m²`;
+  }
+  if (unit === 'ft') {
+    return `${Math.round(realUnitsSq)} sq ft`;
+  }
+  if (unit === 'nm' || unit === 'nmi') {
+    return `${realUnitsSq.toFixed(1)} sq nm`;
+  }
+  if (unit === 'leagues') {
+    return `${realUnitsSq.toFixed(1)} sq leagues`;
   }
   return `${Math.round(realUnitsSq)} sq ${unit}`;
 }

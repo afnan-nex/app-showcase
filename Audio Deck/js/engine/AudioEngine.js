@@ -65,21 +65,19 @@ export class AudioEngine {
      */
     async init() {
         if (this.isInitialized && this.ctx) {
-            if (this.ctx.state === 'suspended') {
-                try { await this.ctx.resume(); } catch (e) {}
-            }
             return;
         }
 
         try {
             const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtxClass) {
+                console.warn('Web Audio API not supported in this browser');
+                return;
+            }
+
             this.ctx = new AudioCtxClass({
                 latencyHint: 'interactive'
             });
-
-            if (this.ctx.state === 'suspended') {
-                try { await this.ctx.resume(); } catch (e) {}
-            }
 
             // Master Output Effects Chain
             this.masterEffects = new EffectsChain(this.ctx, {

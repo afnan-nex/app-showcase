@@ -8,7 +8,7 @@ import state from '../state.js';
 import { getIcon } from '../icons.js';
 import { formatCurrency, formatDate, generateCSV, getMonthKey, addMonths } from '../formatters.js';
 
-let filterState = {
+export let filterState = {
   search: '',
   type: 'all',
   categoryId: 'all',
@@ -19,6 +19,14 @@ let filterState = {
   currentPage: 1,
   pageSize: 15
 };
+
+export function setTransactionFilter(newFilters = {}) {
+  filterState = {
+    ...filterState,
+    ...newFilters,
+    currentPage: 1
+  };
+}
 
 export function renderTransactionsView(container) {
   const { transactions, categories, accounts } = state;

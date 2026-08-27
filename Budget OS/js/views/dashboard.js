@@ -12,7 +12,7 @@ import { calculateBudgetPerformance } from '../calculations/budgets.js';
 import { detectSpendingAnomalies } from '../calculations/anomalies.js';
 import { getMonthlyTrends } from '../calculations/analytics.js';
 import { generateCashFlowForecast } from '../calculations/forecast.js';
-import { renderForecastChart } from '../charts/svg-charts.js';
+import { renderForecastChart, attachForecastChartInteractivity } from '../charts/svg-charts.js';
 
 export function renderDashboardView(container) {
   const { accounts, transactions, budgets, categories, recurring, goals } = state;
@@ -339,6 +339,9 @@ export function renderDashboardView(container) {
     </div>
   `;
 
+  // Attach interactive SVG forecast chart tooltips
+  attachForecastChartInteractivity(container);
+
   // Attach event listeners
   container.querySelector('#btn-quick-transaction')?.addEventListener('click', () => {
     window.dispatchEvent(new CustomEvent('OPEN_TRANSACTION_MODAL'));
@@ -372,5 +375,17 @@ export function renderDashboardView(container) {
   container.querySelector('#btn-view-anomalies')?.addEventListener('click', () => {
     state.activeView = 'reports';
     state.notify('VIEW_CHANGED');
+  });
+
+  // Recent transaction rows click to edit
+  container.querySelectorAll('.tx-row').forEach(row => {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', () => {
+      const id = row.dataset.id;
+      const tx = transactions.find(t => t.id === id);
+      if (tx) {
+        window.dispatchEvent(new CustomEvent('OPEN_TRANSACTION_MODAL', { detail: { transaction: tx } }));
+      }
+    });
   });
 }

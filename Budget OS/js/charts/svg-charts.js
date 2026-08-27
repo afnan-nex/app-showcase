@@ -74,6 +74,42 @@ export function renderDonutChart({
 }
 
 /**
+ * Attach interactive hover events to SVG Donut chart
+ * @param {HTMLElement} container
+ */
+export function attachDonutChartInteractivity(container) {
+  const containers = container.querySelectorAll('.donut-chart-container');
+  containers.forEach(chartBox => {
+    const segments = chartBox.querySelectorAll('.donut-segment');
+    const centerLabel = chartBox.querySelector('.donut-center-label');
+    const centerVal = chartBox.querySelector('.donut-center-val');
+    if (!centerLabel || !centerVal) return;
+
+    const defaultLabel = centerLabel.textContent;
+    const defaultVal = centerVal.textContent;
+
+    segments.forEach(seg => {
+      seg.addEventListener('mouseenter', () => {
+        const name = seg.dataset.name;
+        const amt = seg.dataset.amount;
+        const percent = seg.dataset.percent;
+        centerLabel.textContent = `${name} (${percent})`;
+        centerVal.textContent = amt;
+        seg.style.opacity = '0.85';
+        seg.setAttribute('stroke-width', '34');
+      });
+
+      seg.addEventListener('mouseleave', () => {
+        centerLabel.textContent = defaultLabel;
+        centerVal.textContent = defaultVal;
+        seg.style.opacity = '1';
+        seg.setAttribute('stroke-width', '28');
+      });
+    });
+  });
+}
+
+/**
  * Generate a responsive SVG Area/Line Cash-Flow Forecast Chart
  * @param {Object} options
  * @param {Array} options.timeline - [{ date, balance, income, expense, isBelowBuffer }]
@@ -184,6 +220,100 @@ export function renderForecastChart({
       <div class="forecast-tooltip" style="display: none; position: absolute; pointer-events: none; z-index: 10;"></div>
     </div>
   `;
+}
+
+/**
+ * Attach interactive hover tooltip & crosshair events to rendered forecast SVG charts
+ * @param {HTMLElement} container
+ */
+export function attachForecastChartInteractivity(container) {
+  const wrappers = container.querySelectorAll('.forecast-chart-wrapper');
+  wrappers.forEach(wrapper => {
+    const svg = wrapper.querySelector('.forecast-svg');
+    const tooltip = wrapper.querySelector('.forecast-tooltip');
+    const crosshairGroup = wrapper.querySelector('.chart-crosshair-group');
+    const crosshairLine = wrapper.querySelector('.crosshair-line');
+    const crosshairDot = wrapper.querySelector('.crosshair-dot');
+
+    if (!svg || !tooltip || !svg.dataset.points) return;
+    let points = [];
+    try {
+      points = JSON.parse(svg.dataset.points);
+    } catch (e) {
+      return;
+    }
+    if (!points || points.length === 0) return;
+
+    const viewBox = svg.viewBox.baseVal;
+    const svgWidth = (viewBox && viewBox.width) || 800;
+    const svgHeight = (viewBox && viewBox.height) || 260;
+
+    const onMove = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect();
+      const relativeX = ((clientX - rect.left) / rect.width) * svgWidth;
+
+      let nearest = points[0];
+      let minDiff = Infinity;
+      points.forEach(pt => {
+        const diff = Math.abs(pt.x - relativeX);
+        if (diff < minDiff) {
+          minDiff = diff;
+          nearest = pt;
+        }
+      });
+
+      if (!nearest) return;
+
+      if (crosshairGroup) crosshairGroup.style.display = 'block';
+      if (crosshairLine) {
+        crosshairLine.setAttribute('x1', nearest.x);
+        crosshairLine.setAttribute('x2', nearest.x);
+      }
+      if (crosshairDot) {
+        crosshairDot.setAttribute('cx', nearest.x);
+        crosshairDot.setAttribute('cy', nearest.y);
+      }
+
+      const eventsHtml = nearest.events && nearest.events.length > 0
+        ? `<div class="forecast-tooltip-events">${nearest.events.map(e => `${e.type === 'income' ? '+' : '-'}${formatCurrency(e.amount)} ${e.name}`).join('<br>')}</div>`
+        : '';
+
+      tooltip.innerHTML = `
+        <div class="forecast-tooltip-date">${formatDate(nearest.date, 'medium')}</div>
+        <div class="forecast-tooltip-bal ${nearest.balance < 500 ? 'text-warning' : 'text-primary'}">${nearest.formattedBalance}</div>
+        ${eventsHtml}
+      `;
+      tooltip.style.display = 'block';
+
+      const pixelX = (nearest.x / svgWidth) * rect.width;
+      const pixelY = (nearest.y / svgHeight) * rect.height;
+
+      const tooltipWidth = tooltip.offsetWidth || 140;
+      let left = pixelX - tooltipWidth / 2;
+      if (left < 10) left = 10;
+      if (left + tooltipWidth > rect.width - 10) left = rect.width - tooltipWidth - 10;
+
+      let top = pixelY - 60;
+      if (top < 10) top = pixelY + 20;
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    };
+
+    const onLeave = () => {
+      if (crosshairGroup) crosshairGroup.style.display = 'none';
+      if (tooltip) tooltip.style.display = 'none';
+    };
+
+    svg.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+    svg.addEventListener('mouseleave', onLeave);
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+    svg.addEventListener('touchend', onLeave);
+  });
 }
 
 /**

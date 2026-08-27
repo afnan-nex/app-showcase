@@ -16,7 +16,7 @@ export class EventEngine {
     if (!events || !Array.isArray(events)) return;
 
     for (const rule of events) {
-      if (!rule.enabled && rule.enabled !== undefined) continue;
+      if (rule.enabled === false) continue;
 
       const isTriggered = this.checkTrigger(rule.trigger, objects, collisions, variables, dt);
       if (isTriggered) {
@@ -111,11 +111,14 @@ export class EventEngine {
       }
 
       case 'on_out_of_bounds': {
-        const targetObj = objects.find(o => o.id === trigger.objectId);
+        const targetObj = trigger.objectId === 'player'
+          ? (this.runtime.playerObj || objects.find(o => o.id === 'player' || o.tag === 'player'))
+          : objects.find(o => o.id === trigger.objectId);
+
         if (!targetObj) return false;
-        const world = this.runtime.currentScene.bounds || { width: 1280, height: 720 };
-        const isOut = targetObj.x < -100 || targetObj.x > world.width + 100 ||
-                      targetObj.y < -100 || targetObj.y > world.height + 100;
+        const world = this.runtime.currentScene?.bounds || { width: 1600, height: 800 };
+        const isOut = targetObj.x < -80 || targetObj.x > world.width + 80 ||
+                      targetObj.y < -80 || targetObj.y > world.height + 80;
         return isOut ? { context: { target: targetObj } } : false;
       }
 
@@ -140,6 +143,8 @@ export class EventEngine {
             variables[varName] = (Number(variables[varName]) || 0) + Number(val);
           } else if (op === 'subtract') {
             variables[varName] = (Number(variables[varName]) || 0) - Number(val);
+          } else if (op === 'multiply') {
+            variables[varName] = (Number(variables[varName]) || 0) * Number(val);
           }
           break;
         }
@@ -157,8 +162,8 @@ export class EventEngine {
 
           const idx = objects.findIndex(o => o.id === targetId);
           if (idx !== -1) {
-            // Spawn explosion particles
-            this.runtime.spawnParticles(objects[idx].x + objects[idx].width / 2, objects[idx].y + objects[idx].height / 2, objects[idx].color || '#f85149');
+            const victim = objects[idx];
+            this.runtime.spawnParticles(victim.x + victim.width / 2, victim.y + victim.height / 2, victim.color || '#f85149', 16);
             objects.splice(idx, 1);
           }
           break;
@@ -174,7 +179,7 @@ export class EventEngine {
           }
 
           const newObj = {
-            id: 'spawned_' + Math.random().toString(36).substr(2, 6),
+            id: 'spawned_' + Math.random().toString(36).substr(2, 7),
             name: action.objectName || 'Bullet',
             tag: action.tag || 'projectile',
             x: spawnX,
@@ -188,7 +193,8 @@ export class EventEngine {
             vy: Number(action.vy) || 0,
             hasCollider: true,
             isSolid: false,
-            behavior: action.behavior || 'bullet'
+            behavior: action.behavior || 'bullet',
+            lifespan: Number(action.lifespan) || 3.0
           };
           objects.push(newObj);
           break;
@@ -203,21 +209,32 @@ export class EventEngine {
             if (action.vx !== undefined) targetObj.vx = Number(action.vx);
             if (action.vy !== undefined) targetObj.vy = Number(action.vy);
             if (action.impulseY !== undefined) targetObj.vy = -Number(action.impulseY);
+            if (action.impulseX !== undefined) targetObj.vx = Number(action.impulseX);
           }
           break;
         }
 
         case 'set_position': {
-          const targetObj = objects.find(o => o.id === action.targetId);
+          const targetObj = action.targetId === 'player'
+            ? this.runtime.playerObj
+            : objects.find(o => o.id === action.targetId);
+
           if (targetObj) {
             targetObj.x = Number(action.x) || 0;
             targetObj.y = Number(action.y) || 0;
+            targetObj.vx = 0;
+            targetObj.vy = 0;
           }
           break;
         }
 
         case 'show_message': {
           this.runtime.showHUDMessage(action.message, Number(action.duration) || 3.0);
+          break;
+        }
+
+        case 'camera_shake': {
+          this.runtime.triggerCameraShake(Number(action.intensity) || 8, Number(action.duration) || 0.3);
           break;
         }
 

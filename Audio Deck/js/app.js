@@ -32,26 +32,39 @@ class AudioDeckApp {
     }
 
     async init() {
-        // 1. Initialize Audio Engine context & procedural sample library
-        await this.engine.init();
+        try {
+            // 1. Initialize Audio Engine context & procedural sample library
+            await this.engine.init();
+        } catch (e) {
+            console.warn('AudioEngine init deferred:', e);
+        }
 
-        // 2. Load last project or create Starter Demo Project
-        const savedProjects = await StorageManager.listProjects();
-        if (savedProjects.length > 0) {
-            const lastProj = await StorageManager.loadProject(savedProjects[0].id, this.engine.sampleLibrary);
-            this.project = lastProj || StorageManager.createDemoProject(this.engine.sampleLibrary);
-        } else {
+        try {
+            // 2. Load last project or create Starter Demo Project
+            const savedProjects = await StorageManager.listProjects();
+            if (savedProjects && savedProjects.length > 0) {
+                const lastProj = await StorageManager.loadProject(savedProjects[0].id, this.engine.sampleLibrary);
+                this.project = lastProj || StorageManager.createDemoProject(this.engine.sampleLibrary);
+            } else {
+                this.project = StorageManager.createDemoProject(this.engine.sampleLibrary);
+            }
+        } catch (e) {
+            console.warn('StorageManager project load error, using default demo:', e);
             this.project = StorageManager.createDemoProject(this.engine.sampleLibrary);
         }
 
-        // Register project tracks with AudioEngine
-        this.project.tracks.forEach(track => {
-            this.engine.registerTrack(track);
-        });
+        try {
+            // Register project tracks with AudioEngine
+            this.project.tracks.forEach(track => {
+                this.engine.registerTrack(track);
+            });
 
-        // Set engine clock parameters
-        this.engine.setBPM(this.project.bpm);
-        this.engine.setLoop(this.project.loop.enabled, this.project.loop.startBeat, this.project.loop.endBeat);
+            // Set engine clock parameters
+            this.engine.setBPM(this.project.bpm);
+            this.engine.setLoop(this.project.loop.enabled, this.project.loop.startBeat, this.project.loop.endBeat);
+        } catch (e) {
+            console.warn('Track registration warning:', e);
+        }
 
         // 3. Initialize Modal Manager
         this.modalManager = new ModalManager(
@@ -178,8 +191,11 @@ class AudioDeckApp {
     }
 
     _syncBottomViews() {
-        const track = this.project.getTrack(this.project.activeTrackId);
+        const track = this.project.getTrack(this.project.activeTrackId) || this.project.tracks[0];
         if (!track) return;
+        if (!this.project.activeTrackId) {
+            this.project.activeTrackId = track.id;
+        }
 
         if (this.project.activeBottomTab === 'pianoroll') {
             // Find active or first synth clip

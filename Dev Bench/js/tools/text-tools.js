@@ -1,10 +1,49 @@
 import { escapeHTML } from '../icons.js';
 
+// --- Common Built-in Regex Presets ---
+export const REGEX_PRESETS = [
+  {
+    name: 'Email Address (RFC 5322)',
+    pattern: '[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+',
+    flags: 'g',
+    sample: 'Contact security@enterprise.dev or operations.lead@cloud-infra.io for escalation.'
+  },
+  {
+    name: 'Semantic Versioning (SemVer)',
+    pattern: 'v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?',
+    flags: 'g',
+    sample: 'Upgraded dependencies: v1.0.0, 2.14.3-beta.1, and 3.0.0-rc.2+build.892.'
+  },
+  {
+    name: 'IPv4 Address & Port',
+    pattern: '\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?::(\\d{1,5}))?\\b',
+    flags: 'g',
+    sample: 'Cluster nodes bound to 192.168.1.1:8080 and 10.0.4.12:443.'
+  },
+  {
+    name: 'UUID v4 / v7',
+    pattern: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}',
+    flags: 'g',
+    sample: 'Generated sessions: 7b566580-c081-4ba2-8d77-62f928e40428 and 0191834e-723a-7f61-9c32-b7e1279a110a.'
+  },
+  {
+    name: 'ISO 8601 Datetime',
+    pattern: '\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})',
+    flags: 'g',
+    sample: 'Audit log timestamps: 2026-08-28T09:30:00Z and 2026-08-28T14:15:22.450+00:00.'
+  },
+  {
+    name: 'HTTP/HTTPS URL',
+    pattern: 'https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)',
+    flags: 'g',
+    sample: 'Check the documentation at https://api.devbench.io/v1/docs or http://localhost:3000/api.'
+  }
+];
 
 // --- 1. Regex Tester ---
 export function testRegex(patternStr, flagsStr, testString, replaceStr = '') {
   if (!patternStr) {
-    return { isValid: true, matches: [], highlightedHTML: escapeHTML(testString), replacedText: testString };
+    return { isValid: true, matchCount: 0, matches: [], highlightedHTML: escapeHTML(testString), replacedText: testString };
   }
 
   try {
@@ -13,7 +52,9 @@ export function testRegex(patternStr, flagsStr, testString, replaceStr = '') {
     let match;
 
     if (flagsStr.includes('g')) {
-      while ((match = regex.exec(testString)) !== null) {
+      let loopCount = 0;
+      while ((match = regex.exec(testString)) !== null && loopCount < 5000) {
+        loopCount++;
         matches.push({
           index: match.index,
           length: match[0].length,
@@ -41,7 +82,7 @@ export function testRegex(patternStr, flagsStr, testString, replaceStr = '') {
     let lastIdx = 0;
     matches.forEach((m, idx) => {
       highlightedHTML += escapeHTML(testString.slice(lastIdx, m.index));
-      highlightedHTML += `<mark class="regex-match" title="Match ${idx + 1}">${escapeHTML(m.value)}</mark>`;
+      highlightedHTML += `<mark class="regex-match" title="Match ${idx + 1} at pos ${m.index}">${escapeHTML(m.value)}</mark>`;
       lastIdx = m.index + m.length;
     });
     highlightedHTML += escapeHTML(testString.slice(lastIdx));
@@ -65,6 +106,7 @@ export function testRegex(patternStr, flagsStr, testString, replaceStr = '') {
     return {
       isValid: false,
       error: err.message,
+      matchCount: 0,
       matches: [],
       highlightedHTML: escapeHTML(testString),
       replacedText: testString
@@ -74,17 +116,18 @@ export function testRegex(patternStr, flagsStr, testString, replaceStr = '') {
 
 // --- 2. Text Diff Viewer ---
 export function computeTextDiff(originalText, modifiedText, options = {}) {
-  const { ignoreWhitespace = false } = options;
+  const { ignoreWhitespace = false, caseSensitive = true } = options;
 
   let origLines = (originalText || '').split('\n');
   let modLines = (modifiedText || '').split('\n');
 
-  if (ignoreWhitespace) {
-    origLines = origLines.map(l => l.trim());
-    modLines = modLines.map(l => l.trim());
-  }
+  const normalize = (line) => {
+    let l = ignoreWhitespace ? line.trim() : line;
+    if (!caseSensitive) l = l.toLowerCase();
+    return l;
+  };
 
-  // Myers/LCS-like line diff
+  // Matrix calculation for LCS
   const matrix = [];
   for (let i = 0; i <= origLines.length; i++) {
     matrix[i] = new Array(modLines.length + 1).fill(0);
@@ -92,7 +135,7 @@ export function computeTextDiff(originalText, modifiedText, options = {}) {
 
   for (let i = 1; i <= origLines.length; i++) {
     for (let j = 1; j <= modLines.length; j++) {
-      if (origLines[i - 1] === modLines[j - 1]) {
+      if (normalize(origLines[i - 1]) === normalize(modLines[j - 1])) {
         matrix[i][j] = matrix[i - 1][j - 1] + 1;
       } else {
         matrix[i][j] = Math.max(matrix[i - 1][j], matrix[i][j - 1]);
@@ -106,7 +149,7 @@ export function computeTextDiff(originalText, modifiedText, options = {}) {
   const diff = [];
 
   while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && origLines[i - 1] === modLines[j - 1]) {
+    if (i > 0 && j > 0 && normalize(origLines[i - 1]) === normalize(modLines[j - 1])) {
       diff.unshift({ type: 'unchanged', lineOrig: i, lineMod: j, text: origLines[i - 1] });
       i--;
       j--;
@@ -119,9 +162,9 @@ export function computeTextDiff(originalText, modifiedText, options = {}) {
     }
   }
 
-  let addedCount = diff.filter(d => d.type === 'added').length;
-  let removedCount = diff.filter(d => d.type === 'removed').length;
-  let unchangedCount = diff.filter(d => d.type === 'unchanged').length;
+  const addedCount = diff.filter(d => d.type === 'added').length;
+  const removedCount = diff.filter(d => d.type === 'removed').length;
+  const unchangedCount = diff.filter(d => d.type === 'unchanged').length;
 
   return {
     diff,
@@ -175,9 +218,13 @@ export function sortLines(input, mode = 'asc', caseSensitive = false) {
 // --- 4. Duplicate Line Remover ---
 export function removeDuplicateLines(input, options = {}) {
   if (!input) return { output: '', originalCount: 0, uniqueCount: 0, removedCount: 0 };
-  const { caseSensitive = false, trimLines = false } = options;
+  const { caseSensitive = false, trimLines = false, removeEmpty = false } = options;
 
-  const lines = input.split('\n');
+  let lines = input.split('\n');
+  if (removeEmpty) {
+    lines = lines.filter(l => l.trim().length > 0);
+  }
+
   const seen = new Set();
   const result = [];
 
@@ -260,6 +307,8 @@ export function convertCase(input, targetCase) {
       return words.map(w => w.toLowerCase()).join('.');
     case 'path/case':
       return words.map(w => w.toLowerCase()).join('/');
+    case 'Train-Case':
+      return words.map(capitalize).join('-');
     case 'alternating':
       return input.split('').map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join('');
     case 'reverse':
@@ -283,5 +332,3 @@ function capitalize(word) {
   if (!word) return '';
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
-
-

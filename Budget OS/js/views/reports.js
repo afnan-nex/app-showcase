@@ -10,7 +10,7 @@ import { formatCurrency, formatPercent, getMonthKey, formatMonthKey, formatDate 
 import { getCategorySpendingBreakdown, getMonthlyTrends, getTopMerchants } from '../calculations/analytics.js';
 import { detectSpendingAnomalies } from '../calculations/anomalies.js';
 import { calculateAccountBalances } from '../calculations/balances.js';
-import { renderDonutChart, renderMonthlyTrendBars } from '../charts/svg-charts.js';
+import { renderDonutChart, renderMonthlyTrendBars, attachDonutChartInteractivity } from '../charts/svg-charts.js';
 
 let reportPeriod = 'thisMonth'; // 'thisMonth', 'all'
 
@@ -275,6 +275,9 @@ export function renderReportsView(container) {
       </div>
     </div>
   `;
+
+  // Attach Donut interactive hover handlers
+  attachDonutChartInteractivity(container);
 
   // Attach Handlers
   container.querySelectorAll('#report-period-tabs .segment-btn').forEach(btn => {

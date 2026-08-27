@@ -144,19 +144,27 @@ export function formatMonthKey(monthKey) {
   return d.toLocaleDateString(activeLocale, { month: 'long', year: 'numeric' });
 }
 
+export function formatDateToISO(d) {
+  if (!d || isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 /**
  * Date arithmetic utilities
  */
 export function addDays(dateStrOrObj, days) {
   const d = typeof dateStrOrObj === 'string' ? new Date(dateStrOrObj + 'T00:00:00') : new Date(dateStrOrObj);
   d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
+  return formatDateToISO(d);
 }
 
 export function addMonths(dateStrOrObj, months) {
   const d = typeof dateStrOrObj === 'string' ? new Date(dateStrOrObj + 'T00:00:00') : new Date(dateStrOrObj);
   d.setMonth(d.getMonth() + months);
-  return d.toISOString().split('T')[0];
+  return formatDateToISO(d);
 }
 
 export function getDaysBetween(date1Str, date2Str) {
@@ -167,10 +175,7 @@ export function getDaysBetween(date1Str, date2Str) {
 
 export function getTodayISO() {
   const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return formatDateToISO(now);
 }
 
 export function generateUUID() {

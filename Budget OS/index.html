@@ -101,11 +101,14 @@
       </div>
     </aside>
 
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
     <!-- Main Content Workspace -->
-    <main class="app-main">
+    <main class="app-main" id="main-content" role="main">
       <!-- Top Utility Bar -->
       <header class="app-topbar">
-        <button class="mobile-nav-toggle" id="btn-mobile-sidebar-toggle" aria-label="Toggle menu">
+        <button class="mobile-nav-toggle" id="btn-mobile-sidebar-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="app-sidebar">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -118,7 +121,7 @@
         </div>
 
         <div class="topbar-actions flex items-center gap-2">
-          <button class="btn btn-sm btn-primary" id="btn-topbar-new-tx">
+          <button class="btn btn-sm btn-primary" id="btn-topbar-new-tx" aria-label="Create new transaction">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             + Transaction
           </button>
@@ -126,16 +129,16 @@
       </header>
 
       <!-- View Container -->
-      <div class="main-workspace" id="main-workspace">
+      <div class="main-workspace" id="main-workspace" tabindex="-1">
         <!-- Injected dynamically by router/views -->
       </div>
     </main>
 
     <!-- Modal Container -->
-    <div class="modal-container" id="modal-container"></div>
+    <div class="modal-container" id="modal-container" role="dialog" aria-modal="true"></div>
 
     <!-- Undo Toast Notification Container -->
-    <div class="toast-container" id="toast-container"></div>
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   </div>
 

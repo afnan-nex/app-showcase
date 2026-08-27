@@ -5,7 +5,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Dark Theme (VS Code / Terminal Default) */
+  /* Dark Theme (VS Code / JetBrains / Linear Default) */
   --bg-app: #0d1117;
   --bg-sidebar: #161b22;
   --bg-surface: #161b22;
@@ -35,10 +35,11 @@
   --accent-amber: #d29922;
   --accent-amber-subtle: rgba(210, 153, 34, 0.15);
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, 'SF Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, Menlo, monospace;
 
   --sidebar-width: 270px;
+  --sidebar-collapsed-width: 0px;
   --header-height: 48px;
   --tab-height: 38px;
   --status-height: 28px;
@@ -46,7 +47,7 @@
   --radius-md: 6px;
   --radius-lg: 8px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
@@ -96,6 +97,7 @@
 
 html, body {
   height: 100%;
+  width: 100%;
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-sans);
@@ -103,6 +105,33 @@ html, body {
   line-height: 1.5;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Focus Visibility & Accessibility */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* App Master Shell */
@@ -123,6 +152,13 @@ html, body {
   flex-shrink: 0;
   user-select: none;
   z-index: 100;
+  transition: width 0.2s ease, transform 0.2s ease;
+}
+
+.app-sidebar.collapsed {
+  width: 0;
+  overflow: hidden;
+  border-right: none;
 }
 
 .sidebar-header {
@@ -170,6 +206,15 @@ html, body {
   letter-spacing: 0.5px;
 }
 
+.sidebar-category-group {
+  margin-bottom: 12px;
+}
+
+.sidebar-cat-title {
+  padding: 4px 8px;
+  letter-spacing: 0.5px;
+}
+
 .sidebar-tool-item {
   display: flex;
   align-items: center;
@@ -201,6 +246,12 @@ html, body {
   opacity: 0.85;
 }
 
+.tool-item-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .sidebar-footer {
   padding: 8px 12px;
   border-top: 1px solid var(--border-subtle);
@@ -216,6 +267,7 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  min-width: 0;
   overflow: hidden;
   background-color: var(--bg-app);
 }
@@ -245,7 +297,7 @@ html, body {
   font-size: 12px;
   cursor: pointer;
   width: 280px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 }
 
 .topbar-search-btn:hover {
@@ -274,6 +326,11 @@ html, body {
   overflow-x: auto;
   padding: 0 8px;
   gap: 2px;
+  scrollbar-width: none;
+}
+
+.editor-tab-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .editor-tab {
@@ -290,6 +347,7 @@ html, body {
   font-size: 12px;
   user-select: none;
   height: 32px;
+  white-space: nowrap;
   transition: background-color 0.15s, color 0.15s;
 }
 
@@ -303,6 +361,11 @@ html, body {
   color: var(--accent-primary);
   border-color: var(--border-subtle);
   font-weight: 600;
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
 }
 
 .tab-close-btn {
@@ -328,8 +391,9 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   overflow: hidden;
-  padding: 16px;
+  padding: 14px;
 }
 
 .mobile-nav-toggle {
@@ -338,15 +402,91 @@ html, body {
   border: none;
   color: var(--text-primary);
   cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.devbench-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  pointer-events: auto;
+  animation: slideInToast 0.2s ease-out;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-success { border-left: 3px solid var(--accent-emerald); }
+.toast-info { border-left: 3px solid var(--accent-primary); }
+.toast-warning { border-left: 3px solid var(--accent-amber); }
+.toast-fade-out {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .app-sidebar {
+    width: 240px;
+  }
 }
 
 @media (max-width: 768px) {
   .mobile-nav-toggle { display: flex; }
+  .hidden-mobile { display: none !important; }
   .app-sidebar {
     position: fixed;
     top: 0; bottom: 0; left: -280px;
+    width: 280px;
     transition: left 0.25s ease;
   }
-  .app-sidebar.open { left: 0; box-shadow: var(--shadow-lg); }
-  .topbar-search-btn { width: 180px; }
+  .app-sidebar.open {
+    left: 0;
+    box-shadow: var(--shadow-lg);
+  }
+  .topbar-search-btn { width: 160px; }
+  .active-tool-workspace { padding: 8px; }
+  .split-pane-layout { flex-direction: column !important; }
+  .pane-column { min-height: 220px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-search-btn { width: 130px; font-size: 11px; }
+  .kbd-shortcut { display: none; }
+  .app-topbar { padding: 0 10px; }
+  .active-tool-workspace { padding: 4px; }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

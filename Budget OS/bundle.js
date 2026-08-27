@@ -240,19 +240,27 @@ function formatMonthKey(monthKey) {
   return d.toLocaleDateString(activeLocale, { month: 'long', year: 'numeric' });
 }
 
+function formatDateToISO(d) {
+  if (!d || isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 /**
  * Date arithmetic utilities
  */
 function addDays(dateStrOrObj, days) {
   const d = typeof dateStrOrObj === 'string' ? new Date(dateStrOrObj + 'T00:00:00') : new Date(dateStrOrObj);
   d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
+  return formatDateToISO(d);
 }
 
 function addMonths(dateStrOrObj, months) {
   const d = typeof dateStrOrObj === 'string' ? new Date(dateStrOrObj + 'T00:00:00') : new Date(dateStrOrObj);
   d.setMonth(d.getMonth() + months);
-  return d.toISOString().split('T')[0];
+  return formatDateToISO(d);
 }
 
 function getDaysBetween(date1Str, date2Str) {
@@ -263,10 +271,7 @@ function getDaysBetween(date1Str, date2Str) {
 
 function getTodayISO() {
   const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return formatDateToISO(now);
 }
 
 function generateUUID() {
@@ -1238,6 +1243,42 @@ function renderDonutChart({
 }
 
 /**
+ * Attach interactive hover events to SVG Donut chart
+ * @param {HTMLElement} container
+ */
+function attachDonutChartInteractivity(container) {
+  const containers = container.querySelectorAll('.donut-chart-container');
+  containers.forEach(chartBox => {
+    const segments = chartBox.querySelectorAll('.donut-segment');
+    const centerLabel = chartBox.querySelector('.donut-center-label');
+    const centerVal = chartBox.querySelector('.donut-center-val');
+    if (!centerLabel || !centerVal) return;
+
+    const defaultLabel = centerLabel.textContent;
+    const defaultVal = centerVal.textContent;
+
+    segments.forEach(seg => {
+      seg.addEventListener('mouseenter', () => {
+        const name = seg.dataset.name;
+        const amt = seg.dataset.amount;
+        const percent = seg.dataset.percent;
+        centerLabel.textContent = `${name} (${percent})`;
+        centerVal.textContent = amt;
+        seg.style.opacity = '0.85';
+        seg.setAttribute('stroke-width', '34');
+      });
+
+      seg.addEventListener('mouseleave', () => {
+        centerLabel.textContent = defaultLabel;
+        centerVal.textContent = defaultVal;
+        seg.style.opacity = '1';
+        seg.setAttribute('stroke-width', '28');
+      });
+    });
+  });
+}
+
+/**
  * Generate a responsive SVG Area/Line Cash-Flow Forecast Chart
  * @param {Object} options
  * @param {Array} options.timeline - [{ date, balance, income, expense, isBelowBuffer }]
@@ -1348,6 +1389,100 @@ function renderForecastChart({
       <div class="forecast-tooltip" style="display: none; position: absolute; pointer-events: none; z-index: 10;"></div>
     </div>
   `;
+}
+
+/**
+ * Attach interactive hover tooltip & crosshair events to rendered forecast SVG charts
+ * @param {HTMLElement} container
+ */
+function attachForecastChartInteractivity(container) {
+  const wrappers = container.querySelectorAll('.forecast-chart-wrapper');
+  wrappers.forEach(wrapper => {
+    const svg = wrapper.querySelector('.forecast-svg');
+    const tooltip = wrapper.querySelector('.forecast-tooltip');
+    const crosshairGroup = wrapper.querySelector('.chart-crosshair-group');
+    const crosshairLine = wrapper.querySelector('.crosshair-line');
+    const crosshairDot = wrapper.querySelector('.crosshair-dot');
+
+    if (!svg || !tooltip || !svg.dataset.points) return;
+    let points = [];
+    try {
+      points = JSON.parse(svg.dataset.points);
+    } catch (e) {
+      return;
+    }
+    if (!points || points.length === 0) return;
+
+    const viewBox = svg.viewBox.baseVal;
+    const svgWidth = (viewBox && viewBox.width) || 800;
+    const svgHeight = (viewBox && viewBox.height) || 260;
+
+    const onMove = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect();
+      const relativeX = ((clientX - rect.left) / rect.width) * svgWidth;
+
+      let nearest = points[0];
+      let minDiff = Infinity;
+      points.forEach(pt => {
+        const diff = Math.abs(pt.x - relativeX);
+        if (diff < minDiff) {
+          minDiff = diff;
+          nearest = pt;
+        }
+      });
+
+      if (!nearest) return;
+
+      if (crosshairGroup) crosshairGroup.style.display = 'block';
+      if (crosshairLine) {
+        crosshairLine.setAttribute('x1', nearest.x);
+        crosshairLine.setAttribute('x2', nearest.x);
+      }
+      if (crosshairDot) {
+        crosshairDot.setAttribute('cx', nearest.x);
+        crosshairDot.setAttribute('cy', nearest.y);
+      }
+
+      const eventsHtml = nearest.events && nearest.events.length > 0
+        ? `<div class="forecast-tooltip-events">${nearest.events.map(e => `${e.type === 'income' ? '+' : '-'}${formatCurrency(e.amount)} ${e.name}`).join('<br>')}</div>`
+        : '';
+
+      tooltip.innerHTML = `
+        <div class="forecast-tooltip-date">${formatDate(nearest.date, 'medium')}</div>
+        <div class="forecast-tooltip-bal ${nearest.balance < 500 ? 'text-warning' : 'text-primary'}">${nearest.formattedBalance}</div>
+        ${eventsHtml}
+      `;
+      tooltip.style.display = 'block';
+
+      const pixelX = (nearest.x / svgWidth) * rect.width;
+      const pixelY = (nearest.y / svgHeight) * rect.height;
+
+      const tooltipWidth = tooltip.offsetWidth || 140;
+      let left = pixelX - tooltipWidth / 2;
+      if (left < 10) left = 10;
+      if (left + tooltipWidth > rect.width - 10) left = rect.width - tooltipWidth - 10;
+
+      let top = pixelY - 60;
+      if (top < 10) top = pixelY + 20;
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    };
+
+    const onLeave = () => {
+      if (crosshairGroup) crosshairGroup.style.display = 'none';
+      if (tooltip) tooltip.style.display = 'none';
+    };
+
+    svg.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+    svg.addEventListener('mouseleave', onLeave);
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+    svg.addEventListener('touchend', onLeave);
+  });
 }
 
 /**
@@ -2937,6 +3072,9 @@ function renderDashboardView(container) {
     </div>
   `;
 
+  // Attach interactive SVG forecast chart tooltips
+  attachForecastChartInteractivity(container);
+
   // Attach event listeners
   container.querySelector('#btn-quick-transaction')?.addEventListener('click', () => {
     window.dispatchEvent(new CustomEvent('OPEN_TRANSACTION_MODAL'));
@@ -2971,6 +3109,18 @@ function renderDashboardView(container) {
     state.activeView = 'reports';
     state.notify('VIEW_CHANGED');
   });
+
+  // Recent transaction rows click to edit
+  container.querySelectorAll('.tx-row').forEach(row => {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', () => {
+      const id = row.dataset.id;
+      const tx = transactions.find(t => t.id === id);
+      if (tx) {
+        window.dispatchEvent(new CustomEvent('OPEN_TRANSACTION_MODAL', { detail: { transaction: tx } }));
+      }
+    });
+  });
 }
 
 
@@ -2993,6 +3143,14 @@ let filterState = {
   currentPage: 1,
   pageSize: 15
 };
+
+function setTransactionFilter(newFilters = {}) {
+  filterState = {
+    ...filterState,
+    ...newFilters,
+    currentPage: 1
+  };
+}
 
 function renderTransactionsView(container) {
   const { transactions, categories, accounts } = state;
@@ -3609,6 +3767,13 @@ function renderAccountsView(container) {
 
   container.querySelectorAll('.btn-view-acc-tx').forEach(btn => {
     btn.addEventListener('click', () => {
+      const accId = btn.dataset.id;
+      setTransactionFilter({
+        accountId: accId || 'all',
+        dateRange: 'all',
+        type: 'all',
+        search: ''
+      });
       state.activeView = 'transactions';
       state.notify('VIEW_CHANGED');
     });
@@ -4380,6 +4545,9 @@ function renderForecastView(container) {
     </div>
   `;
 
+  // Attach interactive SVG forecast chart tooltips
+  attachForecastChartInteractivity(container);
+
   // Attach Handlers
   container.querySelectorAll('#forecast-horizon-tabs .segment-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -5009,6 +5177,9 @@ function renderReportsView(container) {
     </div>
   `;
 
+  // Attach Donut interactive hover handlers
+  attachDonutChartInteractivity(container);
+
   // Attach Handlers
   container.querySelectorAll('#report-period-tabs .segment-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -5362,28 +5533,68 @@ function renderDataHubView(container) {
   container.querySelector('#btn-wizard-step2-next')?.addEventListener('click', () => {
     // Parse rows based on mappings
     const rows = [];
-    const { date: dIdx, description: descIdx, amount: amtIdx } = csvWizardState.mappings;
+    const { date: dIdx, description: descIdx, amount: amtIdx, category: catIdx } = csvWizardState.mappings;
     
+    // Category lookup map
+    const catLowerMap = {};
+    categories.forEach(c => {
+      catLowerMap[c.name.toLowerCase()] = c.id;
+      catLowerMap[c.id.toLowerCase()] = c.id;
+    });
+
     for (let i = 1; i < csvWizardState.rawLines.length; i++) {
       const line = csvWizardState.rawLines[i];
-      if (line.length <= 1) continue;
+      if (!line || line.length <= 1) continue;
 
-      let dateVal = line[dIdx] || new Date().toISOString().split('T')[0];
-      // Clean date
-      if (dateVal.includes('/')) {
-        const parts = dateVal.split('/');
-        if (parts.length === 3) {
-          dateVal = `${parts[2].length === 2 ? '20' + parts[2] : parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      let rawDate = (line[dIdx] || '').trim();
+      let dateVal = new Date().toISOString().split('T')[0];
+
+      if (rawDate) {
+        if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(rawDate)) {
+          const parts = rawDate.split(/[-/]/);
+          dateVal = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+        } else if (/^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/.test(rawDate)) {
+          const parts = rawDate.split(/[-/]/);
+          let y = parts[2];
+          if (y.length === 2) y = '20' + y;
+          // default assume MM/DD/YYYY unless month > 12
+          let m = parseInt(parts[0], 10);
+          let d = parseInt(parts[1], 10);
+          if (m > 12 && d <= 12) {
+            // Swap if DD/MM/YYYY
+            const temp = m;
+            m = d;
+            d = temp;
+          }
+          dateVal = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         }
       }
 
-      const descVal = line[descIdx] || 'Imported Transaction';
-      let rawAmt = (line[amtIdx] || '0').replace(/[^0-9.-]/g, '');
-      let amtNum = parseFloat(rawAmt) || 0;
+      const descVal = (line[descIdx] || 'Imported Transaction').trim();
+      let rawAmt = (line[amtIdx] || '0').trim();
+
+      // Check accounting parentheses for negative e.g. (45.00)
+      const isParenthesesNegative = rawAmt.startsWith('(') && rawAmt.endsWith(')');
+      let cleanAmtStr = rawAmt.replace(/[^0-9.-]/g, '');
+      let amtNum = parseFloat(cleanAmtStr) || 0;
+      if (isParenthesesNegative) amtNum = -Math.abs(amtNum);
 
       const isNegative = amtNum < 0 || rawAmt.startsWith('-');
       const absAmount = Math.abs(amtNum);
       const type = isNegative ? 'expense' : 'income';
+
+      // Auto assign category if column was mapped
+      let resolvedCatId = type === 'income' ? 'cat_salary' : 'cat_misc';
+      if (catIdx >= 0 && line[catIdx]) {
+        const rawCat = line[catIdx].trim().toLowerCase();
+        if (catLowerMap[rawCat]) {
+          resolvedCatId = catLowerMap[rawCat];
+        } else {
+          // Fuzzy match against category names
+          const found = categories.find(c => rawCat.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(rawCat));
+          if (found) resolvedCatId = found.id;
+        }
+      }
 
       rows.push({
         id: 'tx_imp_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
@@ -5393,7 +5604,7 @@ function renderDataHubView(container) {
         amount: absAmount,
         type,
         accountId: csvWizardState.targetAccountId || accounts[0]?.id || 'acc_checking',
-        categoryId: type === 'income' ? 'cat_salary' : 'cat_misc',
+        categoryId: resolvedCatId,
         isCleared: true,
         notes: 'Imported via CSV Wizard'
       });
@@ -5413,7 +5624,6 @@ function renderDataHubView(container) {
     for (const tx of csvWizardState.parsedRows) {
       await state.addTransaction(tx);
     }
-    alert(`Successfully imported ${csvWizardState.parsedRows.length} transactions!`);
     csvWizardState = {
       step: 1,
       rawLines: [],
@@ -5504,6 +5714,7 @@ class BudgetOSApp {
     this.modalContainer = document.getElementById('modal-container');
     this.toastContainer = document.getElementById('toast-container');
     this.sidebar = document.getElementById('app-sidebar');
+    this.backdrop = document.getElementById('sidebar-backdrop');
   }
 
   async init() {
@@ -5561,7 +5772,16 @@ class BudgetOSApp {
     // Mobile Sidebar Toggle
     const sidebarToggleBtn = document.getElementById('btn-mobile-sidebar-toggle');
     sidebarToggleBtn?.addEventListener('click', () => {
-      this.sidebar.classList.toggle('open');
+      const isOpen = this.sidebar.classList.toggle('open');
+      this.backdrop?.classList.toggle('active', isOpen);
+      sidebarToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Mobile Backdrop click to dismiss
+    this.backdrop?.addEventListener('click', () => {
+      this.sidebar?.classList.remove('open');
+      this.backdrop?.classList.remove('active');
+      sidebarToggleBtn?.setAttribute('aria-expanded', 'false');
     });
 
     // Topbar quick transaction button
@@ -5590,6 +5810,8 @@ class BudgetOSApp {
 
     // Close mobile sidebar if open
     this.sidebar?.classList.remove('open');
+    this.backdrop?.classList.remove('active');
+    document.getElementById('btn-mobile-sidebar-toggle')?.setAttribute('aria-expanded', 'false');
 
     // Scroll to top
     this.viewContainer.scrollTop = 0;
@@ -5647,6 +5869,20 @@ class BudgetOSApp {
 
   setupShortcuts() {
     window.addEventListener('keydown', (e) => {
+      // ESC key closes active modal or mobile menu anywhere
+      if (e.key === 'Escape') {
+        if (this.modalContainer.classList.contains('active')) {
+          this.closeModal();
+          return;
+        }
+        if (this.sidebar.classList.contains('open')) {
+          this.sidebar.classList.remove('open');
+          this.backdrop?.classList.remove('active');
+          document.getElementById('btn-mobile-sidebar-toggle')?.setAttribute('aria-expanded', 'false');
+          return;
+        }
+      }
+
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
 
       if (e.key === 'n' || e.key === 'N') {
@@ -5663,9 +5899,29 @@ class BudgetOSApp {
         state.activeView = 'dashboard';
         this.renderCurrentView();
       }
+      if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        state.activeView = 'accounts';
+        this.renderCurrentView();
+      }
+      if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        state.activeView = 'budgets';
+        this.renderCurrentView();
+      }
+      if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        state.activeView = 'goals';
+        this.renderCurrentView();
+      }
       if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         state.activeView = 'forecast';
+        this.renderCurrentView();
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        state.activeView = 'reports';
         this.renderCurrentView();
       }
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {

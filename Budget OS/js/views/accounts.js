@@ -7,6 +7,7 @@ import state from '../state.js';
 import { getIcon } from '../icons.js';
 import { formatCurrency, formatPercent } from '../formatters.js';
 import { calculateAccountBalances } from '../calculations/balances.js';
+import { setTransactionFilter } from './transactions.js';
 
 function renderAccountCard(acc, stats = {}) {
   const isCredit = acc.type === 'creditCard';
@@ -202,6 +203,13 @@ export function renderAccountsView(container) {
 
   container.querySelectorAll('.btn-view-acc-tx').forEach(btn => {
     btn.addEventListener('click', () => {
+      const accId = btn.dataset.id;
+      setTransactionFilter({
+        accountId: accId || 'all',
+        dateRange: 'all',
+        type: 'all',
+        search: ''
+      });
       state.activeView = 'transactions';
       state.notify('VIEW_CHANGED');
     });
