@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReceiptVault — Document & Warranty Management Digital Filing Cabinet</title>
+  <meta name="description" content="Browser-based receipt, invoice, document, and warranty tracker with interactive image viewer, warranty countdowns, and financial analytics." />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Menu & Action Bar -->
+    <header class="editor-topbar">
+      <!-- Brand Section -->
+      <div class="toolbar-group">
+        <div class="brand-section">
+          <span class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"></path><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></svg>
+          </span>
+          <span>ReceiptVault</span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="btn btn-sm btn-primary" id="btn-new-receipt" title="Add New Receipt / Document">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>New Receipt</span>
+        </button>
+
+        <button class="btn btn-sm btn-secondary" id="btn-reset-demo-vault" title="Reset Demo Data">Reset Vault</button>
+      </div>
+
+      <!-- Backup & Restore Actions -->
+      <div class="toolbar-group">
+        <button class="btn btn-sm btn-secondary" id="btn-export-vault-json" title="Export Full JSON Backup">Backup JSON</button>
+        <button class="btn btn-sm btn-secondary" id="btn-import-vault-json" title="Restore Full JSON Backup">Restore</button>
+        <input type="file" id="file-import-vault" accept=".json" style="display: none;" />
+      </div>
+    </header>
+
+    <!-- Main Workspace (Left Nav Sidebar + Central Workspace + Right Inspector) -->
+    <div class="editor-main-body">
+      
+      <!-- Left Navigation Sidebar -->
+      <aside class="editor-sidebar-left">
+        <button class="nav-tab-btn active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="library">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"></path><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></svg>
+          <span>All Documents</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="warranties">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          <span>Warranties & Returns</span>
+        </button>
+
+        <button class="nav-tab-btn" data-tab="reports">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Financial Reports</span>
+        </button>
+      </aside>
+
+      <!-- Central Workspace Viewport (Dashboard / Library / Reports) -->
+      <main class="editor-center-workspace" id="main-workspace-view"></main>
+
+      <!-- Resizable Vertical Splitter -->
+      <div id="library-viewer-splitter" title="Drag to Resize Inspector"></div>
+
+      <!-- Right Document Inspector Panel (Active on Library & Warranties) -->
+      <aside class="editor-inspector-right" id="document-viewer-container"></aside>
+
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="editor-statusbar">
+      <div>Privacy: <strong>100% Private Local Filing Cabinet</strong> &bull; Zero Cloud Upload</div>
+      <div class="flex items-center gap-3">
+        <span>ReceiptVault v1.0 &bull; Warranty & Filing Engine</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Upload & Extraction Modal -->
+  <div class="modal-container" id="upload-modal-container"></div>
+
+  <!-- Standalone Application Script Bundle (Works on both http:// and direct file:/// double-click) -->
+  <script src="bundle.js"></script>
+</body>
+</html>

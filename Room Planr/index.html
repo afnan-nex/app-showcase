@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoomPlanr — Architectural Room Planning & 3D Layout Workstation</title>
+  <meta name="description" content="Browser-based 2D CAD floor plan editor and 3D isometric perspective preview studio with real-world dimensions, furniture catalog, collision engine, and multiple layout scenarios." />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Menu & Action Bar -->
+    <header class="editor-topbar">
+      <!-- Brand & Room Template -->
+      <div class="toolbar-group">
+        <div class="brand-section">
+          <span class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+          </span>
+          <span>RoomPlanr</span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <select id="select-sample-room" class="form-control form-control-sm w-44 font-semibold">
+          <option value="studio" selected>Modern Studio (6x4.5m)</option>
+          <option value="office">Executive Office (4.5x3.5m)</option>
+          <option value="bedroom">Master Bedroom (5x4m)</option>
+        </select>
+      </div>
+
+      <!-- 2D / 3D Mode Switcher -->
+      <div class="toolbar-group">
+        <div class="view-mode-toggle-group">
+          <button class="btn-mode-toggle active" id="btn-mode-2d" title="2D CAD Floor Plan View">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <span>2D Plan</span>
+          </button>
+          <button class="btn-mode-toggle" id="btn-mode-3d" title="3D Isometric Perspective Preview">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            <span>3D Isometric</span>
+          </button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Unit & Grid Snapping -->
+        <span class="text-xs text-muted">Unit:</span>
+        <select id="select-display-unit" class="form-control form-control-sm w-16 font-mono font-bold" title="Measurement Unit">
+          <option value="m" selected>m</option>
+          <option value="cm">cm</option>
+          <option value="ft">ft / in</option>
+        </select>
+
+        <span class="text-xs text-muted">Snap:</span>
+        <select id="select-grid-snap" class="form-control form-control-sm w-24 font-mono" title="Grid Snapping Step">
+          <option value="0.05">5 cm</option>
+          <option value="0.10" selected>10 cm</option>
+          <option value="0.25">25 cm</option>
+          <option value="0.50">50 cm</option>
+          <option value="0">Off</option>
+        </select>
+      </div>
+
+      <!-- Undo, Camera & Export Actions -->
+      <div class="toolbar-group">
+        <button class="btn btn-sm btn-secondary" id="btn-undo" title="Undo (Ctrl+Z)">&larr; Undo</button>
+        <button class="btn btn-sm btn-secondary" id="btn-redo" title="Redo (Ctrl+Y)">Redo &rarr;</button>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-out" title="Zoom Out">&minus;</button>
+        <button class="btn btn-sm btn-secondary" id="btn-zoom-in" title="Zoom In">&plus;</button>
+        <button class="btn btn-sm btn-secondary" id="btn-center-room" title="Center Camera on Room">Center</button>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Export -->
+        <button class="btn btn-sm btn-primary" id="btn-export-plan-image" title="Export Floor Plan Snapshot (PNG)">Export Image</button>
+        <button class="btn btn-sm btn-secondary" id="btn-export-plan-json" title="Export Project JSON Backup">Save JSON</button>
+        <button class="btn btn-sm btn-secondary" id="btn-import-plan-json" title="Import Project JSON">Import</button>
+        <input type="file" id="file-import-plan" accept=".json" style="display: none;" />
+      </div>
+    </header>
+
+    <!-- Main Workspace (Left Catalog + Center Viewport + Right Inspector) -->
+    <div class="editor-main-body">
+      
+      <!-- Left Furniture Catalog Sidebar -->
+      <aside class="editor-catalog-left" id="furniture-catalog-container"></aside>
+
+      <!-- Center Design Viewport & Scenarios -->
+      <main class="editor-center-workspace">
+        <div class="canvas-workspace-wrap" id="canvas-workspace-wrap">
+          <canvas id="planr-canvas"></canvas>
+        </div>
+
+        <!-- Scenarios Bar -->
+        <div class="scenarios-toolbar-bar">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-muted uppercase" style="font-size: 10px;">Scenarios:</span>
+            <div id="scenarios-tab-bar"></div>
+          </div>
+          <span class="text-xs text-muted" style="font-size: 10.5px;">Drag items &bull; <strong>R</strong> to rotate &bull; <strong>Del</strong> to delete</span>
+        </div>
+      </main>
+
+      <!-- Right Property Inspector -->
+      <aside class="editor-inspector-right" id="property-inspector-container"></aside>
+
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="editor-statusbar">
+      <div id="status-bar-readout">Room: 6.00m &times; 4.50m (27.0 m&sup2;) &bull; Furniture: 10 items</div>
+      <div class="flex items-center gap-3">
+        <span>RoomPlanr v1.0 &bull; Spatial Planning & Isometric Engine</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Standalone Application Script Bundle (Works on both http:// and direct file:/// double-click) -->
+  <script src="bundle.js"></script>
+</body>
+</html>
